@@ -6,7 +6,6 @@ public abstract class HybridMediaPlayer {
     OnPreparedListener onPreparedListener = null;
     OnCompletionListener onCompletionListener = null;
     OnErrorListener onErrorListener = null;
-    int b;
 
     public static HybridMediaPlayer getInstance(Context context) {
         HybridMediaPlayer res;
