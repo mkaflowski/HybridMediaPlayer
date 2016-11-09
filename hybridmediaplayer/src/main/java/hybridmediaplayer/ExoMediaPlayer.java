@@ -24,6 +24,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.socks.library.KLog;
 
 
 public class ExoMediaPlayer extends HybridMediaPLayer {
@@ -32,6 +33,7 @@ public class ExoMediaPlayer extends HybridMediaPLayer {
     private Context context;
     Handler mainHandler = new Handler();
     private MediaSource mediaSource;
+    private int currentState;
 
 
     public ExoMediaPlayer(Context context) {
@@ -73,17 +75,20 @@ public class ExoMediaPlayer extends HybridMediaPLayer {
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                switch (playbackState) {
-                    case ExoPlayer.STATE_ENDED:
-                        if (onCompletionListener != null)
-                            onCompletionListener.onCompletion(ExoMediaPlayer.this);
-                        break;
+                KLog.e(playbackState);
+                if (currentState != playbackState)
+                    switch (playbackState) {
+                        case ExoPlayer.STATE_ENDED:
+                            if (onCompletionListener != null)
+                                onCompletionListener.onCompletion(ExoMediaPlayer.this);
+                            break;
 
-                    case ExoPlayer.STATE_READY:
-                        if (onPreparedListener != null)
-                            onPreparedListener.onPrepared(ExoMediaPlayer.this);
-                        break;
-                }
+                        case ExoPlayer.STATE_READY:
+                            if (onPreparedListener != null)
+                                onPreparedListener.onPrepared(ExoMediaPlayer.this);
+                            break;
+                    }
+                currentState = playbackState;
             }
 
             @Override
@@ -111,6 +116,7 @@ public class ExoMediaPlayer extends HybridMediaPLayer {
 
     @Override
     public void play() {
+        KLog.i("play");
         player.setPlayWhenReady(true);
     }
 
