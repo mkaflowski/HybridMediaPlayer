@@ -7,12 +7,12 @@ import android.widget.Button;
 
 import com.socks.library.KLog;
 
-import hybridmediaplayer.Hybrid;
+import hybridmediaplayer.HybridMediaPlayer;
 import hybridplayer.demo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Hybrid mediaPlayer;
+    private HybridMediaPlayer mediaPlayer;
     private boolean isPrepared;
     private int time;
 
@@ -28,13 +28,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btPause.setOnClickListener(this);
 
         String url = "https://ia801306.us.archive.org/23/items/dunwich_horror_1511_librivox/dunwichhorror_02_lovecraft.mp3";
-        mediaPlayer = Hybrid.getInstance(this);
+        mediaPlayer = HybridMediaPlayer.getInstance(this);
         mediaPlayer.setDataSource(url);
         mediaPlayer.prepare();
 
-        mediaPlayer.setOnPreparedListener(new Hybrid.OnPreparedListener() {
+        mediaPlayer.setOnPreparedListener(new HybridMediaPlayer.OnPreparedListener() {
             @Override
-            public void onPrepared(Hybrid player) {
+            public void onPrepared(HybridMediaPlayer player) {
                 KLog.i("prepared");
 
                 if (!isPrepared)

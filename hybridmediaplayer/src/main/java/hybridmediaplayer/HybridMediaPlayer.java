@@ -2,13 +2,13 @@ package hybridmediaplayer;
 
 import android.content.Context;
 
-public abstract class Hybrid {
+public abstract class HybridMediaPlayer {
     OnPreparedListener onPreparedListener = null;
     OnCompletionListener onCompletionListener = null;
     OnErrorListener onErrorListener = null;
 
-    public static Hybrid getInstance(Context context) {
-        Hybrid res;
+    public static HybridMediaPlayer getInstance(Context context) {
+        HybridMediaPlayer res;
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
             res = new ExoMediaPlayer(context);
@@ -49,14 +49,14 @@ public abstract class Hybrid {
     }
 
     public interface OnPreparedListener {
-        void onPrepared(Hybrid player);
+        void onPrepared(HybridMediaPlayer player);
     }
 
     public interface OnCompletionListener {
-        void onCompletion(Hybrid player);
+        void onCompletion(HybridMediaPlayer player);
     }
 
     public interface OnErrorListener {
-        void onError(Hybrid player);
+        void onError(HybridMediaPlayer player);
     }
 }
