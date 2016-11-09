@@ -13,18 +13,26 @@ To use the library, first include it your project using Gradle
     }
 
 	dependencies {
-	        compile 'com.github.mkaflowski:GoogleFormHandler:v1.0.5'
+	        compile 'com.github.mkaflowski:HybridMediaPlayer:1.x'
 	}
 	
 
 ## How to use
 
 ```java
-        FormHandler formHandler = FormHandler.getInstance();
-        formHandler.setActionURL("https://docs.google.com/forms/d/e/1FAIpQLSckxYU7gI1B8bZzWQvGe7Vk6Lb6Uko1fF8l_ryKL52TVJUzLw/formResponse");
-        formHandler.setEntries("entry.714513599", "entry.7145135955", "entry.714513599");
-        formHandler.setValues("One", "Two", "Three");
-        formHandler.post();
-```
+        HybridMediaPLayer mediaPLayer = HybridMediaPLayer.getInstance(context);
+        mediaPlayer = new ExoMediaPlayer(this);
+        mediaPlayer.setDataSource(url);
+        mediaPlayer.prepare();
+
+        mediaPLayer.setOnCompletionListener(this);
+        mediaPLayer.setOnErrorListener(this);
+        mediaPLayer.setOnPreparedListener(this);
+        
+        mediaPLayer.play();
+        mediaPLayer.seekTo(1500);
+        mediaPLayer.pause();
+        
+        mediaPLayer.release();
 ```
 
