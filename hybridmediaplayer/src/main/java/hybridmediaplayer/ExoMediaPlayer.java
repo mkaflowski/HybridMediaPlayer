@@ -27,7 +27,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.socks.library.KLog;
 
 
-public class ExoMediaPlayer extends HybridMediaPlayer {
+public class ExoMediaPlayer extends Hybrid {
 
     private SimpleExoPlayer player;
     private Context context;

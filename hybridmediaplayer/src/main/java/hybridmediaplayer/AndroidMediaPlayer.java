@@ -5,7 +5,7 @@ import android.media.MediaPlayer;
 
 import java.io.IOException;
 
-public class AndroidMediaPlayer extends HybridMediaPlayer {
+public class AndroidMediaPlayer extends Hybrid {
 
     private MediaPlayer player;
     private Context context;
