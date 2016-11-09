@@ -20,19 +20,18 @@ To use the library, first include it your project using Gradle
 ## How to use
 
 ```java
-        HybridMediaPlayer mediaPLayer = HybridMediaPLayer.getInstance(context);
-        mediaPlayer = new ExoMediaPlayer(this);
+        HybridMediaPlayer mediaPlayer = HybridMediaPlayer.getInstance(context);
         mediaPlayer.setDataSource(url);
         mediaPlayer.prepare();
 
-        mediaPLayer.setOnCompletionListener(this);
-        mediaPLayer.setOnErrorListener(this);
-        mediaPLayer.setOnPreparedListener(this);
+        mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnErrorListener(this);
+        mediaPlayer.setOnPreparedListener(this);
         
-        mediaPLayer.play();
-        mediaPLayer.seekTo(1500);
-        mediaPLayer.pause();
+        mediaPlayer.play();
+        mediaPlayer.seekTo(1500);
+        mediaPlayer.pause();
         
-        mediaPLayer.release();
+        mediaPlayer.release();
 ```
 
