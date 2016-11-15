@@ -24,7 +24,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.socks.library.KLog;
 
 
 public class ExoMediaPlayer extends HybridMediaPlayer {
@@ -75,7 +74,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                KLog.e(playbackState);
                 if (currentState != playbackState)
                     switch (playbackState) {
                         case ExoPlayer.STATE_ENDED:
@@ -116,7 +114,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
     @Override
     public void play() {
-        KLog.i("play");
         player.setPlayWhenReady(true);
     }
 
