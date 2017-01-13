@@ -15,9 +15,11 @@ import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -38,12 +40,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     public ExoMediaPlayer(Context context) {
         this.context = context;
 
-        Handler mainHandler = new Handler();
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory =
                 new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector =
-                new DefaultTrackSelector(mainHandler, videoTrackSelectionFactory);
+                new DefaultTrackSelector(videoTrackSelectionFactory);
 
         LoadControl loadControl = new DefaultLoadControl();
 
@@ -91,6 +92,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+            }
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
 
             }
 
