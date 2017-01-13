@@ -7,19 +7,19 @@ import java.io.IOException;
 
 public class AndroidMediaPlayer extends HybridMediaPlayer {
 
-    private MediaPlayer player;
+    private MediaPlayer mediaPlayer;
     private Context context;
 
 
     public AndroidMediaPlayer(Context context) {
         this.context = context;
-        player = new MediaPlayer();
+        mediaPlayer = new MediaPlayer();
     }
 
     @Override
     public void setDataSource(String path) {
         try {
-            player.setDataSource(path);
+            mediaPlayer.setDataSource(path);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -28,42 +28,42 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     @Override
 
     public void prepare() {
-        player.prepareAsync();
+        mediaPlayer.prepareAsync();
     }
 
     @Override
     public void release() {
-        player.release();
+        mediaPlayer.release();
     }
 
     @Override
     public void play() {
-        player.start();
+        mediaPlayer.start();
     }
 
     @Override
     public void pause() {
-        player.pause();
+        mediaPlayer.pause();
     }
 
     @Override
     public void seekTo(int msec) {
-        player.seekTo(msec);
+        mediaPlayer.seekTo(msec);
     }
 
     @Override
     public int getDuration() {
-        return player.getDuration();
+        return mediaPlayer.getDuration();
     }
 
     @Override
     public int getCurrentPosition() {
-        return player.getCurrentPosition();
+        return mediaPlayer.getCurrentPosition();
     }
 
     @Override
     public boolean isPlaying() {
-        return player.isPlaying();
+        return mediaPlayer.isPlaying();
     }
 
 
