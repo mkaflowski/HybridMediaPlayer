@@ -59,6 +59,6 @@ public abstract class HybridMediaPlayer {
     }
 
     public interface OnErrorListener {
-        void onError(ExoPlaybackException error, HybridMediaPlayer player);
+        void onError(Exception error, HybridMediaPlayer player);
     }
 }
