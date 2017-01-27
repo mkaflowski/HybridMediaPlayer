@@ -2,6 +2,8 @@ package hybridmediaplayer;
 
 import android.content.Context;
 
+import com.google.android.exoplayer2.ExoPlaybackException;
+
 public abstract class HybridMediaPlayer {
     OnPreparedListener onPreparedListener = null;
     OnCompletionListener onCompletionListener = null;
@@ -57,6 +59,6 @@ public abstract class HybridMediaPlayer {
     }
 
     public interface OnErrorListener {
-        void onError(HybridMediaPlayer player);
+        void onError(ExoPlaybackException error, HybridMediaPlayer player);
     }
 }

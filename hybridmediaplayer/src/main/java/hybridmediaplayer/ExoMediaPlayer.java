@@ -113,7 +113,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 if (onErrorListener != null)
-                    onErrorListener.onError(ExoMediaPlayer.this);
+                    onErrorListener.onError(error, ExoMediaPlayer.this);
             }
 
             @Override
