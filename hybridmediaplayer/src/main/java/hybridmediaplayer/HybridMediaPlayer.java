@@ -1,11 +1,6 @@
 package hybridmediaplayer;
 
 import android.content.Context;
-import android.media.PlaybackParams;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
-import com.google.android.exoplayer2.ExoPlaybackException;
 
 public abstract class HybridMediaPlayer {
     OnPreparedListener onPreparedListener = null;
@@ -65,6 +60,4 @@ public abstract class HybridMediaPlayer {
         void onError(Exception error, HybridMediaPlayer player);
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    public abstract void setPlaybackParams(PlaybackParams playbackParams);
 }
