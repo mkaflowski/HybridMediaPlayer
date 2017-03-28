@@ -157,6 +157,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         return (int) player.getCurrentPosition();
     }
 
+    @Override
     @RequiresApi(Build.VERSION_CODES.M)
     public void setPlaybackParams(PlaybackParams playbackParams){
         player.setPlaybackParams(playbackParams);

@@ -2,6 +2,9 @@ package hybridmediaplayer;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.media.PlaybackParams;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 import java.io.IOException;
 
@@ -35,6 +38,13 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     @Override
     public void release() {
         mediaPlayer.release();
+    }
+
+
+    @Override
+    @RequiresApi(Build.VERSION_CODES.M)
+    public void setPlaybackParams(PlaybackParams playbackParams) {
+        mediaPlayer.setPlaybackParams(playbackParams);
     }
 
     @Override
