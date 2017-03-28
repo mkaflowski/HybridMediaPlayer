@@ -1,8 +1,10 @@
 package hybridmediaplayer;
 
 import android.content.Context;
+import android.media.PlaybackParams;
 import android.net.Uri;
-import android.os.Handler;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -16,7 +18,7 @@ import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -34,7 +36,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
     private SimpleExoPlayer player;
     private Context context;
-    Handler mainHandler = new Handler();
     private MediaSource mediaSource;
     private int currentState;
 
@@ -44,7 +45,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
@@ -64,16 +65,19 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                 true /* allowCrossProtocolRedirects */
         );
         // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null,httpDataSourceFactory);
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
         // Produces Extractor instances for parsing the media data.
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
         // This is the MediaSource representing the media to be played.
         mediaSource = new ExtractorMediaSource(Uri.parse(path),
                 dataSourceFactory, extractorsFactory, null, null);
+
+
+
     }
 
-    @Override
 
+    @Override
     public void prepare() {
 
         player.prepare(mediaSource);
@@ -151,6 +155,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     @Override
     public int getCurrentPosition() {
         return (int) player.getCurrentPosition();
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    public void setPlaybackParams(PlaybackParams playbackParams){
+        player.setPlaybackParams(playbackParams);
     }
 
     @Override

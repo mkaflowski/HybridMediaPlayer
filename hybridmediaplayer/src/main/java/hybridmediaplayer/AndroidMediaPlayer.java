@@ -14,6 +14,7 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     public AndroidMediaPlayer(Context context) {
         this.context = context;
         mediaPlayer = new MediaPlayer();
+
     }
 
     @Override
