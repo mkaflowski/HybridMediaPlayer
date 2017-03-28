@@ -1,7 +1,10 @@
 package hybridmediaplayer;
 
 import android.content.Context;
+import android.media.PlaybackParams;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -154,6 +157,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         return (int) player.getCurrentPosition();
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    @Override
+    public void setPlaybackParams(PlaybackParams playbackParams){
+        player.setPlaybackParams(playbackParams);
+    }
 
     @Override
     public boolean isPlaying() {
