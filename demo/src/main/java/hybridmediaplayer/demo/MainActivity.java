@@ -23,11 +23,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Button btPlay = (Button) findViewById(R.id.btPlay);
         Button btPause = (Button) findViewById(R.id.btPause);
+        Button btFastForward = (Button) findViewById(R.id.fastForward);
 
         btPlay.setOnClickListener(this);
         btPause.setOnClickListener(this);
+        btFastForward.setOnClickListener(this);
 
-        String url = "https://ia801306.us.archive.org/23/items/dunwich_horror_1511_librivox/dunwichhorror_02_lovecraft.mp3";
+        String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
         mediaPlayer = HybridMediaPlayer.getInstance(this);
         mediaPlayer.setDataSource(url);
         mediaPlayer.prepare();
@@ -42,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 isPrepared = true;
                 time = 0;
                 mediaPlayer.play();
+
+                KLog.d(mediaPlayer.getCurrentPosition());
+                KLog.i(mediaPlayer.getDuration());
             }
         });
 
@@ -52,8 +57,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (view.getId() == R.id.btPlay) {
             mediaPlayer.play();
         } else if (view.getId() == R.id.btPause) {
-
             mediaPlayer.pause();
+            KLog.d(mediaPlayer.getCurrentPosition());
+            KLog.i(mediaPlayer.getDuration());
+        } else if (view.getId() == R.id.fastForward) {
+            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 15 * 1000);
         }
     }
 }

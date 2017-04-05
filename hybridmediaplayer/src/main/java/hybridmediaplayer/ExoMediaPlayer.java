@@ -15,6 +15,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.extractor.mp3.Mp3Extractor;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -67,11 +68,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
         // Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
         // This is the MediaSource representing the media to be played.
         mediaSource = new ExtractorMediaSource(Uri.parse(path),
                 dataSourceFactory, extractorsFactory, null, null);
-
 
 
     }

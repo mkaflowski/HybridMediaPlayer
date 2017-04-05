@@ -29,9 +29,18 @@
         android:text="Pause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btPlay"
+        android:id="@+id/btPause"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/fastForward"
+        android:layout_alignStart="@+id/fastForward" />
+
+    <Button
+        android:id="@+id/fastForward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/btPlay"
         android:layout_alignStart="@+id/btPlay"
+        android:layout_below="@+id/btPlay"
         android:layout_marginTop="37dp"
-        android:id="@+id/btPause" />
+        android:text=">>" />
 </RelativeLayout>
