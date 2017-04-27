@@ -11,6 +11,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -124,6 +125,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             public void onPositionDiscontinuity() {
 
             }
+
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+            }
         });
     }
 
@@ -157,10 +163,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         return (int) player.getCurrentPosition();
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @Override
-    public void setPlaybackParams(PlaybackParams playbackParams){
-        player.setPlaybackParams(playbackParams);
+    public void setPlaybackParams(float speed, float pitch) {
+        PlaybackParameters params = new PlaybackParameters(speed, pitch);
+        player.setPlaybackParameters(params);
     }
 
     @Override

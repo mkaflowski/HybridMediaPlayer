@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private HybridMediaPlayer mediaPlayer;
     private boolean isPrepared;
     private int time;
+    float speed = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +25,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button btPlay = (Button) findViewById(R.id.btPlay);
         Button btPause = (Button) findViewById(R.id.btPause);
         Button btFastForward = (Button) findViewById(R.id.fastForward);
+        Button btSpeed = (Button) findViewById(R.id.btSpeed);
 
         btPlay.setOnClickListener(this);
         btPause.setOnClickListener(this);
         btFastForward.setOnClickListener(this);
+        btSpeed.setOnClickListener(this);
 
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
         mediaPlayer = HybridMediaPlayer.getInstance(this);
@@ -62,6 +65,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             KLog.i(mediaPlayer.getDuration());
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 15 * 1000);
+        } else if (view.getId() == R.id.btSpeed) {
+            if (speed == 1)
+                speed = 2f;
+            else speed = 1;
+            mediaPlayer.setPlaybackParams(speed,1);
         }
     }
 }

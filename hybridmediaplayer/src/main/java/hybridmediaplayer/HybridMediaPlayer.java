@@ -65,6 +65,5 @@ public abstract class HybridMediaPlayer {
         void onError(Exception error, HybridMediaPlayer player);
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    public abstract void setPlaybackParams(PlaybackParams playbackParams);
+    public abstract void setPlaybackParams(float speed, float pitch);
 }

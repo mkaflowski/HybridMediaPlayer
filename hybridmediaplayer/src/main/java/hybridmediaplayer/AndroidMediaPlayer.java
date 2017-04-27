@@ -40,12 +40,16 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
         mediaPlayer.release();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
-    public void setPlaybackParams(PlaybackParams playbackParams) {
-        mediaPlayer.setPlaybackParams(playbackParams);
-    }
+    public void setPlaybackParams(float speed, float pitch) {
 
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            PlaybackParams params = new PlaybackParams();
+            params.setSpeed(speed);
+            params.setPitch(pitch);
+            mediaPlayer.setPlaybackParams(params);
+        }
+    }
 
     @Override
     public void play() {
