@@ -167,6 +167,16 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     }
 
     @Override
+    public float getVolume() {
+        return player.getVolume();
+    }
+
+    @Override
+    public void setVolume(float level) {
+        player.setVolume(level);
+    }
+
+    @Override
     public void setPlaybackParams(float speed, float pitch) {
         PlaybackParameters params = new PlaybackParameters(speed, pitch);
         player.setPlaybackParameters(params);

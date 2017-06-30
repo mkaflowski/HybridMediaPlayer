@@ -37,6 +37,13 @@ public abstract class HybridMediaPlayer {
 
     public abstract int getCurrentPosition();
 
+    public abstract float getVolume();
+
+    /**
+     * @param level 0-1
+     */
+    public abstract void setVolume(float level);
+
     public abstract boolean isPlaying();
 
     public abstract void release();

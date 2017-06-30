@@ -12,12 +12,13 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
 
     private MediaPlayer mediaPlayer;
     private Context context;
+    private float volume;
 
 
     public AndroidMediaPlayer(Context context) {
         this.context = context;
         mediaPlayer = new MediaPlayer();
-
+        volume = 1;
     }
 
     @Override
@@ -77,10 +78,20 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     }
 
     @Override
+    public float getVolume() {
+        return volume;
+    }
+
+    @Override
+    public void setVolume(float level) {
+        volume = level;
+        mediaPlayer.setVolume(level, level);
+    }
+
+    @Override
     public boolean isPlaying() {
         return mediaPlayer.isPlaying();
     }
-
 
 
 }
