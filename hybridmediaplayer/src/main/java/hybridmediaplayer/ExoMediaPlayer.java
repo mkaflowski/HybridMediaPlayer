@@ -40,6 +40,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     private Context context;
     private MediaSource mediaSource;
     private int currentState;
+    private boolean isPreparing = false;
 
 
     public ExoMediaPlayer(Context context) {
@@ -80,7 +81,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
     @Override
     public void prepare() {
-
+        isPreparing = true;
         player.prepare(mediaSource);
         player.addListener(new ExoPlayer.EventListener() {
             @Override
@@ -98,8 +99,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                             break;
 
                         case ExoPlayer.STATE_READY:
-                            if (onPreparedListener != null)
+                            if (isPreparing && onPreparedListener != null) {
+                                isPreparing = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
+                            }
                             break;
                     }
                 currentState = playbackState;
