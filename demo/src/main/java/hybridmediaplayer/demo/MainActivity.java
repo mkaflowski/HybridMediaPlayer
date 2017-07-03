@@ -2,6 +2,7 @@ package hybridmediaplayer.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
@@ -32,9 +33,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btFastForward.setOnClickListener(this);
         btSpeed.setOnClickListener(this);
 
-        String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
+        SurfaceView playerView = (SurfaceView) findViewById(R.id.playerView);
+
+
+        //String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
+        String url = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         mediaPlayer = HybridMediaPlayer.getInstance(this);
         mediaPlayer.setDataSource(url);
+        mediaPlayer.setPlayerView(this,playerView);
         mediaPlayer.prepare();
 
         mediaPlayer.setOnPreparedListener(new HybridMediaPlayer.OnPreparedListener() {

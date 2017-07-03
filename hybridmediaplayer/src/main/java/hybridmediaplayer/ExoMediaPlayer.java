@@ -5,6 +5,7 @@ import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -25,6 +26,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
@@ -41,6 +43,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     private MediaSource mediaSource;
     private int currentState;
     private boolean isPreparing = false;
+    private SimpleExoPlayerView playerView;
 
 
     public ExoMediaPlayer(Context context) {
@@ -52,9 +55,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        LoadControl loadControl = new DefaultLoadControl();
-
-        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector, loadControl);
+        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
     }
 
     @Override
@@ -187,4 +188,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         return player.getPlayWhenReady();
     }
 
+    @Override
+    public void setPlayerView(Context context, SurfaceView surfaceView) {
+        player.setVideoSurfaceView(surfaceView);
+    }
 }

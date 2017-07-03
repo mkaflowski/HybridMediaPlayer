@@ -5,6 +5,8 @@ import android.media.MediaPlayer;
 import android.media.PlaybackParams;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.view.SurfaceView;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -39,6 +41,12 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     @Override
     public void release() {
         mediaPlayer.release();
+    }
+
+    @Override
+    public void setPlayerView(Context context, SurfaceView surfaceView) {
+        // TODO: 03.07.2017 setPlayerView
+        Toast.makeText(context, "Not supported yet.", Toast.LENGTH_SHORT).show();
     }
 
     @Override

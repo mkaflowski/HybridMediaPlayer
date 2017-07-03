@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.PlaybackParams;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 
@@ -59,6 +60,8 @@ public abstract class HybridMediaPlayer {
     public void setOnErrorListener(OnErrorListener onErrorListener) {
         this.onErrorListener = onErrorListener;
     }
+
+    public abstract void setPlayerView(Context context, SurfaceView surfaceView);
 
     public interface OnPreparedListener {
         void onPrepared(HybridMediaPlayer player);
