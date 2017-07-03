@@ -22,6 +22,8 @@ To use the library, first include it your project using Gradle
 ```java
         HybridMediaPlayer mediaPlayer = HybridMediaPlayer.getInstance(context);
         mediaPlayer.setDataSource(url);
+	mediaPlayer.setPlayerView(this, playerView);
+	
         mediaPlayer.prepare();
 
         mediaPlayer.setOnCompletionListener(this);
@@ -31,6 +33,8 @@ To use the library, first include it your project using Gradle
         mediaPlayer.play();
         mediaPlayer.seekTo(1500);
         mediaPlayer.pause();
+	
+	mediaPlayer.setVolume(0.5f);
         
         mediaPlayer.release();
 ```
