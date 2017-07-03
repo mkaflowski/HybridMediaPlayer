@@ -45,8 +45,7 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
 
     @Override
     public void setPlayerView(Context context, SurfaceView surfaceView) {
-        // TODO: 03.07.2017 setPlayerView
-        Toast.makeText(context, "Not supported yet.", Toast.LENGTH_SHORT).show();
+        // not supported
     }
 
     @Override

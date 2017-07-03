@@ -1,23 +1,16 @@
 package hybridmediaplayer;
 
 import android.content.Context;
-import android.media.PlaybackParams;
 import android.net.Uri;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.view.SurfaceView;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.extractor.mp3.Mp3Extractor;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -191,5 +184,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     @Override
     public void setPlayerView(Context context, SurfaceView surfaceView) {
         player.setVideoSurfaceView(surfaceView);
+    }
+
+    public SimpleExoPlayer getPlayer() {
+        return player;
     }
 }
