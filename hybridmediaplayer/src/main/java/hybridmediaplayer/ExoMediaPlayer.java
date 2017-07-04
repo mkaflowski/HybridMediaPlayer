@@ -3,7 +3,9 @@ package hybridmediaplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.view.SurfaceView;
+import android.widget.RelativeLayout;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -27,6 +29,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.socks.library.KLog;
 
 
 public class ExoMediaPlayer extends HybridMediaPlayer {
@@ -182,8 +185,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     }
 
     @Override
-    public void setPlayerView(Context context, SurfaceView surfaceView) {
+    public void setPlayerView(Context context, final SurfaceView surfaceView) {
         player.setVideoSurfaceView(surfaceView);
+    }
+
+    @Override
+    public boolean hasVideo() {
+        return player.getVideoFormat() != null;
     }
 
     public SimpleExoPlayer getPlayer() {

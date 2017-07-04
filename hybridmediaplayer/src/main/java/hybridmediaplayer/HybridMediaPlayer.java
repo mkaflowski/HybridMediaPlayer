@@ -63,6 +63,9 @@ public abstract class HybridMediaPlayer {
 
     public abstract void setPlayerView(Context context, SurfaceView surfaceView);
 
+    public abstract boolean hasVideo();
+
+
     public interface OnPreparedListener {
         void onPrepared(HybridMediaPlayer player);
     }

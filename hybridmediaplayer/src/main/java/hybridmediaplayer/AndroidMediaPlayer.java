@@ -49,6 +49,12 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     }
 
     @Override
+    public boolean hasVideo() {
+        // not supported
+        return false;
+    }
+
+    @Override
     public void setPlaybackParams(float speed, float pitch) {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {

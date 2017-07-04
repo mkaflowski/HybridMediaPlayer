@@ -20,7 +20,7 @@
 
     <SurfaceView
         android:layout_width="360px"
-        android:layout_height="410px"
+        android:layout_height="810px"
         android:text="Hello World!"
         android:id="@+id/playerView"
         android:layout_alignParentTop="true"
