@@ -3,9 +3,7 @@ package hybridmediaplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.view.SurfaceView;
-import android.widget.RelativeLayout;
 
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -30,9 +28,6 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.socks.library.KLog;
-
-import java.util.List;
 
 
 public class ExoMediaPlayer extends HybridMediaPlayer {
@@ -177,6 +172,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     @Override
     public void seekTo(int msec) {
         player.seekTo(msec);
+    }
+
+    public void seekTo(int windowIndex, int msec) {
+        player.seekTo(windowIndex, msec);
     }
 
     @Override
