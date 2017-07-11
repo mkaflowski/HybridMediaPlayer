@@ -96,7 +96,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         mediaSource = new ConcatenatingMediaSource(sources);
     }
 
-
     @Override
     public void prepare() {
         isPreparing = true;
