@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -30,6 +31,8 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.socks.library.KLog;
+
+import java.util.List;
 
 
 public class ExoMediaPlayer extends HybridMediaPlayer {
@@ -71,8 +74,31 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         // This is the MediaSource representing the media to be played.
         mediaSource = new ExtractorMediaSource(Uri.parse(path),
                 dataSourceFactory, extractorsFactory, null, null);
+    }
+
+    public void setDataSource(String... paths) {
+        String userAgent = Util.getUserAgent(context, "yourApplicationName");
+        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
+                userAgent,
+                null /* listener */,
+                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+                true /* allowCrossProtocolRedirects */
+        );
+        // Produces DataSource instances through which media data is loaded.
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
+        // Produces Extractor instances for parsing the media data.
+        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
 
 
+        MediaSource[] sources = new MediaSource[paths.length];
+        for (int i = 0; i < paths.length; i++) {
+            // This is the MediaSource representing the media to be played.
+            sources[i] = new ExtractorMediaSource(Uri.parse(paths[i]),
+                    dataSourceFactory, extractorsFactory, null, null);
+        }
+
+        mediaSource = new ConcatenatingMediaSource(sources);
     }
 
 
