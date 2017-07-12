@@ -40,12 +40,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String url = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         String url2 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         mediaPlayer = new ExoMediaPlayer(this);
-        mediaPlayer.setDataSource(url,url2);
+        mediaPlayer.setDataSource(url,url2,url,url2);
         mediaPlayer.setPlayerView(this, playerView);
-        mediaPlayer.setOnTracksChangedListener(new ExoMediaPlayer.OnTracksChangedListener() {
+        mediaPlayer.setOnPositionDiscontinuityListener(new ExoMediaPlayer.OnPositionDiscontinuityListener() {
             @Override
-            public void onTracksChanged() {
-                KLog.d("onTracksChanged");
+            public void onPositionDiscontinuity(int currentWindowIndex) {
+                KLog.d(currentWindowIndex);
             }
         });
         mediaPlayer.prepare();

@@ -40,6 +40,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     private boolean isPreparing = false;
     private SimpleExoPlayerView playerView;
     private OnTracksChangedListener onTracksChangedListener;
+    private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
+
 
 
     public ExoMediaPlayer(Context context) {
@@ -132,7 +134,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                if(onTracksChangedListener!=null)
+                if (onTracksChangedListener != null)
                     onTracksChangedListener.onTracksChanged();
             }
 
@@ -144,12 +146,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onPositionDiscontinuity() {
-
+                if(onPositionDiscontinuityListener!=null)
+                    onPositionDiscontinuityListener.onPositionDiscontinuity(player.getCurrentWindowIndex());
             }
 
             @Override
             public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
 
             }
         });
@@ -228,7 +230,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         this.onTracksChangedListener = onTracksChangedListener;
     }
 
-    public interface OnTracksChangedListener{
+    public void setOnPositionDiscontinuityListener(OnPositionDiscontinuityListener onPositionDiscontinuityListener) {
+        this.onPositionDiscontinuityListener = onPositionDiscontinuityListener;
+    }
+
+    public interface OnTracksChangedListener {
         public void onTracksChanged();
+    }
+    public interface OnPositionDiscontinuityListener {
+        public void onPositionDiscontinuity(int currentWindowIndex);
     }
 }
