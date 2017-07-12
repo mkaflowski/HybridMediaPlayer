@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.socks.library.KLog;
 
 
 public class ExoMediaPlayer extends HybridMediaPlayer {
@@ -103,11 +104,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         player.addListener(new ExoPlayer.EventListener() {
             @Override
             public void onLoadingChanged(boolean isLoading) {
+                KLog.d("onLoadingChanged");
 
             }
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                KLog.d("onPlayerStateChanged: "+playbackState);
+
                 if (currentState != playbackState)
                     switch (playbackState) {
                         case ExoPlayer.STATE_ENDED:
@@ -127,11 +131,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
-
+                KLog.d("onTimelineChanged");
             }
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+                KLog.d("onTracksChanged");
+                if (onCompletionListener != null)
+                    onCompletionListener.onCompletion(ExoMediaPlayer.this);
 
             }
 

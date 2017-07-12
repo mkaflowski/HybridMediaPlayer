@@ -14,7 +14,7 @@ import hybridplayer.demo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private HybridMediaPlayer mediaPlayer;
+    private ExoMediaPlayer mediaPlayer;
     private boolean isPrepared;
     private int time;
     float speed = 1;
@@ -38,8 +38,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
         String url = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
-        mediaPlayer = HybridMediaPlayer.getInstance(this);
-        mediaPlayer.setDataSource(url);
+        String url2 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
+        mediaPlayer = new ExoMediaPlayer(this);
+        mediaPlayer.setDataSource(url,url2);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.prepare();
 
