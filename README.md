@@ -39,7 +39,7 @@ To use the library, first include it your project using Gradle
         mediaPlayer.release();
 ```
 
-# Methods for ExoPlayer only
+### Methods for ExoPlayer only
 
 ```java
         ExoMediaPlayer mediaPlayer = new ExoMediaPlayer(this)
