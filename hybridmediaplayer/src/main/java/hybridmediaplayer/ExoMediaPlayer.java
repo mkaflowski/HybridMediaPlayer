@@ -39,6 +39,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     private int currentState;
     private boolean isPreparing = false;
     private SimpleExoPlayerView playerView;
+    private OnTracksChangedListener onTracksChangedListener;
 
 
     public ExoMediaPlayer(Context context) {
@@ -104,14 +105,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         player.addListener(new ExoPlayer.EventListener() {
             @Override
             public void onLoadingChanged(boolean isLoading) {
-                KLog.d("onLoadingChanged");
-
             }
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                KLog.d("onPlayerStateChanged: "+playbackState);
-
                 if (currentState != playbackState)
                     switch (playbackState) {
                         case ExoPlayer.STATE_ENDED:
@@ -131,15 +128,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
-                KLog.d("onTimelineChanged");
             }
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                KLog.d("onTracksChanged");
-                if (onCompletionListener != null)
-                    onCompletionListener.onCompletion(ExoMediaPlayer.this);
-
+                if(onTracksChangedListener!=null)
+                    onTracksChangedListener.onTracksChanged();
             }
 
             @Override
@@ -155,6 +149,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
 
             }
         });
@@ -227,5 +222,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
     public SimpleExoPlayer getPlayer() {
         return player;
+    }
+
+    public void setOnTracksChangedListener(OnTracksChangedListener onTracksChangedListener) {
+        this.onTracksChangedListener = onTracksChangedListener;
+    }
+
+    public interface OnTracksChangedListener{
+        public void onTracksChanged();
     }
 }

@@ -42,6 +42,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer = new ExoMediaPlayer(this);
         mediaPlayer.setDataSource(url,url2);
         mediaPlayer.setPlayerView(this, playerView);
+        mediaPlayer.setOnTracksChangedListener(new ExoMediaPlayer.OnTracksChangedListener() {
+            @Override
+            public void onTracksChanged() {
+                KLog.d("onTracksChanged");
+            }
+        });
         mediaPlayer.prepare();
 
 
