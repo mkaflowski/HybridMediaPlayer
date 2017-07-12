@@ -39,3 +39,21 @@ To use the library, first include it your project using Gradle
         mediaPlayer.release();
 ```
 
+# Methods for ExoPlayer only
+
+```java
+        ExoMediaPlayer mediaPlayer = new ExoMediaPlayer(this)
+        mediaPlayer.setDataSource(url1, url2, url3 ...);
+	mediaPlayer.setPlayerView(this, playerView);
+	
+        mediaPlayer.prepare();
+
+        mediaPlayer.setOnPositionDiscontinuityListener(this);
+	mediaPlayer.setOnTracksChangedListener(this);
+        
+	mediaPlayer.hasVideo();
+        mediaPlayer.seekTo(windowPosition,time);
+	
+        mediaPlayer.release();
+```
+
