@@ -1,15 +1,21 @@
 package hybridmediaplayer;
 
 import android.content.Context;
+import android.content.Intent;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.audio.AudioRendererEventListener;
+import com.google.android.exoplayer2.audio.MediaCodecAudioRenderer;
+import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -28,7 +34,6 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.socks.library.KLog;
 
 
 public class ExoMediaPlayer extends HybridMediaPlayer {
@@ -38,10 +43,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     private MediaSource mediaSource;
     private int currentState;
     private boolean isPreparing = false;
-    private SimpleExoPlayerView playerView;
     private OnTracksChangedListener onTracksChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
-
 
 
     public ExoMediaPlayer(Context context) {
@@ -102,6 +105,38 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
     @Override
     public void prepare() {
+        player.setAudioDebugListener(new AudioRendererEventListener() {
+            @Override
+            public void onAudioEnabled(DecoderCounters counters) {
+
+            }
+
+            @Override
+            public void onAudioSessionId(int audioSessionId) {
+                setEqualizer();
+            }
+
+            @Override
+            public void onAudioDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
+
+            }
+
+            @Override
+            public void onAudioInputFormatChanged(Format format) {
+
+            }
+
+            @Override
+            public void onAudioTrackUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
+
+            }
+
+            @Override
+            public void onAudioDisabled(DecoderCounters counters) {
+
+            }
+        });
+
         isPreparing = true;
         player.prepare(mediaSource);
         player.addListener(new ExoPlayer.EventListener() {
@@ -146,8 +181,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             @Override
             public void onPositionDiscontinuity() {
-                if(onPositionDiscontinuityListener!=null)
+                if (onPositionDiscontinuityListener != null)
                     onPositionDiscontinuityListener.onPositionDiscontinuity(player.getCurrentWindowIndex());
+
             }
 
             @Override
@@ -155,10 +191,26 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             }
         });
+
+    }
+
+    private void setEqualizer() {
+        final Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
+        intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.getAudioSessionId());
+        intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.getPackageName());
+        context.sendBroadcast(intent);
+    }
+
+    private void releaseEqualizer() {
+        final Intent intent = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
+        intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.getAudioSessionId());
+        intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.getPackageName());
+        context.sendBroadcast(intent);
     }
 
     @Override
     public void release() {
+        releaseEqualizer();
         player.release();
     }
 
@@ -237,6 +289,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     public interface OnTracksChangedListener {
         public void onTracksChanged();
     }
+
     public interface OnPositionDiscontinuityListener {
         public void onPositionDiscontinuity(int currentWindowIndex);
     }
