@@ -49,8 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String url = "https://api.soundcloud.com/tracks/258665732/stream?consumer_key=cd9d2e5604410d714e32642a4ec0eed4";
         String url2 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         mediaPlayer = new ExoMediaPlayer(this);
-        mediaPlayer.setDataSource();
-        mediaPlayer.getMediaSource().addMediaSource(mediaPlayer.pathToMediaSource(url));
+        mediaPlayer.setDataSource(url);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnPositionDiscontinuityListener(new ExoMediaPlayer.OnPositionDiscontinuityListener() {
@@ -87,13 +86,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             else
                 mediaPlayer.play();
         } else if (view.getId() == R.id.btPause) {
-
             mediaPlayer.pause();
             KLog.d(mediaPlayer.getCurrentPosition());
             KLog.i(mediaPlayer.getDuration());
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 15 * 1000);
-            //mediaPlayer.prepare();
+            mediaPlayer.prepare();
         } else if (view.getId() == R.id.btSpeed) {
             if (speed == 1)
                 speed = 2f;

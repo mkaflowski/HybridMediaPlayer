@@ -15,10 +15,6 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        flatDir{
-            dirs 'libs'
-            dirs project(':hybridmediaplayer').file('libs')
-        }
     }
 }
 
