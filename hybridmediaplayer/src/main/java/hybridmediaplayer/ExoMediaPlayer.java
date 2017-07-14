@@ -2,8 +2,10 @@ package hybridmediaplayer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -17,6 +19,7 @@ import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
+import com.google.android.exoplayer2.source.DynamicConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -34,16 +37,20 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.socks.library.KLog;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ExoMediaPlayer extends HybridMediaPlayer {
 
     private SimpleExoPlayer player;
     private Context context;
-    private MediaSource mediaSource;
+    private DynamicConcatenatingMediaSource mediaSource;
     private int currentState;
     private boolean isPreparing = false;
     private OnTracksChangedListener onTracksChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
+    private boolean isSupportingSystemEqualizer;
 
 
     public ExoMediaPlayer(Context context) {
@@ -58,24 +65,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
     }
 
-    @Override
-    public void setDataSource(String path) {
-        String userAgent = Util.getUserAgent(context, "yourApplicationName");
-        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
-                userAgent,
-                null /* listener */,
-                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                true /* allowCrossProtocolRedirects */
-        );
-        // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
-        // Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
-        // This is the MediaSource representing the media to be played.
-        mediaSource = new ExtractorMediaSource(Uri.parse(path),
-                dataSourceFactory, extractorsFactory, null, null);
-    }
 
     public void setDataSource(String... paths) {
         String userAgent = Util.getUserAgent(context, "yourApplicationName");
@@ -92,14 +81,26 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
 
 
-        MediaSource[] sources = new MediaSource[paths.length];
-        for (int i = 0; i < paths.length; i++) {
+        List<MediaSource> sources = new ArrayList<>();
+        for (String path : paths) {
             // This is the MediaSource representing the media to be played.
-            sources[i] = new ExtractorMediaSource(Uri.parse(paths[i]),
-                    dataSourceFactory, extractorsFactory, null, null);
+            sources.add(new ExtractorMediaSource(Uri.parse(path),
+                    dataSourceFactory, extractorsFactory, null, null));
         }
 
-        mediaSource = new ConcatenatingMediaSource(sources);
+        mediaSource = new DynamicConcatenatingMediaSource();
+        mediaSource.addMediaSources(sources);
+    }
+
+
+
+    @Override
+    public void setDataSource(String path) {
+        setDataSource(path);
+    }
+
+    public DynamicConcatenatingMediaSource getMediaSource() {
+        return mediaSource;
     }
 
     @Override
@@ -136,6 +137,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             }
         });
 
+
         isPreparing = true;
         player.prepare(mediaSource);
         player.addListener(new ExoPlayer.EventListener() {
@@ -157,9 +159,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                                 isPreparing = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
                             }
+
                             break;
                     }
                 currentState = playbackState;
+            }
+
+            @Override
+            public void onRepeatModeChanged(int i) {
+
             }
 
             @Override
@@ -194,13 +202,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     }
 
     private void setEqualizer() {
+        if (!isSupportingSystemEqualizer)
+            return;
         final Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
         intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.getAudioSessionId());
         intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.getPackageName());
+        intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
         context.sendBroadcast(intent);
+
+        KLog.d("audioSessionId = "+player.getAudioSessionId());
     }
 
     private void releaseEqualizer() {
+        if (!isSupportingSystemEqualizer)
+            return;
         final Intent intent = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
         intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.getAudioSessionId());
         intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.getPackageName());
@@ -271,6 +286,18 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     @Override
     public boolean hasVideo() {
         return player.getVideoFormat() != null;
+    }
+
+    public void setSupportingSystemEqualizer(boolean supportingSystemEqualizer) {
+        isSupportingSystemEqualizer = supportingSystemEqualizer;
+        if (supportingSystemEqualizer)
+            setEqualizer();
+        else
+            releaseEqualizer();
+    }
+
+    public boolean isSupportingSystemEqualizer() {
+        return isSupportingSystemEqualizer;
     }
 
     public SimpleExoPlayer getPlayer() {

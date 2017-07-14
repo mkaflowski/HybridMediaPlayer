@@ -20,7 +20,7 @@
 
     <SurfaceView
         android:layout_width="360px"
-        android:layout_height="810px"
+        android:layout_height="610px"
         android:text="Hello World!"
         android:id="@+id/playerView"
         android:layout_alignParentTop="true"
@@ -33,10 +33,19 @@
         android:text="Play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/btPlay"
         android:layout_below="@+id/playerView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="27dp"
-        android:id="@+id/btPlay" />
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/btStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        android:layout_alignBaseline="@+id/fastForward"
+        android:layout_alignBottom="@+id/fastForward"
+        android:layout_toRightOf="@+id/btPause"
+        android:layout_toEndOf="@+id/btPause" />
 
     <Button
         android:text="speed x2"
