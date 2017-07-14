@@ -43,7 +43,7 @@ To use the library, first include it your project using Gradle
 
 ```java
         ExoMediaPlayer mediaPlayer = new ExoMediaPlayer(this)
-        mediaPlayer.setDataSource(url1, url2, url3 ...);
+        mediaPlayer.setDataSource(url1, url2, url3, ...);
 	mediaPlayer.setPlayerView(this, playerView);
 	
         mediaPlayer.prepare();
@@ -53,6 +53,10 @@ To use the library, first include it your project using Gradle
         
 	mediaPlayer.hasVideo();
         mediaPlayer.seekTo(windowPosition,time);
+	
+	mediaPlayer.setSupportingSystemEqualizer(true);
+	//FOR EDITING PLAYLIST
+	mediaPlayer.getMediaSource();
 	
         mediaPlayer.release();
 ```
