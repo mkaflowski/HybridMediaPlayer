@@ -17,7 +17,6 @@ allprojects {
         jcenter()
         flatDir{
             dirs 'libs'
-            dirs project(':demo').file('libs')
         }
     }
 }
