@@ -60,83 +60,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
         player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
-    }
 
-
-    public void setDataSource(String... paths) {
-        String userAgent = Util.getUserAgent(context, "yourApplicationName");
-        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
-                userAgent,
-                null /* listener */,
-                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                true /* allowCrossProtocolRedirects */
-        );
-        // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
-        // Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
-
-
-        List<MediaSource> sources = new ArrayList<>();
-        for (String path : paths) {
-            // This is the MediaSource representing the media to be played.
-            sources.add(new ExtractorMediaSource(Uri.parse(path),
-                    dataSourceFactory, extractorsFactory, null, null));
-        }
-
-        mediaSource = new DynamicConcatenatingMediaSource();
-        mediaSource.addMediaSources(sources);
-    }
-
-
-
-    @Override
-    public void setDataSource(String path) {
-        setDataSource(new String[]{path});
-    }
-
-    public DynamicConcatenatingMediaSource getMediaSource() {
-        return mediaSource;
-    }
-
-    @Override
-    public void prepare() {
-        player.setAudioDebugListener(new AudioRendererEventListener() {
-            @Override
-            public void onAudioEnabled(DecoderCounters counters) {
-
-            }
-
-            @Override
-            public void onAudioSessionId(int audioSessionId) {
-                setEqualizer();
-            }
-
-            @Override
-            public void onAudioDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-
-            }
-
-            @Override
-            public void onAudioInputFormatChanged(Format format) {
-
-            }
-
-            @Override
-            public void onAudioTrackUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
-
-            }
-
-            @Override
-            public void onAudioDisabled(DecoderCounters counters) {
-
-            }
-        });
-
-
-        isPreparing = true;
-        player.prepare(mediaSource);
         player.addListener(new ExoPlayer.EventListener() {
             @Override
             public void onLoadingChanged(boolean isLoading) {
@@ -195,7 +119,100 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
             }
         });
+    }
 
+
+    public void setDataSource(String... paths) {
+        String userAgent = Util.getUserAgent(context, "yourApplicationName");
+        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
+                userAgent,
+                null /* listener */,
+                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+                true /* allowCrossProtocolRedirects */
+        );
+        // Produces DataSource instances through which media data is loaded.
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
+        // Produces Extractor instances for parsing the media data.
+        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
+
+
+        List<MediaSource> sources = new ArrayList<>();
+        for (String path : paths) {
+            // This is the MediaSource representing the media to be played.
+            sources.add(new ExtractorMediaSource(Uri.parse(path),
+                    dataSourceFactory, extractorsFactory, null, null));
+        }
+
+        mediaSource = new DynamicConcatenatingMediaSource();
+        mediaSource.addMediaSources(sources);
+    }
+
+
+
+    @Override
+    public void setDataSource(String path) {
+        setDataSource(new String[]{path});
+    }
+
+    public DynamicConcatenatingMediaSource getMediaSource() {
+        return mediaSource;
+    }
+
+    public MediaSource pathToMediaSource(String path){
+        String userAgent = Util.getUserAgent(context, "yourApplicationName");
+        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
+                userAgent,
+                null /* listener */,
+                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+                true /* allowCrossProtocolRedirects */
+        );
+        // Produces DataSource instances through which media data is loaded.
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
+        // Produces Extractor instances for parsing the media data.
+        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
+        return new ExtractorMediaSource(Uri.parse(path),
+                dataSourceFactory, extractorsFactory, null, null);
+    }
+
+    @Override
+    public void prepare() {
+        player.setAudioDebugListener(new AudioRendererEventListener() {
+            @Override
+            public void onAudioEnabled(DecoderCounters counters) {
+
+            }
+
+            @Override
+            public void onAudioSessionId(int audioSessionId) {
+                setEqualizer();
+            }
+
+            @Override
+            public void onAudioDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
+
+            }
+
+            @Override
+            public void onAudioInputFormatChanged(Format format) {
+
+            }
+
+            @Override
+            public void onAudioTrackUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
+
+            }
+
+            @Override
+            public void onAudioDisabled(DecoderCounters counters) {
+
+            }
+        });
+
+
+        isPreparing = true;
+        player.prepare(mediaSource);
     }
 
     private void setEqualizer() {
