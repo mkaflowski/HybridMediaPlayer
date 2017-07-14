@@ -1,1 +1,1 @@
-include ':demo', ':hybridmediaplayer', ':library-core-release'
+include ':demo', ':hybridmediaplayer'

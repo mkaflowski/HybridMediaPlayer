@@ -93,7 +93,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
     @Override
     public void setDataSource(String path) {
-        setDataSource(path);
+        setDataSource(new String[]{path});
     }
 
     public DynamicConcatenatingMediaSource getMediaSource() {

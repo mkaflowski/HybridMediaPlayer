@@ -33,5 +33,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.github.zhaokaiqiang.klog:library:1.5.0'
     //compile 'com.google.android.exoplayer:exoplayer:r2.4.3'
-    compile project(':library-core-release')
+    compile(name: "library-core-release", ext: "aar")
 }

@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/HybridMediaPlayer.iml" filepath="$PROJECT_DIR$/HybridMediaPlayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
       <module fileurl="file://$PROJECT_DIR$/hybridmediaplayer/hybridmediaplayer.iml" filepath="$PROJECT_DIR$/hybridmediaplayer/hybridmediaplayer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/library-core-release/library-core-release.iml" filepath="$PROJECT_DIR$/library-core-release/library-core-release.iml" />
     </modules>
   </component>
 </project>
