@@ -161,6 +161,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                 currentState = playbackState;
             }
 
+            @Override
+            public void onRepeatModeChanged(int i) {
+
+            }
+
 
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
