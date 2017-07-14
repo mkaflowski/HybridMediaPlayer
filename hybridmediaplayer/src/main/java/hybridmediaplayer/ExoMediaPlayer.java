@@ -2,10 +2,8 @@ package hybridmediaplayer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -18,8 +16,6 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
-import com.google.android.exoplayer2.source.DynamicConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -45,7 +41,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
     private SimpleExoPlayer player;
     private Context context;
-    private DynamicConcatenatingMediaSource mediaSource;
+    //private DynamicConcatenatingMediaSource mediaSource;
     private int currentState;
     private boolean isPreparing = false;
     private OnTracksChangedListener onTracksChangedListener;
@@ -88,8 +84,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                     dataSourceFactory, extractorsFactory, null, null));
         }
 
-        mediaSource = new DynamicConcatenatingMediaSource();
-        mediaSource.addMediaSources(sources);
+//        mediaSource = new DynamicConcatenatingMediaSource();
+//        mediaSource.addMediaSources(sources);
     }
 
 
@@ -99,9 +95,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         setDataSource(path);
     }
 
-    public DynamicConcatenatingMediaSource getMediaSource() {
-        return mediaSource;
-    }
+//    public DynamicConcatenatingMediaSource getMediaSource() {
+//        return mediaSource;
+//    }
 
     @Override
     public void prepare() {
@@ -139,7 +135,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
 
         isPreparing = true;
-        player.prepare(mediaSource);
+        //player.prepare(mediaSource);
         player.addListener(new ExoPlayer.EventListener() {
             @Override
             public void onLoadingChanged(boolean isLoading) {
@@ -165,10 +161,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                 currentState = playbackState;
             }
 
-            @Override
-            public void onRepeatModeChanged(int i) {
-
-            }
 
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
