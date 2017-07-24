@@ -156,7 +156,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
                 if (onTracksChangedListener != null)
-                    onTracksChangedListener.onTracksChanged();
+                    onTracksChangedListener.onTracksChanged(trackGroups, trackSelections);
             }
 
             @Override
@@ -289,7 +289,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     }
 
     public interface OnTracksChangedListener {
-        public void onTracksChanged();
+        public void onTracksChanged( TrackGroupArray trackGroups, TrackSelectionArray trackSelections );
     }
 
     public interface OnPositionDiscontinuityListener {

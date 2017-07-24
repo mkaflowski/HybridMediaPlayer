@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void createPlayer() {
         //String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
-        String url = "https://api.soundcloud.com/tracks/258665732/stream?consumer_key=cd9d2e5604410d714e32642a4ec0eed4";
+        String url = "http://stream3.polskieradio.pl:8904/";
         String url2 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         mediaPlayer = new ExoMediaPlayer(this);
         mediaPlayer.setDataSource(url);
