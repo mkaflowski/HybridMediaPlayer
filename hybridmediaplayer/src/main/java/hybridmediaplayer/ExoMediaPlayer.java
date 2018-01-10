@@ -73,6 +73,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
                 DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
                 true /* allowCrossProtocolRedirects */
         );
+
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
         // Produces Extractor instances for parsing the media data.
@@ -113,9 +114,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             }
 
             @Override
-            public void onAudioTrackUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
+            public void onAudioSinkUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
 
             }
+
 
             @Override
             public void onAudioDisabled(DecoderCounters counters) {
@@ -150,6 +152,17 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             }
 
             @Override
+            public void onRepeatModeChanged(int repeatMode) {
+                if (onPositionDiscontinuityListener != null)
+                    onPositionDiscontinuityListener.onPositionDiscontinuity(player.getCurrentWindowIndex());
+            }
+
+            @Override
+            public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+            }
+
+            @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
             }
 
@@ -166,14 +179,18 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             }
 
             @Override
-            public void onPositionDiscontinuity() {
-                if (onPositionDiscontinuityListener != null)
-                    onPositionDiscontinuityListener.onPositionDiscontinuity(player.getCurrentWindowIndex());
+            public void onPositionDiscontinuity(int reason) {
+
+            }
+
+
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
 
             }
 
             @Override
-            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+            public void onSeekProcessed() {
 
             }
         });
@@ -229,6 +246,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
     @Override
     public void seekTo(int msec) {
         player.seekTo(msec);
+    }
+
+    public void stop() {
+        player.stop();
     }
 
     public void seekTo(int windowIndex, int msec) {

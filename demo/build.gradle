@@ -24,8 +24,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.4.0'
     testCompile 'junit:junit:4.12'
-    compile 'com.github.zhaokaiqiang.klog:library:1.5.0'
+    compile 'com.github.zhaokaiqiang.klog:library:1.6.0'
     compile project(':hybridmediaplayer')
 }
