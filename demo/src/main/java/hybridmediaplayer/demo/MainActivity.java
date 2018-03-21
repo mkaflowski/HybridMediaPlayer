@@ -1,6 +1,7 @@
 package hybridmediaplayer.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.view.Menu;
@@ -8,8 +9,13 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.CastState;
+import com.google.android.gms.cast.framework.CastStateListener;
+import com.google.android.gms.cast.framework.SessionManager;
 import com.socks.library.KLog;
 
 import java.util.ArrayList;
@@ -20,7 +26,7 @@ import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
 import hybridplayer.demo.R;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, PlayerManager.QueuePositionListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ExoMediaPlayer mediaPlayer;
     private boolean isPrepared;
@@ -28,13 +34,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     float speed = 1;
     private SurfaceView playerView;
 
-    private PlayerManager playerManager;
-
 
     //Chromecast
     private CastContext castContext;
     private MediaRouteButton mediaRouteButton;
-
 
 
     @Override
@@ -60,12 +63,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Chromecast:
         mediaRouteButton = findViewById(R.id.media_route_button);
-        CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
+
         castContext = CastContext.getSharedInstance(this);
+        castContext.addCastStateListener(new CastStateListener() {
+            @Override
+            public void onCastStateChanged(int state) {
+                if (state == CastState.NO_DEVICES_AVAILABLE)
+                    mediaRouteButton.setVisibility(View.GONE);
+                else {
+                    if (mediaRouteButton.getVisibility() == View.GONE)
+                        mediaRouteButton.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         createPlayer();
-    }
 
+
+        CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
+
+
+
+
+    }
 
     private void createPlayer() {
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
@@ -140,11 +160,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
-        } else if (view.getId() == R.id.btNext){
-            mediaPlayer.seekTo(mediaPlayer.getCurrentWindow()+1,0);
+        } else if (view.getId() == R.id.btNext) {
+            mediaPlayer.seekTo(mediaPlayer.getCurrentWindow() + 1, 0);
         }
     }
-
 
 
     @Override
@@ -153,11 +172,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.options, menu);
         CastButtonFactory.setUpMediaRouteButton(this, menu, R.id.media_route_menu_item);
         return true;
-    }
-
-    @Override
-    public void onQueuePositionChanged(int previousIndex, int newIndex) {
-
     }
 
 

@@ -389,8 +389,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         long time = currentPlayer.getCurrentPosition();
         int window = currentPlayer.getCurrentWindowIndex();
 
-        KLog.d(time/1000);
-
         currentPlayer = player;
 
         if (currentPlayer == castPlayer)
