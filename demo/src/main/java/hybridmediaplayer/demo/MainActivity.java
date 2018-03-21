@@ -1,6 +1,5 @@
 package hybridmediaplayer.demo;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteButton;
@@ -9,19 +8,16 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.ext.cast.CastPlayer;
-import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
-import com.google.android.gms.common.images.WebImage;
 import com.socks.library.KLog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import hybridmediaplayer.ExoMediaPlayer;
 import hybridmediaplayer.HybridMediaPlayer;
+import hybridmediaplayer.MediaSourceInfo;
 import hybridplayer.demo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, PlayerManager.QueuePositionListener {
@@ -51,12 +47,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button btFastForward = findViewById(R.id.fastForward);
         Button btSpeed = findViewById(R.id.btSpeed);
         Button btStop = findViewById(R.id.btStop);
+        Button btNext = findViewById(R.id.btNext);
 
         btPlay.setOnClickListener(this);
         btPause.setOnClickListener(this);
         btFastForward.setOnClickListener(this);
         btSpeed.setOnClickListener(this);
         btStop.setOnClickListener(this);
+        btNext.setOnClickListener(this);
 
         playerView = findViewById(R.id.playerView);
 
@@ -71,10 +69,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void createPlayer() {
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
-        //String url = "http://stream3.polskieradio.pl:8904/";
-        //String url2 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
+        String url2 = "http://stream3.polskieradio.pl:8904/";
+        String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         mediaPlayer = new ExoMediaPlayer(this);
-        mediaPlayer.setDataSource(url);
+        //mediaPlayer.setDataSource(url);
+        MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
+                .setTitle("Podcast Stream")
+                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .build();
+        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url3)
+                .setTitle("Radio FM")
+                .setImageUrl("https://image.freepik.com/darmowe-wektory/retro-radio-logo_1438-470.jpg")
+                .build();
+
+        List<MediaSourceInfo> sources = new ArrayList<>();
+        sources.add(source1);
+        sources.add(source2);
+
+        mediaPlayer.setDataSource(sources);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnPositionDiscontinuityListener(new ExoMediaPlayer.OnPositionDiscontinuityListener() {
@@ -128,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
+        } else if (view.getId() == R.id.btNext){
+            mediaPlayer.seekTo(mediaPlayer.getCurrentWindow()+1,0);
         }
     }
 

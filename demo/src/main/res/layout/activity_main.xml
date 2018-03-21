@@ -18,6 +18,16 @@
         android:layout_below="@+id/fastForward"
         android:text="Pause" />
 
+    <Button
+        android:id="@+id/btNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/fastForward"
+        android:layout_alignBottom="@+id/fastForward"
+        android:layout_toLeftOf="@+id/btPause"
+        android:layout_toStartOf="@+id/btPause"
+        android:text="Next" />
+
     <SurfaceView
         android:id="@+id/playerView"
         android:layout_width="360px"

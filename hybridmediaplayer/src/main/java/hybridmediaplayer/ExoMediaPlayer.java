@@ -41,6 +41,9 @@ import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
 import com.socks.library.KLog;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.SessionAvailabilityListener {
 
@@ -57,6 +60,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private OnTracksChangedListener onTracksChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
     private boolean isSupportingSystemEqualizer;
+    private Player.DefaultEventListener listener;
+
+    private List<MediaSourceInfo> mediaSourceInfoList;
 
 
     public ExoMediaPlayer(Context context) {
@@ -70,11 +76,85 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         currentPlayer = exoPlayer;
+
+        listener = new Player.DefaultEventListener() {
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if (currentState != playbackState)
+                    switch (playbackState) {
+                        case ExoPlayer.STATE_ENDED:
+                            if (onCompletionListener != null)
+                                onCompletionListener.onCompletion(ExoMediaPlayer.this);
+                            break;
+
+                        case ExoPlayer.STATE_READY:
+                            if (isPreparing && onPreparedListener != null) {
+                                isPreparing = false;
+                                onPreparedListener.onPrepared(ExoMediaPlayer.this);
+                            }
+                            break;
+                    }
+                currentState = playbackState;
+            }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+                if (onPositionDiscontinuityListener != null)
+                    onPositionDiscontinuityListener.onPositionDiscontinuity(currentPlayer.getCurrentWindowIndex());
+            }
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+                if (onTracksChangedListener != null)
+                    onTracksChangedListener.onTracksChanged(trackGroups, trackSelections);
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+                if (onErrorListener != null)
+                    onErrorListener.onError(error, ExoMediaPlayer.this);
+            }
+        };
     }
 
     @Override
     public void setDataSource(String path) {
         setDataSource(new String[]{path});
+    }
+
+    public void setDataSource(MediaSourceInfo mediaSourceInfo) {
+        List<MediaSourceInfo> list = new ArrayList<>();
+        list.add(mediaSourceInfo);
+        setDataSource(list);
+    }
+
+
+    public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList) {
+        String userAgent = Util.getUserAgent(context, "yourApplicationName");
+        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
+                userAgent,
+                null /* listener */,
+                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+                true /* allowCrossProtocolRedirects */
+        );
+
+        // Produces DataSource instances through which media data is loaded.
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
+        // Produces Extractor instances for parsing the media data.
+        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
+
+
+        MediaSource[] sources = new MediaSource[mediaSourceInfoList.size()];
+        for (int i = 0; i < mediaSourceInfoList.size(); i++) {
+            // This is the MediaSource representing the media to be played.
+            sources[i] = new ExtractorMediaSource(Uri.parse(mediaSourceInfoList.get(i).getUrl()),
+                    dataSourceFactory, extractorsFactory, null, null);
+        }
+
+        mediaSource = new ConcatenatingMediaSource(sources);
+
+        setMediaSourceInfoList(mediaSourceInfoList);
     }
 
     public void setDataSource(String... paths) {
@@ -105,16 +185,27 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         //media sources for CastPlayer
         mediaItems = new MediaQueueItem[paths.length];
         for (int i = 0; i < paths.length; i++) {
-            mediaItems[i] = buildMediaQueueItem(paths[i]);
+            mediaItems[i] = buildMediaQueueItem(paths[i], null);
         }
     }
 
-    private  MediaQueueItem buildMediaQueueItem(String url) {
+    public void setMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
+        this.mediaSourceInfoList = mediaSourceInfoList;
+        //media sources for CastPlayer
+        mediaItems = new MediaQueueItem[mediaSourceInfoList.size()];
+        for (int i = 0; i < mediaSourceInfoList.size(); i++) {
+            mediaItems[i] = buildMediaQueueItem(mediaSourceInfoList.get(i).getUrl(), mediaSourceInfoList.get(i));
+        }
+    }
+
+    private  MediaQueueItem buildMediaQueueItem(String url, MediaSourceInfo mediaSourceInfo) {
+        if(mediaSourceInfo == null)
+            mediaSourceInfo = MediaSourceInfo.PLACEHOLDER;
+
         MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
-        movieMetadata.putString(MediaMetadata.KEY_TITLE, "HybridPlayer");
-        movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, "Artist");
-        movieMetadata.addImage(new WebImage(Uri.parse("https://avatars2.githubusercontent.com/u/10148175?s=460&v=4")));
-        //movieMetadata.addImage(new WebImage(Uri.parse("http://www.juvepoland.com/images/news/36975.jpg")));
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, mediaSourceInfo.getTitle());
+        movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, mediaSourceInfo.getAuthor());
+        movieMetadata.addImage(new WebImage(Uri.parse(mediaSourceInfo.getImageUrl())));
         MediaInfo mediaInfo = new MediaInfo.Builder(url)
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED).setContentType(MimeTypes.AUDIO_UNKNOWN)
                 .setMetadata(movieMetadata).build();
@@ -158,44 +249,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         isPreparing = true;
         exoPlayer.prepare(mediaSource);
-        exoPlayer.addListener(new Player.DefaultEventListener() {
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                if (currentState != playbackState)
-                    switch (playbackState) {
-                        case ExoPlayer.STATE_ENDED:
-                            if (onCompletionListener != null)
-                                onCompletionListener.onCompletion(ExoMediaPlayer.this);
-                            break;
-
-                        case ExoPlayer.STATE_READY:
-                            if (isPreparing && onPreparedListener != null) {
-                                isPreparing = false;
-                                onPreparedListener.onPrepared(ExoMediaPlayer.this);
-                            }
-                            break;
-                    }
-                currentState = playbackState;
-            }
-
-            @Override
-            public void onRepeatModeChanged(int repeatMode) {
-                if (onPositionDiscontinuityListener != null)
-                    onPositionDiscontinuityListener.onPositionDiscontinuity(exoPlayer.getCurrentWindowIndex());
-            }
-
-            @Override
-            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                if (onTracksChangedListener != null)
-                    onTracksChangedListener.onTracksChanged(trackGroups, trackSelections);
-            }
-
-            @Override
-            public void onPlayerError(ExoPlaybackException error) {
-                if (onErrorListener != null)
-                    onErrorListener.onError(error, ExoMediaPlayer.this);
-            }
-        });
+        exoPlayer.addListener(listener);
 
     }
 
@@ -231,8 +285,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
     public void setCastPlayer(CastContext castContext) {
         castPlayer = new CastPlayer(castContext);
-
         castPlayer.setSessionAvailabilityListener(this);
+        castPlayer.addListener(listener);
     }
 
     @Override
@@ -343,9 +397,17 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
 
         if (currentPlayer == exoPlayer) {
-            castPlayer.seekTo(window, time);
+            currentPlayer.seekTo(window, time);
             play();
         }
+    }
+
+    public int getCurrentWindow() {
+        return currentPlayer.getCurrentWindowIndex();
+    }
+
+    public int getWindowCount() {
+        return mediaSourceInfoList.size();
     }
 
     public interface OnTracksChangedListener {
