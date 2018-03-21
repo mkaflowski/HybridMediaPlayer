@@ -13,9 +13,9 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
+import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -32,15 +32,26 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.cast.MediaQueueItem;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.common.images.WebImage;
 import com.socks.library.KLog;
 
 
-public class ExoMediaPlayer extends HybridMediaPlayer {
+public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.SessionAvailabilityListener {
 
-    private SimpleExoPlayer player;
+    private Player currentPlayer;
+    private SimpleExoPlayer exoPlayer;
+    private CastPlayer castPlayer;
+
+
     private Context context;
     private MediaSource mediaSource;
+    private MediaQueueItem[] mediaItems;
     private int currentState;
     private boolean isPreparing = false;
     private OnTracksChangedListener onTracksChangedListener;
@@ -57,7 +68,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        currentPlayer = exoPlayer;
     }
 
     @Override
@@ -89,11 +101,29 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         }
 
         mediaSource = new ConcatenatingMediaSource(sources);
+
+        //media sources for CastPlayer
+        mediaItems = new MediaQueueItem[paths.length];
+        for (int i = 0; i < paths.length; i++) {
+            mediaItems[i] = buildMediaQueueItem(paths[i]);
+        }
+    }
+
+    private  MediaQueueItem buildMediaQueueItem(String url) {
+        MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, "HybridPlayer");
+        movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, "Artist");
+        movieMetadata.addImage(new WebImage(Uri.parse("https://avatars2.githubusercontent.com/u/10148175?s=460&v=4")));
+        //movieMetadata.addImage(new WebImage(Uri.parse("http://www.juvepoland.com/images/news/36975.jpg")));
+        MediaInfo mediaInfo = new MediaInfo.Builder(url)
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED).setContentType(MimeTypes.AUDIO_UNKNOWN)
+                .setMetadata(movieMetadata).build();
+        return new MediaQueueItem.Builder(mediaInfo).build();
     }
 
     @Override
     public void prepare() {
-        player.setAudioDebugListener(new AudioRendererEventListener() {
+        exoPlayer.setAudioDebugListener(new AudioRendererEventListener() {
             @Override
             public void onAudioEnabled(DecoderCounters counters) {
 
@@ -127,8 +157,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         });
 
         isPreparing = true;
-        player.prepare(mediaSource);
-        player.addListener(new Player.DefaultEventListener() {
+        exoPlayer.prepare(mediaSource);
+        exoPlayer.addListener(new Player.DefaultEventListener() {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 if (currentState != playbackState)
@@ -151,7 +181,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             @Override
             public void onRepeatModeChanged(int repeatMode) {
                 if (onPositionDiscontinuityListener != null)
-                    onPositionDiscontinuityListener.onPositionDiscontinuity(player.getCurrentWindowIndex());
+                    onPositionDiscontinuityListener.onPositionDiscontinuity(exoPlayer.getCurrentWindowIndex());
             }
 
             @Override
@@ -173,7 +203,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         if (!isSupportingSystemEqualizer)
             return;
         final Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
-        intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.getAudioSessionId());
+        intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, exoPlayer.getAudioSessionId());
         intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.getPackageName());
         context.sendBroadcast(intent);
     }
@@ -182,7 +212,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         if (!isSupportingSystemEqualizer)
             return;
         final Intent intent = new Intent(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
-        intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.getAudioSessionId());
+        intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, exoPlayer.getAudioSessionId());
         intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.getPackageName());
         context.sendBroadcast(intent);
     }
@@ -199,78 +229,86 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         return isSupportingSystemEqualizer;
     }
 
+    public void setCastPlayer(CastContext castContext) {
+        castPlayer = new CastPlayer(castContext);
+
+        castPlayer.setSessionAvailabilityListener(this);
+    }
+
     @Override
     public void release() {
         releaseEqualizer();
-        player.release();
+        exoPlayer.release();
+        if(castPlayer !=null)
+            castPlayer.release();
     }
 
     @Override
     public void play() {
-        player.setPlayWhenReady(true);
+        currentPlayer.setPlayWhenReady(true);
     }
 
     @Override
     public void pause() {
-        player.setPlayWhenReady(false);
+        currentPlayer.setPlayWhenReady(false);
     }
 
     @Override
     public void seekTo(int msec) {
-        player.seekTo(msec);
+        currentPlayer.seekTo(msec);
     }
 
     public void stop() {
-        player.stop();
+        currentPlayer.stop();
     }
 
     public void seekTo(int windowIndex, int msec) {
-        player.seekTo(windowIndex, msec);
+        currentPlayer.seekTo(windowIndex, msec);
     }
 
     @Override
     public int getDuration() {
-        return (int) player.getDuration();
+        return (int) currentPlayer.getDuration();
     }
 
     @Override
     public int getCurrentPosition() {
-        return (int) player.getCurrentPosition();
+        return (int) currentPlayer.getCurrentPosition();
     }
 
     @Override
     public float getVolume() {
-        return player.getVolume();
+        return exoPlayer.getVolume();
     }
 
     @Override
     public void setVolume(float level) {
-        player.setVolume(level);
+        exoPlayer.setVolume(level);
     }
 
     @Override
     public void setPlaybackParams(float speed, float pitch) {
         PlaybackParameters params = new PlaybackParameters(speed, pitch);
-        player.setPlaybackParameters(params);
+        currentPlayer.setPlaybackParameters(params);
     }
 
     @Override
     public boolean isPlaying() {
-        return player.getPlayWhenReady();
+        return exoPlayer.getPlayWhenReady();
     }
 
     @Override
     public void setPlayerView(Context context, final SurfaceView surfaceView) {
-        player.setVideoSurfaceView(surfaceView);
+        exoPlayer.setVideoSurfaceView(surfaceView);
     }
 
     @Override
     public boolean hasVideo() {
-        return player.getVideoFormat() != null;
+        return exoPlayer.getVideoFormat() != null;
     }
 
-    public SimpleExoPlayer getPlayer() {
-        return player;
+    public SimpleExoPlayer getExoPlayer() {
+        return exoPlayer;
     }
 
     public void setOnTracksChangedListener(OnTracksChangedListener onTracksChangedListener) {
@@ -281,8 +319,37 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
         this.onPositionDiscontinuityListener = onPositionDiscontinuityListener;
     }
 
+    @Override
+    public void onCastSessionAvailable() {
+        setCurrentPlayer(castPlayer);
+    }
+
+
+    @Override
+    public void onCastSessionUnavailable() {
+        setCurrentPlayer(exoPlayer);
+    }
+
+    private void setCurrentPlayer(Player player) {
+        pause();
+        long time = currentPlayer.getCurrentPosition();
+        int window = currentPlayer.getCurrentWindowIndex();
+
+        KLog.d(time/1000);
+
+        currentPlayer = player;
+
+        if (currentPlayer == castPlayer)
+            castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
+
+        if (currentPlayer == exoPlayer) {
+            castPlayer.seekTo(window, time);
+            play();
+        }
+    }
+
     public interface OnTracksChangedListener {
-        public void onTracksChanged( TrackGroupArray trackGroups, TrackSelectionArray trackSelections );
+        public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections);
     }
 
     public interface OnPositionDiscontinuityListener {

@@ -59,26 +59,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btStop.setOnClickListener(this);
 
         playerView = findViewById(R.id.playerView);
-        createPlayer();
 
         //Chromecast:
         mediaRouteButton = findViewById(R.id.media_route_button);
         CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
         castContext = CastContext.getSharedInstance(this);
+
+        createPlayer();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        playerManager.release();
-    }
 
     private void createPlayer() {
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
@@ -112,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 KLog.w(mediaPlayer.hasVideo());
             }
         });
+
+        mediaPlayer.setCastPlayer(castContext);
     }
 
 
@@ -130,50 +121,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 15 * 1000);
             mediaPlayer.prepare();
         } else if (view.getId() == R.id.btSpeed) {
-            testCast();
-//            if (speed == 1)
-//                speed = 2f;
-//            else speed = 1;
-//            mediaPlayer.setPlaybackParams(speed, 1);
+            if (speed == 1)
+                speed = 2f;
+            else speed = 1;
+            mediaPlayer.setPlaybackParams(speed, 1);
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
         }
     }
 
-    private void testCast() {
-//        playerManager =
-//                PlayerManager.createPlayerManager(
-//            /* queuePositionListener= */ this,
-//                        null,
-//                        null,
-//            /* context= */ this,
-//                        castContext);
-//
-//        playerManager.addItem(DemoUtil.SAMPLES.get(2));
-//        playerManager.selectQueueItem(0);
 
-        final CastPlayer castPlayer = new CastPlayer(castContext);
-//        castPlayer.addListener(this);
-
-        final MediaQueueItem[] items = new MediaQueueItem[1];
-        items[0] = buildMediaQueueItem(DemoUtil.SAMPLES.get(0));
-        castPlayer.loadItems(items, 0, 0, Player.REPEAT_MODE_OFF);
-
-        castPlayer.setSessionAvailabilityListener(new CastPlayer.SessionAvailabilityListener() {
-            @Override
-            public void onCastSessionAvailable() {
-                castPlayer.loadItems(items, 0, 0, Player.REPEAT_MODE_OFF);
-            }
-
-            @Override
-            public void onCastSessionUnavailable() {
-
-            }
-        });
-
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -188,16 +146,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private static MediaQueueItem buildMediaQueueItem(DemoUtil.Sample sample) {
-        MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
-        movieMetadata.putString(MediaMetadata.KEY_TITLE, "Name");
-        movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, "Artist");
-        movieMetadata.addImage(new WebImage(Uri.parse("http://www.juvepoland.com/images/news/36959.jpg")));
-        movieMetadata.addImage(new WebImage(Uri.parse("http://www.juvepoland.com/images/news/36975.jpg")));
-        MediaInfo mediaInfo = new MediaInfo.Builder("https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3")
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED).setContentType(MimeTypes.AUDIO_UNKNOWN)
-                .setMetadata(movieMetadata).build();
-        return new MediaQueueItem.Builder(mediaInfo).build();
-    }
 
 }
