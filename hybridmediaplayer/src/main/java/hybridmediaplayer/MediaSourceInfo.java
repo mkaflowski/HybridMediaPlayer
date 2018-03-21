@@ -6,6 +6,7 @@ public class MediaSourceInfo {
     private String author;
     private String url;
     private String imageUrl;
+    private boolean isVideo;
 
     public static MediaSourceInfo PLACEHOLDER = new Builder().setTitle("HybridMediaPlayer Casting")
             .setAuthor("lib by Mateusz Kaflowski")
@@ -44,11 +45,16 @@ public class MediaSourceInfo {
         this.imageUrl = imageUrl;
     }
 
-    private MediaSourceInfo(String title, String author, String url, String imageUrl) {
+    public boolean isVideo() {
+        return isVideo;
+    }
+
+    private MediaSourceInfo(String title, String author, String url, String imageUrl, boolean isVideo) {
         this.title = title;
         this.author = author;
         this.url = url;
         this.imageUrl = imageUrl;
+        this.isVideo = isVideo;
     }
 
     public static class Builder {
@@ -56,6 +62,7 @@ public class MediaSourceInfo {
         private String author;
         private String url;
         private String imageUrl;
+        private boolean isVideo;
 
 
         public Builder setTitle(String title) {
@@ -78,8 +85,13 @@ public class MediaSourceInfo {
             return this;
         }
 
+        public Builder isVideo(boolean hasVideo) {
+            this.isVideo = hasVideo;
+            return this;
+        }
+
         public MediaSourceInfo build() {
-            return new MediaSourceInfo(title, author, url, imageUrl);
+            return new MediaSourceInfo(title, author, url, imageUrl, isVideo);
         }
     }
 

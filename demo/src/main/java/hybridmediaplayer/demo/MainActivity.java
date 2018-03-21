@@ -1,7 +1,6 @@
 package hybridmediaplayer.demo;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.view.Menu;
@@ -9,13 +8,10 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
-import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastState;
 import com.google.android.gms.cast.framework.CastStateListener;
-import com.google.android.gms.cast.framework.SessionManager;
 import com.socks.library.KLog;
 
 import java.util.ArrayList;
@@ -98,8 +94,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
         MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url3)
-                .setTitle("Radio FM")
-                .setImageUrl("https://image.freepik.com/darmowe-wektory/retro-radio-logo_1438-470.jpg")
+                .setTitle("Movie")
+                .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
+                .isVideo(true)
                 .build();
 
         List<MediaSourceInfo> sources = new ArrayList<>();

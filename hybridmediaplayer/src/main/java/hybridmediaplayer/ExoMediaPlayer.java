@@ -39,7 +39,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -198,17 +197,19 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
     }
 
-    private  MediaQueueItem buildMediaQueueItem(String url, MediaSourceInfo mediaSourceInfo) {
-        if(mediaSourceInfo == null)
+    private MediaQueueItem buildMediaQueueItem(String url, MediaSourceInfo mediaSourceInfo) {
+        if (mediaSourceInfo == null)
             mediaSourceInfo = MediaSourceInfo.PLACEHOLDER;
 
-        MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
+        MediaMetadata movieMetadata = new MediaMetadata(mediaSourceInfo.isVideo() ? MediaMetadata.MEDIA_TYPE_MOVIE : MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
         movieMetadata.putString(MediaMetadata.KEY_TITLE, mediaSourceInfo.getTitle());
         movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, mediaSourceInfo.getAuthor());
         movieMetadata.addImage(new WebImage(Uri.parse(mediaSourceInfo.getImageUrl())));
         MediaInfo mediaInfo = new MediaInfo.Builder(url)
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED).setContentType(MimeTypes.AUDIO_UNKNOWN)
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setContentType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN)
                 .setMetadata(movieMetadata).build();
+
         return new MediaQueueItem.Builder(mediaInfo).build();
     }
 
@@ -293,7 +294,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     public void release() {
         releaseEqualizer();
         exoPlayer.release();
-        if(castPlayer !=null)
+        if (castPlayer != null)
             castPlayer.release();
     }
 
