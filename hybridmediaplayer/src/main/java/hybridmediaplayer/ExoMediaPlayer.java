@@ -11,6 +11,7 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
@@ -127,11 +128,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
 
         isPreparing = true;
         player.prepare(mediaSource);
-        player.addListener(new ExoPlayer.EventListener() {
-            @Override
-            public void onLoadingChanged(boolean isLoading) {
-            }
-
+        player.addListener(new Player.DefaultEventListener() {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 if (currentState != playbackState)
@@ -158,15 +155,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             }
 
             @Override
-            public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
-            }
-
-            @Override
-            public void onTimelineChanged(Timeline timeline, Object manifest) {
-            }
-
-            @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
                 if (onTracksChangedListener != null)
                     onTracksChangedListener.onTracksChanged(trackGroups, trackSelections);
@@ -176,22 +164,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer {
             public void onPlayerError(ExoPlaybackException error) {
                 if (onErrorListener != null)
                     onErrorListener.onError(error, ExoMediaPlayer.this);
-            }
-
-            @Override
-            public void onPositionDiscontinuity(int reason) {
-
-            }
-
-
-            @Override
-            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-            }
-
-            @Override
-            public void onSeekProcessed() {
-
             }
         });
 

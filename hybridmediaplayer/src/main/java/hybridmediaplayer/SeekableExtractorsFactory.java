@@ -8,10 +8,6 @@ import com.google.android.exoplayer2.extractor.mp3.Mp3Extractor;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Mateusz on 05.04.2017.
- */
-
 public class SeekableExtractorsFactory implements ExtractorsFactory {
     // Lazily initialized default extractor classes in priority order.
     private static List<Class<? extends Extractor>> defaultExtractorClasses;

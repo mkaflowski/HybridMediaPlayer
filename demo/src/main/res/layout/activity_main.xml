@@ -13,55 +13,67 @@
         android:id="@+id/btPause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pause"
-        android:layout_below="@+id/fastForward"
         android:layout_alignLeft="@+id/fastForward"
-        android:layout_alignStart="@+id/fastForward" />
+        android:layout_alignStart="@+id/fastForward"
+        android:layout_below="@+id/fastForward"
+        android:text="Pause" />
 
     <SurfaceView
+        android:id="@+id/playerView"
         android:layout_width="360px"
         android:layout_height="610px"
-        android:text="Hello World!"
-        android:id="@+id/playerView"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="Hello World!" />
 
     <Button
-        android:text="Play"
+        android:id="@+id/btPlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btPlay"
         android:layout_below="@+id/playerView"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:text="Play" />
 
     <Button
         android:id="@+id/btStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stop"
         android:layout_alignBaseline="@+id/fastForward"
         android:layout_alignBottom="@+id/fastForward"
+        android:layout_toEndOf="@+id/btPause"
         android:layout_toRightOf="@+id/btPause"
-        android:layout_toEndOf="@+id/btPause" />
+        android:text="Stop" />
 
     <Button
-        android:text="speed x2"
+        android:id="@+id/btSpeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btSpeed"
-        android:layout_below="@+id/btPause"
         android:layout_alignLeft="@+id/btPause"
-        android:layout_alignStart="@+id/btPause" />
+        android:layout_alignStart="@+id/btPause"
+        android:layout_below="@+id/btPause"
+        android:text="speed x2" />
+
+    <android.support.v7.app.MediaRouteButton
+        android:id="@+id/media_route_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btStop"
+        android:layout_toEndOf="@+id/btPlay"
+        android:layout_toRightOf="@+id/btPlay"
+        android:mediaRouteTypes="user"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:targetApi="jelly_bean" />
 
     <Button
         android:id="@+id/fastForward"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=">>"
-        android:layout_below="@+id/btPlay"
         android:layout_alignLeft="@+id/btPlay"
-        android:layout_alignStart="@+id/btPlay" />
+        android:layout_alignStart="@+id/btPlay"
+        android:layout_below="@+id/btPlay"
+        android:text=">>" />
 </RelativeLayout>
