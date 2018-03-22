@@ -78,9 +78,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
 
-
-
-
     }
 
     private void createPlayer() {
