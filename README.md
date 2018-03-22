@@ -44,6 +44,12 @@ To use the library, first include it your project using Gradle
 ```java
         ExoMediaPlayer mediaPlayer = new ExoMediaPlayer(this)
         mediaPlayer.setDataSource(url1, url2, url3, ...);
+	
+	//for proper Chromecast handling
+	mediaPlayer.setDataSource(mediaSourceInfoList);
+	mediaPlayer.setCastPlayer(castContext);
+	
+	//setting video view:
 	mediaPlayer.setPlayerView(this, playerView);
 	
         mediaPlayer.prepare();
@@ -60,4 +66,23 @@ To use the library, first include it your project using Gradle
 	
         mediaPlayer.release();
 ```
+### Creating MediaSourceInfo for proper Chromecast handling example
 
+```java
+        MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
+                .setTitle("Podcast Stream")
+                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .build();
+        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url3)
+                .setTitle("Movie")
+                .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
+                .isVideo(true)
+                .build();
+
+        List<MediaSourceInfo> sources = new ArrayList<>();
+        sources.add(source1);
+        sources.add(source2);
+
+        mediaPlayer.setDataSource(sources);
+	mediaPlayer.setCastPlayer(castContext);
+```
