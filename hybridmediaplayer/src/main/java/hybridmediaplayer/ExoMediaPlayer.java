@@ -184,7 +184,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         //media sources for CastPlayer
         mediaItems = new MediaQueueItem[paths.length];
         for (int i = 0; i < paths.length; i++) {
-            mediaItems[i] = buildMediaQueueItem(paths[i], null);
+            mediaItems[i] = buildMediaQueueItem(paths[i], null, i + 1);
         }
     }
 
@@ -193,17 +193,18 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         //media sources for CastPlayer
         mediaItems = new MediaQueueItem[mediaSourceInfoList.size()];
         for (int i = 0; i < mediaSourceInfoList.size(); i++) {
-            mediaItems[i] = buildMediaQueueItem(mediaSourceInfoList.get(i).getUrl(), mediaSourceInfoList.get(i));
+            mediaItems[i] = buildMediaQueueItem(mediaSourceInfoList.get(i).getUrl(), mediaSourceInfoList.get(i), i + 1);
         }
     }
 
-    private MediaQueueItem buildMediaQueueItem(String url, MediaSourceInfo mediaSourceInfo) {
+    private MediaQueueItem buildMediaQueueItem(String url, MediaSourceInfo mediaSourceInfo, int position) {
         if (mediaSourceInfo == null)
             mediaSourceInfo = MediaSourceInfo.PLACEHOLDER;
 
         MediaMetadata movieMetadata = new MediaMetadata(mediaSourceInfo.isVideo() ? MediaMetadata.MEDIA_TYPE_MOVIE : MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
         movieMetadata.putString(MediaMetadata.KEY_TITLE, mediaSourceInfo.getTitle());
         movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, mediaSourceInfo.getAuthor());
+        movieMetadata.putInt(MediaMetadata.KEY_TRACK_NUMBER, position);
         movieMetadata.addImage(new WebImage(Uri.parse(mediaSourceInfo.getImageUrl())));
         MediaInfo mediaInfo = new MediaInfo.Builder(url)
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
