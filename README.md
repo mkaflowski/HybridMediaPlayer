@@ -58,7 +58,7 @@ To use the library, first include it your project using Gradle
 	mediaPlayer.setOnTracksChangedListener(this);
         
 	mediaPlayer.hasVideo();
-        mediaPlayer.seekTo(windowPosition,time);
+        mediaPlayer.seekTo(trackNum,time);
 	
 	mediaPlayer.setSupportingSystemEqualizer(true);
 	//FOR EDITING PLAYLIST
