@@ -65,6 +65,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private List<MediaSourceInfo> mediaSourceInfoList;
     private boolean isCasting;
     private OnCastAvailabilityChangeListener onCastAvailabilityChangeListener;
+    private boolean isPreparingCast;
 
 
     public ExoMediaPlayer(Context context) {
@@ -80,9 +81,16 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         currentPlayer = exoPlayer;
 
         listener = new Player.DefaultEventListener() {
+            private Player listenerCurrentPlayer;
+
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                if (currentState != playbackState)
+                KLog.d("abc " + playbackState);
+
+                if (currentState != playbackState || listenerCurrentPlayer != currentPlayer) {
+                    KLog.e("abc " + currentPlayer);
+
+                    listenerCurrentPlayer = currentPlayer;
                     switch (playbackState) {
                         case ExoPlayer.STATE_ENDED:
                             if (onCompletionListener != null)
@@ -93,9 +101,16 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                             if (isPreparing && onPreparedListener != null) {
                                 isPreparing = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
+                                KLog.w("abc ready" + playbackState);
+                            }
+                            if(listenerCurrentPlayer == castPlayer && isPreparingCast && onPreparedListener != null){
+                                isPreparingCast = false;
+                                onPreparedListener.onPrepared(ExoMediaPlayer.this);
+                                KLog.w("abc ready" + playbackState);
                             }
                             break;
                     }
+                }
                 currentState = playbackState;
             }
 
@@ -389,14 +404,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     @Override
     public void onCastSessionAvailable() {
         setCurrentPlayer(castPlayer);
-        if(onCastAvailabilityChangeListener != null)
+        if (onCastAvailabilityChangeListener != null)
             onCastAvailabilityChangeListener.onCastAvailabilityChange(true);
     }
 
     @Override
     public void onCastSessionUnavailable() {
         setCurrentPlayer(exoPlayer);
-        if(onCastAvailabilityChangeListener != null)
+        if (onCastAvailabilityChangeListener != null)
             onCastAvailabilityChangeListener.onCastAvailabilityChange(false);
     }
 
@@ -409,8 +424,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         currentPlayer = player;
 
         if (currentPlayer == castPlayer) {
-            castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
+            isPreparingCast = true;
             isCasting = true;
+            castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
         }
 
         if (currentPlayer == exoPlayer) {
