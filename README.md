@@ -86,3 +86,11 @@ To use the library, first include it your project using Gradle
         mediaPlayer.setDataSource(sources);
 	mediaPlayer.setCastPlayer(castContext);
 ```
+
+Register your CastOptionProvider (or default) in manifest file:
+
+```xml
+   <meta-data
+    android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+    android:value="com.google.android.exoplayer2.ext.cast.DefaultCastOptionsProvider" />
+```
