@@ -39,6 +39,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
     private List<MediaSourceInfo> mediaSourceInfoList;
     private boolean isCasting;
+    private OnCastAvailabilityChangeListener onCastAvailabilityChangeListener;
 
 
     public ExoMediaPlayer(Context context) {
@@ -292,6 +294,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         castPlayer.addListener(listener);
     }
 
+    public CastPlayer getCastPlayer() {
+        return castPlayer;
+    }
+
     @Override
     public void release() {
         releaseEqualizer();
@@ -351,7 +357,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
     @Override
     public boolean isPlaying() {
-        return exoPlayer.getPlayWhenReady();
+        return currentPlayer.getPlayWhenReady();
     }
 
     @Override
@@ -383,14 +389,19 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     @Override
     public void onCastSessionAvailable() {
         setCurrentPlayer(castPlayer);
+        if(onCastAvailabilityChangeListener != null)
+            onCastAvailabilityChangeListener.onCastAvailabilityChange(true);
     }
 
     @Override
     public void onCastSessionUnavailable() {
         setCurrentPlayer(exoPlayer);
+        if(onCastAvailabilityChangeListener != null)
+            onCastAvailabilityChangeListener.onCastAvailabilityChange(false);
     }
 
     private void setCurrentPlayer(Player player) {
+        boolean shouldPlay = isPlaying();
         pause();
         long time = currentPlayer.getCurrentPosition();
         int window = currentPlayer.getCurrentWindowIndex();
@@ -399,12 +410,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         if (currentPlayer == castPlayer) {
             castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
-            isCasting  = true;
+            isCasting = true;
         }
 
         if (currentPlayer == exoPlayer) {
             currentPlayer.seekTo(window, time);
-            play();
+            if (shouldPlay)
+                play();
+            else
+                pause();
             isCasting = false;
         }
     }
@@ -421,11 +435,19 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         return mediaSourceInfoList.size();
     }
 
+    public void setOnCastAvailabilityChangeListener(OnCastAvailabilityChangeListener onCastAvailabilityChangeListener) {
+        this.onCastAvailabilityChangeListener = onCastAvailabilityChangeListener;
+    }
+
     public interface OnTracksChangedListener {
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections);
     }
 
     public interface OnPositionDiscontinuityListener {
         public void onPositionDiscontinuity(int currentWindowIndex);
+    }
+
+    public interface OnCastAvailabilityChangeListener {
+        public void onCastAvailabilityChange(boolean available);
     }
 }
