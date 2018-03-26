@@ -49,6 +49,8 @@ To use the library, first include it your project using Gradle
 	mediaPlayer.setDataSource(mediaSourceInfoList);
 	mediaPlayer.setCastPlayer(castContext);
 	
+	mediaPlayer.isCasting()
+	
 	//setting video view:
 	mediaPlayer.setPlayerView(this, playerView);
 	
