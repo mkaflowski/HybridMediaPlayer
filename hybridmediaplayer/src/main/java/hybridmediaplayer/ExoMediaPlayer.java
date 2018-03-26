@@ -62,6 +62,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private Player.DefaultEventListener listener;
 
     private List<MediaSourceInfo> mediaSourceInfoList;
+    private boolean isCasting;
 
 
     public ExoMediaPlayer(Context context) {
@@ -363,6 +364,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         return exoPlayer.getVideoFormat() != null;
     }
 
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
     public SimpleExoPlayer getExoPlayer() {
         return exoPlayer;
     }
@@ -380,7 +385,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         setCurrentPlayer(castPlayer);
     }
 
-
     @Override
     public void onCastSessionUnavailable() {
         setCurrentPlayer(exoPlayer);
@@ -393,12 +397,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         currentPlayer = player;
 
-        if (currentPlayer == castPlayer)
+        if (currentPlayer == castPlayer) {
             castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
+            isCasting  = true;
+        }
 
         if (currentPlayer == exoPlayer) {
             currentPlayer.seekTo(window, time);
             play();
+            isCasting = false;
         }
     }
 

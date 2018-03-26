@@ -2,7 +2,6 @@ package hybridmediaplayer.demo;
 
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.MediaMetadata;
@@ -10,7 +9,6 @@ import com.google.android.gms.cast.framework.CastOptions;
 import com.google.android.gms.cast.framework.OptionsProvider;
 import com.google.android.gms.cast.framework.SessionProvider;
 import com.google.android.gms.cast.framework.media.CastMediaOptions;
-import com.google.android.gms.cast.framework.media.ImageHints;
 import com.google.android.gms.cast.framework.media.ImagePicker;
 import com.google.android.gms.cast.framework.media.MediaIntentReceiver;
 import com.google.android.gms.cast.framework.media.NotificationOptions;
@@ -18,8 +16,6 @@ import com.google.android.gms.common.images.WebImage;
 
 import java.util.Arrays;
 import java.util.List;
-
-import hybridplayer.demo.R;
 
 public class CastOptionsProvider implements OptionsProvider {
     @Override

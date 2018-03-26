@@ -73,10 +73,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        createPlayer();
-
-
         CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
+
+
+        createPlayer();
 
     }
 
