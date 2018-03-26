@@ -409,6 +409,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
     }
 
+    public boolean isCasting() {
+        return isCasting;
+    }
+
     public int getCurrentWindow() {
         return currentPlayer.getCurrentWindowIndex();
     }
