@@ -82,14 +82,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onPause() {
-        mediaPlayer.pause();
         super.onPause();
+        if (mediaPlayer != null)
+            mediaPlayer.pause();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mediaPlayer.release();
+        if (mediaPlayer != null)
+            mediaPlayer.release();
     }
 
     private void createPlayer() {

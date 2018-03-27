@@ -39,7 +39,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,12 +90,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                     listenerCurrentPlayer = currentPlayer;
                     switch (playbackState) {
-                        case ExoPlayer.STATE_ENDED:
+                        case Player.STATE_ENDED:
                             if (onCompletionListener != null)
                                 onCompletionListener.onCompletion(ExoMediaPlayer.this);
                             break;
 
-                        case ExoPlayer.STATE_READY:
+                        case Player.STATE_READY:
                             if (isPreparing && onPreparedListener != null) {
                                 isPreparing = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
