@@ -39,7 +39,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,10 +84,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                KLog.d("abc " + playbackState);
 
                 if (currentState != playbackState || listenerCurrentPlayer != currentPlayer) {
-                    KLog.e("abc " + currentPlayer);
 
                     listenerCurrentPlayer = currentPlayer;
                     switch (playbackState) {
@@ -101,12 +98,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                             if (isPreparing && onPreparedListener != null) {
                                 isPreparing = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
-                                KLog.w("abc ready" + playbackState);
                             }
                             if(listenerCurrentPlayer == castPlayer && isPreparingCast && onPreparedListener != null){
                                 isPreparingCast = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
-                                KLog.w("abc ready" + playbackState);
                             }
                             break;
                     }
