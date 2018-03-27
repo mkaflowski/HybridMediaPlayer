@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -58,6 +57,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private boolean isPreparing = false;
     private OnTracksChangedListener onTracksChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
+    private OnTrackCompleteListener onTrackCompleteListener;
     private boolean isSupportingSystemEqualizer;
     private Player.DefaultEventListener listener;
 
@@ -85,22 +85,25 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
 
-
                 if (currentState != playbackState || listenerCurrentPlayer != currentPlayer) {
 
                     listenerCurrentPlayer = currentPlayer;
                     switch (playbackState) {
                         case Player.STATE_ENDED:
+
                             if (onCompletionListener != null)
                                 onCompletionListener.onCompletion(ExoMediaPlayer.this);
+                            if (onTrackCompleteListener != null)
+                                onTrackCompleteListener.onTrackComplete();
                             break;
 
                         case Player.STATE_READY:
                             if (isPreparing && onPreparedListener != null) {
+
                                 isPreparing = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
                             }
-                            if(listenerCurrentPlayer == castPlayer && isPreparingCast && onPreparedListener != null){
+                            if (listenerCurrentPlayer == castPlayer && isPreparingCast && onPreparedListener != null) {
                                 isPreparingCast = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
                             }
@@ -111,13 +114,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             }
 
             @Override
-            public void onRepeatModeChanged(int repeatMode) {
+            public void onPositionDiscontinuity(int reason) {
+                super.onPositionDiscontinuity(reason);
+                if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION) {
+                    if (onTrackCompleteListener != null)
+                        onTrackCompleteListener.onTrackComplete();
+                }
                 if (onPositionDiscontinuityListener != null)
-                    onPositionDiscontinuityListener.onPositionDiscontinuity(currentPlayer.getCurrentWindowIndex());
+                    onPositionDiscontinuityListener.onPositionDiscontinuity(reason, currentPlayer.getCurrentWindowIndex());
             }
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+                isPreparing = true;
+
                 if (onTracksChangedListener != null)
                     onTracksChangedListener.onTracksChanged(trackGroups, trackSelections);
             }
@@ -337,7 +347,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public void seekTo(int windowIndex, int msec) {
-        if(getCurrentWindow()!=windowIndex)
+        if (getCurrentWindow() != windowIndex)
             isPreparing = true;
         currentPlayer.seekTo(windowIndex, msec);
     }
@@ -453,15 +463,23 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         this.onCastAvailabilityChangeListener = onCastAvailabilityChangeListener;
     }
 
+    public void setOnTrackCompleteListener(OnTrackCompleteListener onTrackCompleteListener) {
+        this.onTrackCompleteListener = onTrackCompleteListener;
+    }
+
     public interface OnTracksChangedListener {
-        public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections);
+        void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections);
     }
 
     public interface OnPositionDiscontinuityListener {
-        public void onPositionDiscontinuity(int currentWindowIndex);
+        void onPositionDiscontinuity(int reason, int currentWindowIndex);
     }
 
     public interface OnCastAvailabilityChangeListener {
-        public void onCastAvailabilityChange(boolean available);
+        void onCastAvailabilityChange(boolean available);
+    }
+
+    public interface OnTrackCompleteListener {
+        void onTrackComplete();
     }
 }

@@ -113,14 +113,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         List<MediaSourceInfo> sources = new ArrayList<>();
         sources.add(source1);
         sources.add(source2);
+        sources.add(source2);
 
         mediaPlayer.setDataSource(sources);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
-        mediaPlayer.setOnPositionDiscontinuityListener(new ExoMediaPlayer.OnPositionDiscontinuityListener() {
+        mediaPlayer.setOnTrackCompleteListener(new ExoMediaPlayer.OnTrackCompleteListener() {
             @Override
-            public void onPositionDiscontinuity(int currentWindowIndex) {
-                KLog.d(currentWindowIndex);
+            public void onTrackComplete() {
+                KLog.w("abc complete");
             }
         });
         mediaPlayer.prepare();
@@ -158,8 +159,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             KLog.d(mediaPlayer.getCurrentPosition());
             KLog.i(mediaPlayer.getDuration());
         } else if (view.getId() == R.id.fastForward) {
-            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 15 * 1000);
-            mediaPlayer.prepare();
+            mediaPlayer.seekTo(mediaPlayer.getDuration() - 1500);
         } else if (view.getId() == R.id.btSpeed) {
             if (speed == 1)
                 speed = 2f;
