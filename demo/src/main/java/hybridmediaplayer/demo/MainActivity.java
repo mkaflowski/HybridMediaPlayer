@@ -80,6 +80,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    @Override
+    protected void onPause() {
+        mediaPlayer.pause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mediaPlayer.release();
+    }
+
     private void createPlayer() {
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
         String url2 = "http://stream3.polskieradio.pl:8904/";
@@ -155,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer.release();
             mediaPlayer = null;
         } else if (view.getId() == R.id.btNext) {
-            mediaPlayer.seekTo(mediaPlayer.getCurrentWindow() + 1, 0);
+            mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
         }
     }
 
