@@ -8,8 +8,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastState;
@@ -120,9 +118,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.setDataSource(sources);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
-        mediaPlayer.setOnTracksChangedListener(new ExoMediaPlayer.OnTracksChangedListener() {
+        mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
-            public void onTracksChanged(boolean isFinished) {
+            public void onTrackChanged(boolean isFinished) {
                 KLog.d("abc isFinished " + isFinished);
             }
         });

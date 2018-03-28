@@ -19,11 +19,9 @@ import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -55,7 +53,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private MediaQueueItem[] mediaItems;
     private int currentState;
     private boolean isPreparing = false;
-    private OnTracksChangedListener onTracksChangedListener;
+    private OnTrackChangedListener onTrackChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
     private boolean isSupportingSystemEqualizer;
     private Player.DefaultEventListener listener;
@@ -115,8 +113,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                     // The index has changed; update the UI to show info for source at newIndex
                     isPreparing = true;
 
-                    if (onTracksChangedListener != null)
-                        onTracksChangedListener.onTracksChanged(!isChangingWindowByUser);
+                    if (onTrackChangedListener != null)
+                        onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
 
                     isChangingWindowByUser = false;
 
@@ -398,8 +396,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         return exoPlayer;
     }
 
-    public void setOnTracksChangedListener(OnTracksChangedListener onTracksChangedListener) {
-        this.onTracksChangedListener = onTracksChangedListener;
+    public void setOnTrackChangedListener(OnTrackChangedListener onTrackChangedListener) {
+        this.onTrackChangedListener = onTrackChangedListener;
     }
 
     public void setOnPositionDiscontinuityListener(OnPositionDiscontinuityListener onPositionDiscontinuityListener) {
@@ -462,8 +460,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
 
-    public interface OnTracksChangedListener {
-        void onTracksChanged(boolean isFinished);
+    public interface OnTrackChangedListener {
+        void onTrackChanged(boolean isFinished);
     }
 
     public interface OnPositionDiscontinuityListener {
