@@ -57,14 +57,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private boolean isPreparing = false;
     private OnTracksChangedListener onTracksChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
-    private OnTrackCompleteListener onTrackCompleteListener;
     private boolean isSupportingSystemEqualizer;
     private Player.DefaultEventListener listener;
 
     private List<MediaSourceInfo> mediaSourceInfoList;
     private boolean isCasting;
     private OnCastAvailabilityChangeListener onCastAvailabilityChangeListener;
-    private boolean isPreparingCast;
+    private boolean isChangingWindowByUser;
 
 
     public ExoMediaPlayer(Context context) {
@@ -73,7 +72,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory =
                 new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector =
+        final TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
@@ -81,6 +80,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         listener = new Player.DefaultEventListener() {
             private Player listenerCurrentPlayer;
+            private int currentWindow;
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
@@ -93,20 +93,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                             if (onCompletionListener != null)
                                 onCompletionListener.onCompletion(ExoMediaPlayer.this);
-                            if (onTrackCompleteListener != null)
-                                onTrackCompleteListener.onTrackComplete();
                             break;
 
                         case Player.STATE_READY:
                             if (isPreparing && onPreparedListener != null) {
-
                                 isPreparing = false;
                                 onPreparedListener.onPrepared(ExoMediaPlayer.this);
                             }
-                            if (listenerCurrentPlayer == castPlayer && isPreparingCast && onPreparedListener != null) {
-                                isPreparingCast = false;
-                                onPreparedListener.onPrepared(ExoMediaPlayer.this);
-                            }
+
                             break;
                     }
                 }
@@ -116,21 +110,23 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             @Override
             public void onPositionDiscontinuity(int reason) {
                 super.onPositionDiscontinuity(reason);
-                if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION) {
-                    if (onTrackCompleteListener != null)
-                        onTrackCompleteListener.onTrackComplete();
+                int newIndex = currentPlayer.getCurrentWindowIndex();
+                if (newIndex != currentWindow) {
+                    // The index has changed; update the UI to show info for source at newIndex
+                    isPreparing = true;
+
+                    if (onTracksChangedListener != null)
+                        onTracksChangedListener.onTracksChanged(!isChangingWindowByUser);
+
+                    isChangingWindowByUser = false;
+
+                    currentWindow = newIndex;
                 }
+
                 if (onPositionDiscontinuityListener != null)
                     onPositionDiscontinuityListener.onPositionDiscontinuity(reason, currentPlayer.getCurrentWindowIndex());
             }
 
-            @Override
-            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                isPreparing = true;
-
-                if (onTracksChangedListener != null)
-                    onTracksChangedListener.onTracksChanged(trackGroups, trackSelections);
-            }
 
             @Override
             public void onPlayerError(ExoPlaybackException error) {
@@ -347,8 +343,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public void seekTo(int windowIndex, int msec) {
-        if (getCurrentWindow() != windowIndex)
-            isPreparing = true;
+        if (getCurrentWindow() != windowIndex) {
+            isChangingWindowByUser = true;
+        }
         currentPlayer.seekTo(windowIndex, msec);
     }
 
@@ -429,10 +426,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         long time = currentPlayer.getCurrentPosition();
         int window = currentPlayer.getCurrentWindowIndex();
 
+        currentPlayer.removeListener(listener);
         currentPlayer = player;
+        currentPlayer.addListener(listener);
 
         if (currentPlayer == castPlayer) {
-            isPreparingCast = true;
             isCasting = true;
             castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
         }
@@ -463,12 +461,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         this.onCastAvailabilityChangeListener = onCastAvailabilityChangeListener;
     }
 
-    public void setOnTrackCompleteListener(OnTrackCompleteListener onTrackCompleteListener) {
-        this.onTrackCompleteListener = onTrackCompleteListener;
-    }
 
     public interface OnTracksChangedListener {
-        void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections);
+        void onTracksChanged(boolean isFinished);
     }
 
     public interface OnPositionDiscontinuityListener {
@@ -479,7 +474,5 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         void onCastAvailabilityChange(boolean available);
     }
 
-    public interface OnTrackCompleteListener {
-        void onTrackComplete();
-    }
+
 }
