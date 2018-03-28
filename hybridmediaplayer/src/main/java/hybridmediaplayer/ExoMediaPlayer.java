@@ -46,6 +46,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private Player currentPlayer;
     private SimpleExoPlayer exoPlayer;
     private CastPlayer castPlayer;
+    private int currentWindow;
+
 
 
     private Context context;
@@ -56,7 +58,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private OnTrackChangedListener onTrackChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
     private boolean isSupportingSystemEqualizer;
-    private Player.DefaultEventListener listener;
 
     private List<MediaSourceInfo> mediaSourceInfoList;
     private boolean isCasting;
@@ -74,64 +75,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         currentPlayer = exoPlayer;
-
-        listener = new Player.DefaultEventListener() {
-            private int currentWindow;
-
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-
-                if (currentState != playbackState) {
-
-                    switch (playbackState) {
-                        case Player.STATE_ENDED:
-
-                            if (onCompletionListener != null)
-                                onCompletionListener.onCompletion(ExoMediaPlayer.this);
-                            break;
-
-                        case Player.STATE_READY:
-                            if (isPreparing && onPreparedListener != null) {
-                                if(currentPlayer.getDuration()<0)
-                                    return;
-                                isPreparing = false;
-                                onPreparedListener.onPrepared(ExoMediaPlayer.this);
-                            }
-
-                            break;
-                    }
-                }
-                currentState = playbackState;
-
-            }
-
-            @Override
-            public void onPositionDiscontinuity(int reason) {
-                super.onPositionDiscontinuity(reason);
-                int newIndex = currentPlayer.getCurrentWindowIndex();
-                if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
-                    // The index has changed; update the UI to show info for source at newIndex
-                    isPreparing = true;
-
-                    if (onTrackChangedListener != null)
-                        onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
-
-                    isChangingWindowByUser = false;
-
-                    currentWindow = newIndex;
-                }
-
-                if (onPositionDiscontinuityListener != null)
-                    onPositionDiscontinuityListener.onPositionDiscontinuity(reason, currentPlayer.getCurrentWindowIndex());
-            }
-
-
-            @Override
-            public void onPlayerError(ExoPlaybackException error) {
-                if (onErrorListener != null)
-                    onErrorListener.onError(error, ExoMediaPlayer.this);
-            }
-        };
     }
 
     @Override
@@ -269,7 +212,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         isPreparing = true;
         exoPlayer.prepare(mediaSource);
-        exoPlayer.addListener(listener);
+        exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
 
     }
 
@@ -306,7 +249,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     public void setCastPlayer(CastContext castContext) {
         castPlayer = new CastPlayer(castContext);
         castPlayer.setSessionAvailabilityListener(this);
-        castPlayer.addListener(listener);
+        castPlayer.addListener(new MyPlayerEventListener(castPlayer));
     }
 
     public CastPlayer getCastPlayer() {
@@ -475,4 +418,76 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
 
+    class MyPlayerEventListener extends Player.DefaultEventListener {
+        private Player player;
+
+        public MyPlayerEventListener(Player player) {
+            this.player = player;
+        }
+
+        @Override
+        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+            super.onPlayerStateChanged(playWhenReady,playbackState);
+
+            if(currentPlayer != player)
+                return;
+
+            if (currentState != playbackState) {
+
+                switch (playbackState) {
+                    case Player.STATE_ENDED:
+
+                        if (onCompletionListener != null)
+                            onCompletionListener.onCompletion(ExoMediaPlayer.this);
+                        break;
+
+                    case Player.STATE_READY:
+                        if (isPreparing && onPreparedListener != null) {
+                            if(currentPlayer.getDuration()<0)
+                                return;
+                            isPreparing = false;
+                            onPreparedListener.onPrepared(ExoMediaPlayer.this);
+                        }
+
+                        break;
+                }
+            }
+            currentState = playbackState;
+
+        }
+
+        @Override
+        public void onPositionDiscontinuity(int reason) {
+            super.onPositionDiscontinuity(reason);
+            if(currentPlayer != player)
+                return;
+
+            int newIndex = currentPlayer.getCurrentWindowIndex();
+            if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
+                // The index has changed; update the UI to show info for source at newIndex
+                isPreparing = true;
+
+                if (onTrackChangedListener != null)
+                    onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
+
+                isChangingWindowByUser = false;
+
+                currentWindow = newIndex;
+            }
+
+            if (onPositionDiscontinuityListener != null)
+                onPositionDiscontinuityListener.onPositionDiscontinuity(reason, currentPlayer.getCurrentWindowIndex());
+        }
+
+
+        @Override
+        public void onPlayerError(ExoPlaybackException error) {
+            if(currentPlayer != player)
+                return;
+
+            if (onErrorListener != null)
+                onErrorListener.onError(error, ExoMediaPlayer.this);
+        }
+
+    }
 }
