@@ -463,7 +463,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                 return;
 
             int newIndex = currentPlayer.getCurrentWindowIndex();
-            if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
+            if (newIndex != currentWindow && currentPlayer.getPlaybackState() == Player.STATE_READY) {
                 // The index has changed; update the UI to show info for source at newIndex
                 isPreparing = true;
 
