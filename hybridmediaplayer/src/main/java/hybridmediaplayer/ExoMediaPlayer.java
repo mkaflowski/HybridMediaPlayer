@@ -36,6 +36,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +47,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private Player currentPlayer;
     private SimpleExoPlayer exoPlayer;
     private CastPlayer castPlayer;
-    private int currentWindow;
-
+    private int currentWindow = -1;
 
 
     private Context context;
@@ -292,6 +292,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
     @Override
     public int getDuration() {
+        if (currentPlayer.getDuration() < 0)
+            return -1;
         return (int) currentPlayer.getDuration();
     }
 
@@ -427,9 +429,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            super.onPlayerStateChanged(playWhenReady,playbackState);
+            super.onPlayerStateChanged(playWhenReady, playbackState);
 
-            if(currentPlayer != player)
+            if (currentPlayer != player)
                 return;
 
             if (currentState != playbackState) {
@@ -443,7 +445,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                     case Player.STATE_READY:
                         if (isPreparing && onPreparedListener != null) {
-                            if(currentPlayer.getDuration()<0)
+                            if (currentPlayer.getDuration() < 0)
                                 return;
                             isPreparing = false;
                             onPreparedListener.onPrepared(ExoMediaPlayer.this);
@@ -459,13 +461,18 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         @Override
         public void onPositionDiscontinuity(int reason) {
             super.onPositionDiscontinuity(reason);
-            if(currentPlayer != player)
+            if (currentPlayer != player)
                 return;
 
+            if(currentWindow == -1)
+                isChangingWindowByUser = true;
+
+//            KLog.e("abc "+currentWindow+" "+currentPlayer.getCurrentWindowIndex()+" "+currentPlayer.getPlaybackState() +" "+ reason);
             int newIndex = currentPlayer.getCurrentWindowIndex();
-            if (newIndex != currentWindow && currentPlayer.getPlaybackState() == Player.STATE_READY) {
+            if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
-                isPreparing = true;
+                if (player.getDuration() < 0)
+                    isPreparing = true;
 
                 if (onTrackChangedListener != null)
                     onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
@@ -482,7 +489,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         @Override
         public void onPlayerError(ExoPlaybackException error) {
-            if(currentPlayer != player)
+            if (currentPlayer != player)
                 return;
 
             if (onErrorListener != null)

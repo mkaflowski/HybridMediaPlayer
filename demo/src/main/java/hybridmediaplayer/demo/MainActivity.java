@@ -104,6 +104,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setTitle("Podcast Stream")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
+        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3")
+                .setTitle("Podcast 2")
+                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .build();
+        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
+                .setTitle("Podcast 3")
+                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .build();
         MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url3)
                 .setTitle("Movie")
                 .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
@@ -112,7 +120,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         List<MediaSourceInfo> sources = new ArrayList<>();
         sources.add(source1);
-        sources.add(source2);
+        sources.add(source3);
+        sources.add(source4);
         sources.add(source2);
 
         mediaPlayer.setDataSource(sources);
@@ -121,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
             public void onTrackChanged(boolean isFinished) {
-                KLog.d("abc isFinished " + isFinished);
+                KLog.d("abc isFinished " + isFinished+ " "+mediaPlayer.getDuration());
             }
         });
 
