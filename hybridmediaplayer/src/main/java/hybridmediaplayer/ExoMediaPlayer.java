@@ -36,6 +36,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
 
     private Context context;
-    private MediaSource mediaSource;
+    private MediaSource exoMediaSource;
     private MediaQueueItem[] mediaItems;
     private int currentState;
     private boolean isPreparing = false;
@@ -113,9 +114,37 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                     dataSourceFactory, extractorsFactory, null, null);
         }
 
-        mediaSource = new ConcatenatingMediaSource(sources);
+        exoMediaSource = new ConcatenatingMediaSource(sources);
 
-        setMediaSourceInfoList(mediaSourceInfoList);
+        setCastMediaSourceInfoList(mediaSourceInfoList);
+    }
+
+    public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
+        String userAgent = Util.getUserAgent(context, "yourApplicationName");
+        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
+                userAgent,
+                null /* listener */,
+                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+                true /* allowCrossProtocolRedirects */
+        );
+
+        // Produces DataSource instances through which media data is loaded.
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
+        // Produces Extractor instances for parsing the media data.
+        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
+
+
+        MediaSource[] sources = new MediaSource[normalSources.size()];
+        for (int i = 0; i < normalSources.size(); i++) {
+            // This is the MediaSource representing the media to be played.
+            sources[i] = new ExtractorMediaSource(Uri.parse(normalSources.get(i).getUrl()),
+                    dataSourceFactory, extractorsFactory, null, null);
+        }
+
+        exoMediaSource = new ConcatenatingMediaSource(sources);
+
+        setCastMediaSourceInfoList(castSources);
     }
 
     public void setDataSource(String... paths) {
@@ -141,7 +170,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                     dataSourceFactory, extractorsFactory, null, null);
         }
 
-        mediaSource = new ConcatenatingMediaSource(sources);
+        exoMediaSource = new ConcatenatingMediaSource(sources);
 
         //media sources for CastPlayer
         mediaItems = new MediaQueueItem[paths.length];
@@ -150,7 +179,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
     }
 
-    public void setMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
+    public void setCastMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
         this.mediaSourceInfoList = mediaSourceInfoList;
         //media sources for CastPlayer
         mediaItems = new MediaQueueItem[mediaSourceInfoList.size()];
@@ -212,7 +241,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         });
 
         isPreparing = true;
-        exoPlayer.prepare(mediaSource);
+        exoPlayer.prepare(exoMediaSource);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
 
     }
@@ -477,7 +506,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             if (currentWindow == -1)
                 isChangingWindowByUser = true;
 
-//            KLog.e("abc "+currentWindow+" "+currentPlayer.getCurrentWindowIndex()+" "+currentPlayer.getPlaybackState() +" "+ reason);
+            KLog.e("abc "+currentWindow+" "+currentPlayer.getCurrentWindowIndex()+" "+currentPlayer.getPlaybackState() +" "+ reason);
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
