@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
             public void onTrackChanged(boolean isFinished) {
-                KLog.d("abc isFinished " + isFinished+ " "+mediaPlayer.getDuration());
+                KLog.d("abc isFinished " + isFinished+ " "+mediaPlayer.getDuration() + " window = "+mediaPlayer.getCurrentWindow());
             }
         });
 
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.setOnPreparedListener(new HybridMediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(HybridMediaPlayer player) {
-                KLog.i("abc prepared " + mediaPlayer.getDuration());
+                KLog.i("abc prepared " + mediaPlayer.getDuration()+ " window = "+mediaPlayer.getCurrentWindow());
 
                 if (!isPrepared)
                     player.seekTo(time);

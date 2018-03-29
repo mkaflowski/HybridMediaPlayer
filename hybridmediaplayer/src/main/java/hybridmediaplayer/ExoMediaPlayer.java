@@ -36,7 +36,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +57,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private OnTrackChangedListener onTrackChangedListener;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
     private boolean isSupportingSystemEqualizer;
+    private int shouldBeWindow;
 
     private List<MediaSourceInfo> mediaSourceInfoList;
     private boolean isCasting;
@@ -286,6 +286,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     public void seekTo(int windowIndex, int msec) {
         if (getCurrentWindow() != windowIndex) {
             isChangingWindowByUser = true;
+            shouldBeWindow = windowIndex;
         }
         currentPlayer.seekTo(windowIndex, msec);
     }
@@ -444,7 +445,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                         break;
 
                     case Player.STATE_READY:
-                        if (isPreparing && onPreparedListener != null) {
+                        if (isPreparing && onPreparedListener != null && shouldBeWindow == getCurrentWindow()) {
                             if (currentPlayer.getDuration() < 0)
                                 return;
                             isPreparing = false;
@@ -479,6 +480,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                 isChangingWindowByUser = false;
 
+                shouldBeWindow = newIndex;
                 currentWindow = newIndex;
             }
 
