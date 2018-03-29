@@ -55,6 +55,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private int currentState;
     private boolean isPreparing = false;
     private OnTrackChangedListener onTrackChangedListener;
+    private OnLoadingChanged onLoadingChanged;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
     private boolean isSupportingSystemEqualizer;
     private int shouldBeWindow;
@@ -364,6 +365,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             onCastAvailabilityChangeListener.onCastAvailabilityChange(false);
     }
 
+    public void setOnLoadingChanged(OnLoadingChanged onLoadingChanged) {
+        this.onLoadingChanged = onLoadingChanged;
+    }
+
     private void setCurrentPlayer(Player player) {
         isPreparing = true;
 
@@ -420,6 +425,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         void onCastAvailabilityChange(boolean available);
     }
 
+    public interface OnLoadingChanged {
+        void onLoadingChanged(boolean isLoading);
+    }
+
 
     class MyPlayerEventListener extends Player.DefaultEventListener {
         private Player player;
@@ -465,13 +474,16 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             if (currentPlayer != player)
                 return;
 
-            if(currentWindow == -1)
+            if (currentWindow == -1)
                 isChangingWindowByUser = true;
 
 //            KLog.e("abc "+currentWindow+" "+currentPlayer.getCurrentWindowIndex()+" "+currentPlayer.getPlaybackState() +" "+ reason);
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
+                shouldBeWindow = newIndex;
+                currentWindow = newIndex;
+
                 if (player.getDuration() < 0)
                     isPreparing = true;
 
@@ -479,9 +491,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                     onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
 
                 isChangingWindowByUser = false;
-
-                shouldBeWindow = newIndex;
-                currentWindow = newIndex;
             }
 
             if (onPositionDiscontinuityListener != null)
@@ -498,5 +507,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                 onErrorListener.onError(error, ExoMediaPlayer.this);
         }
 
+        @Override
+        public void onLoadingChanged(boolean isLoading) {
+            super.onLoadingChanged(isLoading);
+            if (onLoadingChanged != null)
+                onLoadingChanged.onLoadingChanged(isLoading);
+        }
     }
 }
