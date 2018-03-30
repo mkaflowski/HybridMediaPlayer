@@ -20,6 +20,7 @@ import java.util.List;
 import hybridmediaplayer.ExoMediaPlayer;
 import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
+import hybridmediaplayer.PlayerManager;
 import hybridplayer.demo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Chromecast
     private CastContext castContext;
     private MediaRouteButton mediaRouteButton;
+    private PlayerManager pm;
 
 
     @Override
@@ -47,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button btSpeed = findViewById(R.id.btSpeed);
         Button btStop = findViewById(R.id.btStop);
         Button btNext = findViewById(R.id.btNext);
+        Button btCreatePlayer = findViewById(R.id.btCreatePlayer);
+
 
         btPlay.setOnClickListener(this);
         btPause.setOnClickListener(this);
@@ -54,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btSpeed.setOnClickListener(this);
         btStop.setOnClickListener(this);
         btNext.setOnClickListener(this);
+        btCreatePlayer.setOnClickListener(this);
 
         playerView = findViewById(R.id.playerView);
 
@@ -74,9 +79,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
-
-
-        createPlayer();
 
     }
 
@@ -123,8 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources.add(source3);
         sources.add(source4);
         sources.add(source2);
-
         mediaPlayer.setDataSource(sources);
+        mediaPlayer.setCastPlayer(castContext);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
@@ -153,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        mediaPlayer.setCastPlayer(castContext);
     }
 
 
@@ -179,7 +180,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer.release();
             mediaPlayer = null;
         } else if (view.getId() == R.id.btNext) {
+//            pm.selectQueueItem(pm.getCurrentItemIndex()+1);
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
+        } else if(view.getId() == R.id.btCreatePlayer){
+//            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {
+//                @Override
+//                public void onQueuePositionChanged(int previousIndex, int newIndex) {
+//
+//                }
+//            }, this, castContext);
+//            MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3")
+//                    .setTitle("Movie")
+//                    .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
+//                    .build();
+//            MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3")
+//                    .setTitle("Source 3")
+//                    .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
+//                    .build();
+//            pm.addItem(source2);
+//            pm.addItem(source2);
+//            pm.selectQueueItem(0);
+
+            createPlayer();
+
         }
     }
 

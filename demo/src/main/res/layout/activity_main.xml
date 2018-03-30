@@ -48,6 +48,15 @@
         android:text="Play" />
 
     <Button
+        android:id="@+id/btCreatePlayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/playerView"
+        android:layout_toLeftOf="@+id/btPlay"
+        android:layout_toStartOf="@+id/btPlay"
+        android:text="Create Player" />
+
+    <Button
         android:id="@+id/btStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

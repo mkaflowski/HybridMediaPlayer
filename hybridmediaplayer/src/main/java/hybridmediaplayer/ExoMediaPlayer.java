@@ -92,31 +92,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
 
     public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList) {
-        String userAgent = Util.getUserAgent(context, "yourApplicationName");
-        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
-                userAgent,
-                null /* listener */,
-                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                true /* allowCrossProtocolRedirects */
-        );
-
-        // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
-        // Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
-
-
-        MediaSource[] sources = new MediaSource[mediaSourceInfoList.size()];
-        for (int i = 0; i < mediaSourceInfoList.size(); i++) {
-            // This is the MediaSource representing the media to be played.
-            sources[i] = new ExtractorMediaSource(Uri.parse(mediaSourceInfoList.get(i).getUrl()),
-                    dataSourceFactory, extractorsFactory, null, null);
-        }
-
-        exoMediaSource = new ConcatenatingMediaSource(sources);
-
-        setCastMediaSourceInfoList(mediaSourceInfoList);
+        setDataSource(mediaSourceInfoList, mediaSourceInfoList);
     }
 
     public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
@@ -145,6 +121,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         exoMediaSource = new ConcatenatingMediaSource(sources);
 
         setCastMediaSourceInfoList(castSources);
+
+        if (castPlayer != null)
+            setCurrentPlayer(castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
     }
 
     public void setDataSource(String... paths) {
@@ -243,7 +222,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         isPreparing = true;
         exoPlayer.prepare(exoMediaSource);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
-
     }
 
     private void setEqualizer() {
@@ -280,6 +258,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         castPlayer = new CastPlayer(castContext);
         castPlayer.setSessionAvailabilityListener(this);
         castPlayer.addListener(new MyPlayerEventListener(castPlayer));
+        
+        if (castPlayer != null)
+            setCurrentPlayer(castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
+
     }
 
     public CastPlayer getCastPlayer() {
@@ -318,11 +300,16 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             isChangingWindowByUser = true;
             shouldBeWindow = windowIndex;
         }
-        currentPlayer.seekTo(windowIndex, msec);
+        try {
+            currentPlayer.seekTo(windowIndex, msec);
+        }catch (ArrayIndexOutOfBoundsException e){
+            // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
+        }
     }
 
     @Override
     public int getDuration() {
+        KLog.d(currentPlayer.getDuration() + " "+currentPlayer);
         if (currentPlayer.getDuration() < 0)
             return -1;
         return (int) currentPlayer.getDuration();
@@ -399,6 +386,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     private void setCurrentPlayer(Player player) {
+        if (currentPlayer == player)
+            return;
+
         isPreparing = true;
 
         boolean shouldPlay = isPlaying();
@@ -506,7 +496,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             if (currentWindow == -1)
                 isChangingWindowByUser = true;
 
-            KLog.e("abc "+currentWindow+" "+currentPlayer.getCurrentWindowIndex()+" "+currentPlayer.getPlaybackState() +" "+ reason);
+            KLog.e("abc " + currentWindow + " " + currentPlayer.getCurrentWindowIndex() + " " + currentPlayer.getPlaybackState() + " " + reason);
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
