@@ -276,7 +276,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             shouldBeWindow = windowIndex;
         }
         try {
-            currentPlayer.seekTo(windowIndex, msec);
+            if (currentPlayer == castPlayer)
+                castPlayer.loadItems(mediaItems, windowIndex, msec, Player.REPEAT_MODE_OFF);
+            else
+                currentPlayer.seekTo(windowIndex, msec);
         } catch (ArrayIndexOutOfBoundsException e) {
             // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
         }
