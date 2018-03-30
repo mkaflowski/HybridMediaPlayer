@@ -20,7 +20,6 @@ import java.util.List;
 import hybridmediaplayer.ExoMediaPlayer;
 import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
-import hybridmediaplayer.PlayerManager;
 import hybridplayer.demo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Chromecast
     private CastContext castContext;
     private MediaRouteButton mediaRouteButton;
-    private PlayerManager pm;
 
 
     @Override
@@ -97,6 +95,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void createPlayer() {
+        if(mediaPlayer!=null)
+        {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
         String url2 = "http://stream3.polskieradio.pl:8904/";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
@@ -125,8 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources.add(source3);
         sources.add(source4);
         sources.add(source2);
-        mediaPlayer.setDataSource(sources);
-        mediaPlayer.setCastPlayer(castContext);
+        mediaPlayer.setDataSource(sources, castContext);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
@@ -136,21 +138,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        mediaPlayer.prepare();
+        mediaPlayer.play();
 
 
         mediaPlayer.setOnPreparedListener(new HybridMediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(HybridMediaPlayer player) {
-                KLog.i("abc prepared " + mediaPlayer.getDuration()+ " window = "+mediaPlayer.getCurrentWindow());
-
-                if (!isPrepared)
-                    player.seekTo(time);
-                isPrepared = true;
-                time = 0;
-                mediaPlayer.play();
-
-
                 KLog.w(mediaPlayer.hasVideo());
             }
         });

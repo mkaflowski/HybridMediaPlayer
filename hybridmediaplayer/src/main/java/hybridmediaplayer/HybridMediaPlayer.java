@@ -3,6 +3,8 @@ package hybridmediaplayer;
 import android.content.Context;
 import android.view.SurfaceView;
 
+import com.google.android.gms.cast.framework.CastContext;
+
 public abstract class HybridMediaPlayer {
     OnPreparedListener onPreparedListener = null;
     OnCompletionListener onCompletionListener = null;

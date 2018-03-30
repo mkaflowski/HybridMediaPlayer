@@ -14,7 +14,6 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
-import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -81,21 +80,26 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
     @Override
     public void setDataSource(String path) {
-        setDataSource(new String[]{path});
+        MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl(path)
+                .setTitle("Title")
+                .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
+                .build();
+        setDataSource(source);
     }
 
     public void setDataSource(MediaSourceInfo mediaSourceInfo) {
         List<MediaSourceInfo> list = new ArrayList<>();
         list.add(mediaSourceInfo);
-        setDataSource(list);
+        setDataSource(list, null);
     }
 
 
-    public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList) {
-        setDataSource(mediaSourceInfoList, mediaSourceInfoList);
+    public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList, CastContext castContext) {
+        setDataSource(mediaSourceInfoList, mediaSourceInfoList, castContext);
     }
 
-    public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
+    public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources,
+                              CastContext castContext) {
         String userAgent = Util.getUserAgent(context, "yourApplicationName");
         DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
                 userAgent,
@@ -122,41 +126,21 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         setCastMediaSourceInfoList(castSources);
 
+        prepare();
+
+        if (castContext != null) {
+            castPlayer = new CastPlayer(castContext);
+            castPlayer.setSessionAvailabilityListener(this);
+            castPlayer.addListener(new MyPlayerEventListener(castPlayer));
+        }
+        init();
+    }
+
+    private void init() {
         if (castPlayer != null)
             setCurrentPlayer(castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
     }
 
-    public void setDataSource(String... paths) {
-        String userAgent = Util.getUserAgent(context, "yourApplicationName");
-        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
-                userAgent,
-                null /* listener */,
-                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                true /* allowCrossProtocolRedirects */
-        );
-
-        // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
-        // Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
-
-
-        MediaSource[] sources = new MediaSource[paths.length];
-        for (int i = 0; i < paths.length; i++) {
-            // This is the MediaSource representing the media to be played.
-            sources[i] = new ExtractorMediaSource(Uri.parse(paths[i]),
-                    dataSourceFactory, extractorsFactory, null, null);
-        }
-
-        exoMediaSource = new ConcatenatingMediaSource(sources);
-
-        //media sources for CastPlayer
-        mediaItems = new MediaQueueItem[paths.length];
-        for (int i = 0; i < paths.length; i++) {
-            mediaItems[i] = buildMediaQueueItem(paths[i], null, i + 1);
-        }
-    }
 
     public void setCastMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
         this.mediaSourceInfoList = mediaSourceInfoList;
@@ -254,15 +238,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         return isSupportingSystemEqualizer;
     }
 
-    public void setCastPlayer(CastContext castContext) {
-        castPlayer = new CastPlayer(castContext);
-        castPlayer.setSessionAvailabilityListener(this);
-        castPlayer.addListener(new MyPlayerEventListener(castPlayer));
-        
-        if (castPlayer != null)
-            setCurrentPlayer(castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
-
-    }
 
     public CastPlayer getCastPlayer() {
         return castPlayer;
@@ -302,14 +277,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
         try {
             currentPlayer.seekTo(windowIndex, msec);
-        }catch (ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e) {
             // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
         }
     }
 
     @Override
     public int getDuration() {
-        KLog.d(currentPlayer.getDuration() + " "+currentPlayer);
+        KLog.d(currentPlayer.getDuration() + " " + currentPlayer);
         if (currentPlayer.getDuration() < 0)
             return -1;
         return (int) currentPlayer.getDuration();
