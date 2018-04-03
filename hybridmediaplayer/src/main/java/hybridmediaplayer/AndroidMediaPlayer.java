@@ -27,16 +27,12 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     public void setDataSource(String path) {
         try {
             mediaPlayer.setDataSource(path);
+            mediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-
-    public void prepare() {
-        mediaPlayer.prepareAsync();
-    }
 
     @Override
     public void release() {

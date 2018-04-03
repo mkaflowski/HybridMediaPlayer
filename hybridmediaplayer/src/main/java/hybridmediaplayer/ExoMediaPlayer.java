@@ -173,8 +173,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         return new MediaQueueItem.Builder(mediaInfo).build();
     }
 
-    @Override
-    public void prepare() {
+    private void prepare() {
         exoPlayer.setAudioDebugListener(new AudioRendererEventListener() {
             @Override
             public void onAudioEnabled(DecoderCounters counters) {

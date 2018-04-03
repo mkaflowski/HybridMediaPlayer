@@ -23,7 +23,6 @@ public abstract class HybridMediaPlayer {
 
     public abstract void setDataSource(String path);
 
-    public abstract void prepare();
 
     public abstract void play();
 
