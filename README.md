@@ -24,8 +24,6 @@ To use the library, first include it your project using Gradle
         mediaPlayer.setDataSource(url);
 	mediaPlayer.setPlayerView(this, playerView);
 	
-        mediaPlayer.prepare();
-
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnPreparedListener(this);
@@ -54,8 +52,6 @@ To use the library, first include it your project using Gradle
 	//setting video view:
 	mediaPlayer.setPlayerView(this, playerView);
 	
-        mediaPlayer.prepare();
-
         mediaPlayer.setOnPositionDiscontinuityListener(this);
 	mediaPlayer.setOnTracksChangedListener(this);
         
