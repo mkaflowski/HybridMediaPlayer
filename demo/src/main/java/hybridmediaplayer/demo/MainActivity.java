@@ -95,15 +95,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void createPlayer() {
-        if(mediaPlayer!=null)
-        {
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
         }
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
         String url2 = "http://stream3.polskieradio.pl:8904/";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
-        mediaPlayer = new ExoMediaPlayer(this);
+        mediaPlayer = new ExoMediaPlayer(this, castContext);
         //mediaPlayer.setDataSource(url);
         MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
                 .setTitle("Podcast Stream")
@@ -128,13 +127,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources.add(source3);
         sources.add(source4);
         sources.add(source2);
-        mediaPlayer.setDataSource(sources, castContext);
+        mediaPlayer.setDataSource(sources);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
             public void onTrackChanged(boolean isFinished) {
-                KLog.d("abc isFinished " + isFinished+ " "+mediaPlayer.getDuration() + " window = "+mediaPlayer.getCurrentWindow());
+                KLog.d("abc isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
             }
         });
 
@@ -175,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view.getId() == R.id.btNext) {
 //            pm.selectQueueItem(pm.getCurrentItemIndex()+1);
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
-        } else if(view.getId() == R.id.btCreatePlayer){
+        } else if (view.getId() == R.id.btCreatePlayer) {
 //            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {
 //                @Override
 //                public void onQueuePositionChanged(int previousIndex, int newIndex) {

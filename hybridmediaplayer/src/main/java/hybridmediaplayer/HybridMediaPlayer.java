@@ -14,7 +14,7 @@ public abstract class HybridMediaPlayer {
         HybridMediaPlayer res;
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            res = new ExoMediaPlayer(context);
+            res = new ExoMediaPlayer(context, null);
         } else {
             res = new AndroidMediaPlayer(context);
         }

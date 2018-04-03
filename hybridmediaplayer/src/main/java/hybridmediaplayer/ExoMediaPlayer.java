@@ -65,7 +65,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private OnCastAvailabilityChangeListener onCastAvailabilityChangeListener;
     private boolean isChangingWindowByUser;
 
-    public ExoMediaPlayer(Context context) {
+    public ExoMediaPlayer(Context context, CastContext castContext) {
         this.context = context;
 
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -76,6 +76,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         currentPlayer = exoPlayer;
+
+        if (castContext != null) {
+            castPlayer = new CastPlayer(castContext);
+            castPlayer.setSessionAvailabilityListener(this);
+            castPlayer.addListener(new MyPlayerEventListener(castPlayer));
+        }
     }
 
     @Override
@@ -90,16 +96,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     public void setDataSource(MediaSourceInfo mediaSourceInfo) {
         List<MediaSourceInfo> list = new ArrayList<>();
         list.add(mediaSourceInfo);
-        setDataSource(list, null);
+        setDataSource(list);
     }
 
 
-    public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList, CastContext castContext) {
-        setDataSource(mediaSourceInfoList, mediaSourceInfoList, castContext);
+    public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList) {
+        setDataSource(mediaSourceInfoList, mediaSourceInfoList);
     }
 
-    public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources,
-                              CastContext castContext) {
+    public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
+        if(exoPlayer!=null)
+            exoPlayer.stop();
+        if(castPlayer!=null)
+            castPlayer.stop();
+
         String userAgent = Util.getUserAgent(context, "yourApplicationName");
         DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
                 userAgent,
@@ -128,11 +138,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         prepare();
 
-        if (castContext != null) {
-            castPlayer = new CastPlayer(castContext);
-            castPlayer.setSessionAvailabilityListener(this);
-            castPlayer.addListener(new MyPlayerEventListener(castPlayer));
-        }
         init();
     }
 
