@@ -107,8 +107,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
         if(exoPlayer!=null)
             exoPlayer.stop();
-        if(castPlayer!=null)
-            castPlayer.stop();
+
+        KLog.w("abc init ");
 
         String userAgent = Util.getUserAgent(context, "yourApplicationName");
         DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
@@ -134,20 +134,26 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         exoMediaSource = new ConcatenatingMediaSource(sources);
 
-        setCastMediaSourceInfoList(castSources);
+        prepareCastMediaSourceInfoList(castSources);
 
         prepare();
 
         init();
+
+        if(castPlayer!=null && isCasting()) {
+            castPlayer.stop();
+            castPlayer.loadItems(mediaItems, 0, 0, Player.REPEAT_MODE_OFF);
+        }
     }
 
     private void init() {
+        KLog.d("abc init");
         if (castPlayer != null)
             setCurrentPlayer(castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
     }
 
 
-    public void setCastMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
+    private void prepareCastMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
         this.mediaSourceInfoList = mediaSourceInfoList;
         //media sources for CastPlayer
         mediaItems = new MediaQueueItem[mediaSourceInfoList.size()];
