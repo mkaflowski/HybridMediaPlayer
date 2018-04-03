@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources.add(source3);
         sources.add(source4);
         sources.add(source2);
-        mediaPlayer.setDataSource(sources);
+        mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .build();
             sources2.add(source);
             sources2.add(source2);
-            mediaPlayer.setDataSource(sources2);
+            mediaPlayer.setDataSource(sources2, sources2);
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;

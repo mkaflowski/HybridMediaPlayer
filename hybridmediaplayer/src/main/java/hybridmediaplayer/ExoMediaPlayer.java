@@ -35,7 +35,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,8 +107,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         if(exoPlayer!=null)
             exoPlayer.stop();
 
-        KLog.w("abc init ");
-
         String userAgent = Util.getUserAgent(context, "yourApplicationName");
         DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
                 userAgent,
@@ -141,13 +138,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         init();
 
         if(castPlayer!=null && isCasting()) {
-            castPlayer.stop();
             castPlayer.loadItems(mediaItems, 0, 0, Player.REPEAT_MODE_OFF);
         }
     }
 
     private void init() {
-        KLog.d("abc init");
         if (castPlayer != null)
             setCurrentPlayer(castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
     }
@@ -281,6 +276,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public void seekTo(int windowIndex, int msec) {
+        try{
         if (getCurrentWindow() != windowIndex) {
             isChangingWindowByUser = true;
             shouldBeWindow = windowIndex;
@@ -292,12 +288,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                 currentPlayer.seekTo(windowIndex, msec);
         } catch (ArrayIndexOutOfBoundsException e) {
             // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
+        }}catch (Exception ignored){
+
         }
     }
 
     @Override
     public int getDuration() {
-        KLog.d(currentPlayer.getDuration() + " " + currentPlayer);
         if (currentPlayer.getDuration() < 0)
             return -1;
         return (int) currentPlayer.getDuration();
@@ -484,7 +481,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             if (currentWindow == -1)
                 isChangingWindowByUser = true;
 
-            KLog.e("abc " + currentWindow + " " + currentPlayer.getCurrentWindowIndex() + " " + currentPlayer.getPlaybackState() + " " + reason);
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
