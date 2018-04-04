@@ -74,6 +74,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
         if (castContext != null) {
@@ -104,7 +105,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
-        if(exoPlayer!=null)
+        if (exoPlayer != null)
             exoPlayer.stop();
 
         String userAgent = Util.getUserAgent(context, "yourApplicationName");
@@ -137,7 +138,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         init();
 
-        if(castPlayer!=null && isCasting()) {
+        if (castPlayer != null && isCasting()) {
             castPlayer.loadItems(mediaItems, 0, 0, Player.REPEAT_MODE_OFF);
         }
     }
@@ -210,7 +211,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         isPreparing = true;
         exoPlayer.prepare(exoMediaSource);
-        exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
     }
 
     private void setEqualizer() {
@@ -276,19 +276,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public void seekTo(int windowIndex, int msec) {
-        try{
-        if (getCurrentWindow() != windowIndex) {
-            isChangingWindowByUser = true;
-            shouldBeWindow = windowIndex;
-        }
         try {
-            if (currentPlayer == castPlayer)
-                castPlayer.loadItems(mediaItems, windowIndex, msec, Player.REPEAT_MODE_OFF);
-            else
-                currentPlayer.seekTo(windowIndex, msec);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
-        }}catch (Exception ignored){
+            if (getCurrentWindow() != windowIndex) {
+                isChangingWindowByUser = true;
+                shouldBeWindow = windowIndex;
+            }
+            try {
+                if (currentPlayer == castPlayer)
+                    castPlayer.loadItems(mediaItems, windowIndex, msec, Player.REPEAT_MODE_OFF);
+                else
+                    currentPlayer.seekTo(windowIndex, msec);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
+            }
+        } catch (Exception ignored) {
 
         }
     }
@@ -391,7 +392,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
 
         if (currentPlayer == exoPlayer) {
-            currentPlayer.seekTo(window, time);
+            seekTo(window, (int) time);
             if (shouldPlay)
                 play();
             else
@@ -418,18 +419,31 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
 
     public interface OnTrackChangedListener {
+        /**
+         * @param isFinished is track finished, if false it was changed by user
+         */
         void onTrackChanged(boolean isFinished);
     }
 
     public interface OnPositionDiscontinuityListener {
+        /**
+         * @param reason             reason
+         * @param currentWindowIndex currentWindowIndex
+         */
         void onPositionDiscontinuity(int reason, int currentWindowIndex);
     }
 
     public interface OnCastAvailabilityChangeListener {
-        void onCastAvailabilityChange(boolean available);
+        /**
+         * @param isAvailable is casting availabe
+         */
+        void onCastAvailabilityChange(boolean isAvailable);
     }
 
     public interface OnLoadingChanged {
+        /**
+         * @param isLoading is player Loading
+         */
         void onLoadingChanged(boolean isLoading);
     }
 
@@ -459,7 +473,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                     case Player.STATE_READY:
                         if (isPreparing && onPreparedListener != null && shouldBeWindow == getCurrentWindow()) {
-                            if (currentPlayer.getDuration() < 0)
+                            if (currentPlayer.getDuration() < 0 || currentPlayer.getCurrentWindowIndex() >= getWindowCount())
                                 return;
                             isPreparing = false;
                             onPreparedListener.onPrepared(ExoMediaPlayer.this);
