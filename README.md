@@ -44,6 +44,7 @@ To use the library, first include it your project using Gradle
         mediaPlayer.setDataSource(url1, url2, url3, ...);
 	
 	//for proper Chromecast handling
+	mediaPlayer.setInitialWindowNum(1); // start track number
 	mediaPlayer.setDataSource(mediaSourceInfoList);
 	mediaPlayer.setCastPlayer(castContext);
 	
