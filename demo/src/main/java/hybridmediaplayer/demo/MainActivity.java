@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .build();
             sources2.add(source);
             sources2.add(source2);
+            mediaPlayer.setInitialWindowNum(1);
             mediaPlayer.setDataSource(sources2, sources2);
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();

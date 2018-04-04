@@ -64,6 +64,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private OnCastAvailabilityChangeListener onCastAvailabilityChangeListener;
     private boolean isChangingWindowByUser;
 
+    private int initialWindowNum;
+
     public ExoMediaPlayer(Context context, CastContext castContext) {
         this.context = context;
 
@@ -82,13 +84,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             castPlayer.setSessionAvailabilityListener(this);
             castPlayer.addListener(new MyPlayerEventListener(castPlayer));
         }
+
+        initialWindowNum = 0;
     }
 
     @Override
     public void setDataSource(String path) {
         MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl(path)
                 .setTitle("Title")
-                .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
                 .build();
         setDataSource(source);
     }
@@ -138,8 +141,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         init();
 
+        if (initialWindowNum != 0)
+            exoPlayer.seekTo(initialWindowNum, 0);
+
         if (castPlayer != null && isCasting()) {
-            castPlayer.loadItems(mediaItems, 0, 0, Player.REPEAT_MODE_OFF);
+            castPlayer.loadItems(mediaItems, initialWindowNum, 0, Player.REPEAT_MODE_OFF);
         }
     }
 
@@ -405,6 +411,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         return isCasting;
     }
 
+    public void setInitialWindowNum(int initialWindowNum) {
+        this.initialWindowNum = initialWindowNum;
+    }
+
     public int getCurrentWindow() {
         return currentPlayer.getCurrentWindowIndex();
     }
@@ -462,7 +472,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             if (currentPlayer != player)
                 return;
 
-            if (currentState != playbackState) {
+            if (currentState != playbackState || isPreparing) {
 
                 switch (playbackState) {
                     case Player.STATE_ENDED:
