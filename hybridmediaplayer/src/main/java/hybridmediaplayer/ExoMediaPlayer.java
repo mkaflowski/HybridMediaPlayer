@@ -384,8 +384,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         if (currentPlayer == player)
             return;
 
-        isPreparing = true;
-
         boolean shouldPlay = isPlaying();
 
         pause();
@@ -394,6 +392,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         int window = currentPlayer.getCurrentWindowIndex();
 
         currentPlayer = player;
+        isPreparing = true;
+
 
         if (currentPlayer == castPlayer) {
             isCasting = true;
@@ -472,12 +472,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             super.onPlayerStateChanged(playWhenReady, playbackState);
 
-
+            KLog.w("ppp "+playbackState);
             if (currentPlayer != player)
                 return;
 
             if (currentState != playbackState || isPreparing) {
 
+                // handling: https://github.com/google/ExoPlayer/issues/4049
                 if (playbackState == Player.STATE_READY)
                     checkWindowChanged();
 
@@ -517,7 +518,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
 
         private void checkWindowChanged() {
-            if(currentWindow == -1)
+            if (currentWindow == -1)
                 isChangingWindowByUser = true;
 
             int newIndex = currentPlayer.getCurrentWindowIndex();

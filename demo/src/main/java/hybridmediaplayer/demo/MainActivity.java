@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onPrepared(HybridMediaPlayer player) {
                 KLog.w(mediaPlayer.hasVideo());
+                KLog.d("ppp "+mediaPlayer.getCurrentPlayer());
             }
         });
 
