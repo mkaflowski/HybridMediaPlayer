@@ -35,6 +35,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private Player currentPlayer;
     private SimpleExoPlayer exoPlayer;
     private CastPlayer castPlayer;
-    private int currentWindow = -1;
+    private int currentWindow;
 
 
     private Context context;
@@ -108,6 +109,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
+        currentWindow = -1;
+
         if (exoPlayer != null)
             exoPlayer.stop();
 
@@ -469,10 +472,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             super.onPlayerStateChanged(playWhenReady, playbackState);
 
+
             if (currentPlayer != player)
                 return;
 
             if (currentState != playbackState || isPreparing) {
+
+                if (playbackState == Player.STATE_READY)
+                    checkWindowChanged();
 
                 switch (playbackState) {
                     case Player.STATE_ENDED:
@@ -499,10 +506,18 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         @Override
         public void onPositionDiscontinuity(int reason) {
             super.onPositionDiscontinuity(reason);
+            KLog.w("abc onPositionDiscontinuity " + currentPlayer.getPlaybackState() + " window = " + currentPlayer.getCurrentWindowIndex() + " / " + currentWindow);
             if (currentPlayer != player)
                 return;
 
-            if (currentWindow == -1)
+            checkWindowChanged();
+
+            if (onPositionDiscontinuityListener != null)
+                onPositionDiscontinuityListener.onPositionDiscontinuity(reason, currentPlayer.getCurrentWindowIndex());
+        }
+
+        private void checkWindowChanged() {
+            if(currentWindow == -1)
                 isChangingWindowByUser = true;
 
             int newIndex = currentPlayer.getCurrentWindowIndex();
@@ -519,9 +534,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                 isChangingWindowByUser = false;
             }
-
-            if (onPositionDiscontinuityListener != null)
-                onPositionDiscontinuityListener.onPositionDiscontinuity(reason, currentPlayer.getCurrentWindowIndex());
         }
 
 
