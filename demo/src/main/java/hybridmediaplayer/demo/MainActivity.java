@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources.add(source3);
         sources.add(source4);
         sources.add(source2);
-        mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
@@ -138,16 +137,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        mediaPlayer.play();
 
 
         mediaPlayer.setOnPreparedListener(new HybridMediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(HybridMediaPlayer player) {
                 KLog.w(mediaPlayer.hasVideo());
-                KLog.d("ppp "+mediaPlayer.getCurrentPlayer());
+                KLog.d("ppp " + mediaPlayer.getCurrentPlayer());
             }
         });
+
+        mediaPlayer.setOnPlayerStateChanged(new ExoMediaPlayer.OnPlayerStateChanged() {
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                KLog.d("cvv " + playbackState);
+            }
+        });
+
+        mediaPlayer.setDataSource(sources, sources);
+        mediaPlayer.play();
 
     }
 

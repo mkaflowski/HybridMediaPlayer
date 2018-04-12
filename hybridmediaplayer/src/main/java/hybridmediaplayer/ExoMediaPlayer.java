@@ -35,7 +35,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +56,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private OnTrackChangedListener onTrackChangedListener;
     private OnLoadingChanged onLoadingChanged;
     private OnPositionDiscontinuityListener onPositionDiscontinuityListener;
+    private OnPlayerStateChanged onPlayerStateChanged;
     private boolean isSupportingSystemEqualizer;
     private int shouldBeWindow;
 
@@ -358,6 +358,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         this.onTrackChangedListener = onTrackChangedListener;
     }
 
+    public void setOnPlayerStateChanged(OnPlayerStateChanged onPlayerStateChanged) {
+        this.onPlayerStateChanged = onPlayerStateChanged;
+    }
+
     public void setOnPositionDiscontinuityListener(OnPositionDiscontinuityListener onPositionDiscontinuityListener) {
         this.onPositionDiscontinuityListener = onPositionDiscontinuityListener;
     }
@@ -460,6 +464,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         void onLoadingChanged(boolean isLoading);
     }
 
+    public interface OnPlayerStateChanged {
+        /**
+         *
+         * @param playWhenReady playWhenReady
+         * @param playbackState playbackState states from Player class
+         */
+        void onPlayerStateChanged(boolean playWhenReady, int playbackState);
+    }
+
 
     class MyPlayerEventListener extends Player.DefaultEventListener {
         private Player player;
@@ -472,9 +485,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             super.onPlayerStateChanged(playWhenReady, playbackState);
 
-            KLog.w("ppp "+playbackState);
             if (currentPlayer != player)
                 return;
+
+            if(onPlayerStateChanged!=null)
+                onPlayerStateChanged.onPlayerStateChanged(playWhenReady,playbackState);
 
             if (currentState != playbackState || isPreparing) {
 
@@ -507,7 +522,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         @Override
         public void onPositionDiscontinuity(int reason) {
             super.onPositionDiscontinuity(reason);
-            KLog.w("abc onPositionDiscontinuity " + currentPlayer.getPlaybackState() + " window = " + currentPlayer.getCurrentWindowIndex() + " / " + currentWindow);
             if (currentPlayer != player)
                 return;
 
