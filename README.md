@@ -24,6 +24,7 @@ To use the library, first include it your project using Gradle
         mediaPlayer.setDataSource(url);
 	mediaPlayer.setPlayerView(this, playerView);
 	
+	//it goes to STATE_IDLE on the end of sources in Chromecast 
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnPreparedListener(this);
