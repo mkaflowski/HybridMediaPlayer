@@ -531,9 +531,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
 
         private void checkWindowChanged() {
-            if (currentWindow == -1)
-                isChangingWindowByUser = true;
-
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex

@@ -8,6 +8,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.exoplayer2.Player;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastState;
@@ -151,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 KLog.d("cvv " + playbackState);
+                if(mediaPlayer.isCasting() && playbackState == Player.STATE_IDLE)
+                    mediaPlayer.pause();
             }
         });
 
