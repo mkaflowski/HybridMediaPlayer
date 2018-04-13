@@ -124,9 +124,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .build();
 
         sources = new ArrayList<>();
-        sources.add(source1);
-        sources.add(source3);
-        sources.add(source4);
+//        sources.add(source1);
+//        sources.add(source3);
+//        sources.add(source4);
         sources.add(source2);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
@@ -191,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             sources2.add(source2);
             mediaPlayer.setInitialWindowNum(1);
             mediaPlayer.setDataSource(sources2, sources2);
+            mediaPlayer.seekTo(10000);
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
