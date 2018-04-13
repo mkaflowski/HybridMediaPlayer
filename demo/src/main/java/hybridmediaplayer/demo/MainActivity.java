@@ -182,24 +182,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getDuration() - 1500);
         } else if (view.getId() == R.id.btSpeed) {
-//            if (speed == 1)
-//                speed = 2f;
-//            else speed = 1;
-//            mediaPlayer.setPlaybackParams(speed, 1);
-            List<MediaSourceInfo> sources2 = new ArrayList<>();
-            MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
-                    .setTitle("NEW Podcast")
-                    .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
-                    .build();
-            MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
-                    .setTitle("NEW Podcast 2")
-                    .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
-                    .build();
-            sources2.add(source);
-            sources2.add(source2);
-            mediaPlayer.setInitialWindowNum(1);
-            mediaPlayer.setDataSource(sources2, sources2);
-            mediaPlayer.seekTo(10000);
+            if (speed == 1)
+                speed = 2f;
+            else speed = 1;
+            mediaPlayer.setPlaybackParams(speed, 1);
+            //loadOtherSources();
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
@@ -228,6 +215,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             createPlayer();
 
         }
+    }
+
+    private void loadOtherSources() {
+        List<MediaSourceInfo> sources2 = new ArrayList<>();
+        MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
+                .setTitle("NEW Podcast")
+                .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
+                .build();
+        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
+                .setTitle("NEW Podcast 2")
+                .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
+                .build();
+        sources2.add(source);
+        sources2.add(source2);
+        mediaPlayer.setInitialWindowNum(1);
+        mediaPlayer.setDataSource(sources2, sources2);
+        mediaPlayer.seekTo(10000);
     }
 
 
