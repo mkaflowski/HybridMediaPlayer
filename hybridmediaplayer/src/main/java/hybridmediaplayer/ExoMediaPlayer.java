@@ -512,12 +512,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                         }
 
                         break;
-
-                    case Player.STATE_IDLE:
-                        if (isCasting)
-                            if (onCompletionListener != null)
-                                onCompletionListener.onCompletion(ExoMediaPlayer.this);
-                        break;
                 }
             }
             currentState = playbackState;

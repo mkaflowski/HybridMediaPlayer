@@ -154,6 +154,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        mediaPlayer.setOnCompletionListener(new HybridMediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(HybridMediaPlayer player) {
+                KLog.i("cvv complete");
+
+            }
+        });
+
         mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.play();
 
