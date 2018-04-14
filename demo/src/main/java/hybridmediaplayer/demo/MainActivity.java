@@ -126,15 +126,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         sources = new ArrayList<>();
 //        sources.add(source1);
-//        sources.add(source3);
-//        sources.add(source4);
+        sources.add(source3);
+        sources.add(source4);
         sources.add(source2);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
             public void onTrackChanged(boolean isFinished) {
-                KLog.d("abc isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
+                KLog.w("abc isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
+                KLog.trace();
             }
         });
 
@@ -165,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.play();
 
@@ -185,11 +187,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getDuration() - 1500);
         } else if (view.getId() == R.id.btSpeed) {
-            if (speed == 1)
-                speed = 2f;
-            else speed = 1;
-            mediaPlayer.setPlaybackParams(speed, 1);
-            //loadOtherSources();
+//            if (speed == 1)
+//                speed = 2f;
+//            else speed = 1;
+//            mediaPlayer.setPlaybackParams(speed, 1);
+            loadOtherSources();
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;

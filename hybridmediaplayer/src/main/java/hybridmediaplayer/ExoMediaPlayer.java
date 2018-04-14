@@ -35,6 +35,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private Player currentPlayer;
     private SimpleExoPlayer exoPlayer;
     private CastPlayer castPlayer;
-    private int currentWindow;
+    private int currentWindow = -1;
 
 
     private Context context;
@@ -109,8 +110,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
-        currentWindow = -1;
-
         if (exoPlayer != null)
             exoPlayer.stop();
 
@@ -142,10 +141,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         prepare();
 
-        init();
+        isChangingWindowByUser = true;
+        shouldBeWindow = initialWindowNum;
 
         if (initialWindowNum != 0)
             exoPlayer.seekTo(initialWindowNum, 0);
+
+        //if (!isCasting)
+            init();
 
         if (castPlayer != null && isCasting()) {
             castPlayer.loadItems(mediaItems, initialWindowNum, 0, Player.REPEAT_MODE_OFF);
@@ -531,6 +534,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
 
         private void checkWindowChanged() {
+            KLog.e("abc "+currentWindow +" / "+currentPlayer.getCurrentWindowIndex() + " state = "+currentPlayer.getPlaybackState());
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
@@ -541,7 +545,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                     isPreparing = true;
 
                 if (onTrackChangedListener != null)
-                    onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
+                    onTrackChangedListener.onTrackChanged(!isChangingWindowByUser && !isCasting);
 
                 isChangingWindowByUser = false;
             }
