@@ -749,12 +749,12 @@ public final class CastPlayer implements Player {
 
     /**
      * Retrieves the current item index from {@code mediaStatus} and maps it into a window index. If
-     * there is no media session, returns 0.
+     * there is no media session, returns -1.
      */
     private static int fetchCurrentWindowIndex(@Nullable MediaStatus mediaStatus) {
         Integer currentItemId = mediaStatus != null
                 ? mediaStatus.getIndexById(mediaStatus.getCurrentItemId()) : null;
-        return currentItemId != null ? currentItemId : 0;
+        return currentItemId != null ? currentItemId : -1;
     }
 
     private static boolean isTrackActive(long id, long[] activeTrackIds) {

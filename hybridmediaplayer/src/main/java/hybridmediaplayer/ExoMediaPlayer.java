@@ -144,10 +144,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         isChangingWindowByUser = true;
         shouldBeWindow = initialWindowNum;
 
+        currentWindow = initialWindowNum;
+        if (onTrackChangedListener != null)
+            onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
+
         if (initialWindowNum != 0)
             exoPlayer.seekTo(initialWindowNum, 0);
 
-        //if (!isCasting)
+        if (!isCasting)
             init();
 
         if (castPlayer != null && isCasting()) {
@@ -534,8 +538,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
 
         private void checkWindowChanged() {
-            KLog.e("abc "+currentWindow +" / "+currentPlayer.getCurrentWindowIndex() + " state = "+currentPlayer.getPlaybackState());
+            KLog.e("abc " + currentWindow + " / " + currentPlayer.getCurrentWindowIndex() + " state = " + currentPlayer.getPlaybackState());
             int newIndex = currentPlayer.getCurrentWindowIndex();
+            if (newIndex < 0)
+                return;
+
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
                 shouldBeWindow = newIndex;
@@ -545,7 +552,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                     isPreparing = true;
 
                 if (onTrackChangedListener != null)
-                    onTrackChangedListener.onTrackChanged(!isChangingWindowByUser && !isCasting);
+                    onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
 
                 isChangingWindowByUser = false;
             }
