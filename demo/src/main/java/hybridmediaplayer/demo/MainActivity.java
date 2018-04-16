@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        mediaPlayer.setInitialWindowNum(2);
+        mediaPlayer.setInitialWindowNum(1);
         mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.play();
 

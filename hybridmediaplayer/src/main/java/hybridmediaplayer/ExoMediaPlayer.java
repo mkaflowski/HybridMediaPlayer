@@ -35,7 +35,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,12 +140,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         prepare();
 
-        isChangingWindowByUser = true;
         shouldBeWindow = initialWindowNum;
 
         currentWindow = initialWindowNum;
-        if (onTrackChangedListener != null)
-            onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
 
         if (initialWindowNum != 0)
             exoPlayer.seekTo(initialWindowNum, 0);
@@ -156,7 +152,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         if (castPlayer != null && isCasting()) {
             castPlayer.loadItems(mediaItems, initialWindowNum, 0, Player.REPEAT_MODE_OFF);
+            castPlayer.setPlayWhenReady(true);
         }
+
+        if (onTrackChangedListener != null)
+            onTrackChangedListener.onTrackChanged(false);
     }
 
     private void init() {
@@ -538,7 +538,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         }
 
         private void checkWindowChanged() {
-            KLog.e("abc " + currentWindow + " / " + currentPlayer.getCurrentWindowIndex() + " state = " + currentPlayer.getPlaybackState());
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex < 0)
                 return;

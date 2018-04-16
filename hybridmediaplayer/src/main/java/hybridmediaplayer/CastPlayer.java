@@ -161,6 +161,7 @@ public final class CastPlayer implements Player {
      * @return The Cast {@code PendingResult}, or null if no session is available.
      */
     public PendingResult<MediaChannelResult> loadItem(MediaQueueItem item, long positionMs) {
+        currentWindowIndex = 0;
         return loadItems(new MediaQueueItem[] {item}, 0, positionMs, REPEAT_MODE_OFF);
     }
 
@@ -180,6 +181,7 @@ public final class CastPlayer implements Player {
         if (remoteMediaClient != null) {
             positionMs = positionMs != C.TIME_UNSET ? positionMs : 0;
             waitingForInitialTimeline = true;
+            currentWindowIndex = startIndex;
             return remoteMediaClient.queueLoad(items, startIndex, getCastRepeatMode(repeatMode),
                     positionMs, null);
         }
