@@ -517,8 +517,17 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                             isPreparing = false;
                             onPreparedListener.onPrepared(ExoMediaPlayer.this);
                         }
-
                         break;
+
+//                    case Player.STATE_IDLE:
+//                        if (isCasting) {
+//                            KLog.d("ddd " + player.getCurrentWindowIndex() + " / " + player.getDuration()+ " / " + castPlayer.get);
+//                            KLog.e("ddd " + currentState);
+//                            if (player.getDuration() > 0 && player.getCurrentWindowIndex() == getWindowCount())
+//                                if (onCompletionListener != null)
+//                                    onCompletionListener.onCompletion(ExoMediaPlayer.this);
+//                            break;
+//                        }
                 }
             }
             currentState = playbackState;
