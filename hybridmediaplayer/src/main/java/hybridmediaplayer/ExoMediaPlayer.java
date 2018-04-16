@@ -35,7 +35,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -496,8 +495,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             if (currentPlayer != player)
                 return;
 
-            KLog.e("ddd " + playbackState + " "+ player + " "+this);
-
+//            KLog.e("ddd " + playbackState + " "+ player + " "+this);
 
             if (onPlayerStateChanged != null)
                 onPlayerStateChanged.onPlayerStateChanged(playWhenReady, playbackState);
