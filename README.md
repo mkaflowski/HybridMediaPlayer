@@ -22,6 +22,8 @@ To use the library, first include it your project using Gradle
 ```java
         HybridMediaPlayer mediaPlayer = HybridMediaPlayer.getInstance(context);
         mediaPlayer.setDataSource(url);
+	mediaPlayer.prepare();
+	
 	mediaPlayer.setPlayerView(this, playerView);
 	
 	//it goes to STATE_IDLE on the end of sources in Chromecast 
@@ -43,6 +45,7 @@ To use the library, first include it your project using Gradle
 ```java
         ExoMediaPlayer mediaPlayer = new ExoMediaPlayer(this)
         mediaPlayer.setDataSource(url1, url2, url3, ...);
+	mediaPlayer.prepare();
 	
 	//for proper Chromecast handling
 	mediaPlayer.setInitialWindowNum(1); // start track number
