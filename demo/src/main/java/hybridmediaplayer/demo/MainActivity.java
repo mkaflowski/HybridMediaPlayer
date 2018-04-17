@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mediaPlayer.setInitialWindowNum(1);
         mediaPlayer.setDataSource(sources, sources);
+        mediaPlayer.prepare();
         mediaPlayer.play();
 
     }
@@ -236,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources2.add(source2);
         mediaPlayer.setInitialWindowNum(1);
         mediaPlayer.setDataSource(sources2, sources2);
+        mediaPlayer.prepare();
         mediaPlayer.seekTo(10000);
     }
 

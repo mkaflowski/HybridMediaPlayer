@@ -137,26 +137,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         exoMediaSource = new ConcatenatingMediaSource(sources);
 
         prepareCastMediaSourceInfoList(castSources);
-
-        prepare();
-
-        shouldBeWindow = initialWindowNum;
-
-        currentWindow = initialWindowNum;
-
-        if (initialWindowNum != 0)
-            exoPlayer.seekTo(initialWindowNum, 0);
-
-        if (!isCasting)
-            init();
-
-        if (castPlayer != null && isCasting()) {
-            castPlayer.loadItems(mediaItems, initialWindowNum, 0, Player.REPEAT_MODE_OFF);
-            castPlayer.setPlayWhenReady(true);
-        }
-
-        if (onTrackChangedListener != null)
-            onTrackChangedListener.onTrackChanged(false);
     }
 
     private void init() {
@@ -191,7 +171,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         return new MediaQueueItem.Builder(mediaInfo).build();
     }
 
-    private void prepare() {
+
+    @Override
+    public void prepare() {
         exoPlayer.setAudioDebugListener(new AudioRendererEventListener() {
             @Override
             public void onAudioEnabled(DecoderCounters counters) {
@@ -227,6 +209,24 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         isPreparing = true;
         exoPlayer.prepare(exoMediaSource);
+
+        shouldBeWindow = initialWindowNum;
+
+        currentWindow = initialWindowNum;
+
+        if (initialWindowNum != 0)
+            exoPlayer.seekTo(initialWindowNum, 0);
+
+        if (!isCasting)
+            init();
+
+        if (castPlayer != null && isCasting()) {
+            castPlayer.loadItems(mediaItems, initialWindowNum, 0, Player.REPEAT_MODE_OFF);
+            castPlayer.setPlayWhenReady(true);
+        }
+
+        if (onTrackChangedListener != null)
+            onTrackChangedListener.onTrackChanged(false);
     }
 
     private void setEqualizer() {

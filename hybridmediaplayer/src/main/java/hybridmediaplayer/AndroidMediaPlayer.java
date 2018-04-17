@@ -3,10 +3,7 @@ package hybridmediaplayer;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.PlaybackParams;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -27,7 +24,6 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     public void setDataSource(String path) {
         try {
             mediaPlayer.setDataSource(path);
-            mediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,6 +75,11 @@ public class AndroidMediaPlayer extends HybridMediaPlayer {
     @Override
     public int getDuration() {
         return mediaPlayer.getDuration();
+    }
+
+    @Override
+    public void prepare() {
+        mediaPlayer.prepareAsync();
     }
 
     @Override
