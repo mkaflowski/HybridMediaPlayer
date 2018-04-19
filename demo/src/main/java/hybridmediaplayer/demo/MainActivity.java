@@ -1,5 +1,6 @@
 package hybridmediaplayer.demo;
 
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteButton;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
 
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     @Override
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setTitle("Podcast 2")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
+        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://stream2.nadaje.com:11140/rdc")
                 .setTitle("Podcast 3")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();

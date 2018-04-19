@@ -491,11 +491,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             super.onPlayerStateChanged(playWhenReady, playbackState);
 
-
             if (currentPlayer != player)
                 return;
-
-//            KLog.e("ddd " + playbackState + " "+ player + " "+this);
 
             if (onPlayerStateChanged != null)
                 onPlayerStateChanged.onPlayerStateChanged(playWhenReady, playbackState);
@@ -515,7 +512,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                     case Player.STATE_READY:
                         if (isPreparing && onPreparedListener != null && shouldBeWindow == getCurrentWindow()) {
-                            if (currentPlayer.getDuration() < 0 || currentPlayer.getCurrentWindowIndex() >= getWindowCount())
+                            if ((currentPlayer.getDuration() < 0 && currentPlayer.isCurrentWindowSeekable())
+                                    || currentPlayer.getCurrentWindowIndex() >= getWindowCount())
                                 return;
                             isPreparing = false;
                             onPreparedListener.onPrepared(ExoMediaPlayer.this);
