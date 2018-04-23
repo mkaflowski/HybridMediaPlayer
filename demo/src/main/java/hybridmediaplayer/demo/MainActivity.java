@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setTitle("Podcast 2")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://stream2.nadaje.com:11140/rdc")
+        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://stream3.polskieradio.pl:8904/;")
                 .setTitle("Podcast 3")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
