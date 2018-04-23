@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * Creates {@link CastTimeline}s from cast receiver app media status.
+ * Creates {@link com.google.android.exoplayer2.ext.cast.CastTimeline}s from cast receiver app media status.
  *
  * <p>This class keeps track of the duration reported by the current item to fill any missing
  * durations in the media queue items [See internal: b/65152553].
@@ -40,10 +40,10 @@ import java.util.List;
   }
 
   /**
-   * Returns a {@link CastTimeline} that represent the given {@code status}.
+   * Returns a {@link com.google.android.exoplayer2.ext.cast.CastTimeline} that represent the given {@code status}.
    *
    * @param status The Cast media status.
-   * @return A {@link CastTimeline} that represent the given {@code status}.
+   * @return A {@link com.google.android.exoplayer2.ext.cast.CastTimeline} that represent the given {@code status}.
    */
   public CastTimeline getCastTimeline(MediaStatus status) {
     MediaInfo mediaInfo = status.getMediaInfo();
