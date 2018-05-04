@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.mkaflowski'
+group = 'com.github.mkaflowski'
 
 android {
     compileSdkVersion 26
@@ -32,5 +32,11 @@ dependencies {
     compile 'com.github.zhaokaiqiang.klog:library:1.6.0'
     compile 'com.google.android.exoplayer:exoplayer:2.7.0'
     compile 'com.google.android.exoplayer:extension-cast:2.7.0'
+}
 
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    destinationDir = file("../javadoc/")
+    failOnError false
 }
