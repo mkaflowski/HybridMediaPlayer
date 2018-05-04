@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: "io.github.amannepid.androidjavadoc"
+
 group = 'com.github.mkaflowski'
 
 android {

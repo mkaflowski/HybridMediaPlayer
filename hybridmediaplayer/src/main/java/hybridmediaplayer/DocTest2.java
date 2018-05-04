@@ -1,7 +1,7 @@
 package hybridmediaplayer;
 
 /**
- * test 1
+ * test 2
  */
-public class DocTest {
+public class DocTest2 {
 }
