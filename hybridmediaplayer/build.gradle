@@ -34,20 +34,3 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:2.7.0'
     compile 'com.google.android.exoplayer:extension-cast:2.7.0'
 }
-
-task javadoc(type: Javadoc) {
-    failOnError false
-    source = android.sourceSets.main.java.sourceFiles
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
-}
-
-// build a jar with javadoc
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar
-}
