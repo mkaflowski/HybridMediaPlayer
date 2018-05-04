@@ -442,6 +442,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
 
+    public interface OnTrackChangedListener{
+        /**
+         * @param isFinished is track finished, if false it was changed by user
+         */
+        void onTrackChanged(boolean isFinished);
+    }
 
     public interface OnPositionDiscontinuityListener {
         /**
@@ -516,6 +522,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                     case Player.STATE_IDLE:
                         if (isCasting) {
+//                            KLog.d("ddd " + player.getCurrentWindowIndex() + " / " + castPlayer.getCurrentTimeline().isEmpty());
+//                            KLog.e("ddd " + currentState);
                             if (player.getDuration() > 0 && player.getCurrentWindowIndex() == getWindowCount())
                                 if (onCompletionListener != null)
                                     onCompletionListener.onCompletion(ExoMediaPlayer.this);

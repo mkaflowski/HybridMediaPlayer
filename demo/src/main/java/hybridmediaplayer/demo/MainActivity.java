@@ -22,7 +22,6 @@ import java.util.List;
 import hybridmediaplayer.ExoMediaPlayer;
 import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
-import hybridmediaplayer.OnTrackChangedListener;
 import hybridplayer.demo.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -134,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources.add(source2);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
-        mediaPlayer.setOnTrackChangedListener(new OnTrackChangedListener() {
+        mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
             public void onTrackChanged(boolean isFinished) {
                 KLog.w("abc isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
