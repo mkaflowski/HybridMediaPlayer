@@ -33,6 +33,7 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:2.7.0'
     compile 'com.google.android.exoplayer:extension-cast:2.7.0'
 }
+apply plugin: "com.vanniktech.android.javadoc"
 
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs

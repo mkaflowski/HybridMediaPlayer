@@ -40,6 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * Main player class.
+ */
 public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.SessionAvailabilityListener {
 
     private Player currentPlayer;
