@@ -7,15 +7,10 @@ allprojects {
                 name 'Google'
             }
             google()
-            maven {
-                url "https://plugins.gradle.org/m2/"
-            }
         }
         dependencies {
             classpath 'com.android.tools.build:gradle:3.0.1'
             classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
-            classpath "gradle.plugin.io.github.amannepid:javadoc:0.1.0"
-
         }
 
 
@@ -32,7 +27,3 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
-
-
-

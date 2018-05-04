@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: "io.github.amannepid.androidjavadoc"
 
 group = 'com.github.mkaflowski'
 
@@ -36,7 +35,19 @@ dependencies {
     compile 'com.google.android.exoplayer:extension-cast:2.7.0'
 }
 
-ext {
-    javadocTitle = 'HybridMediaPlayer'
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
 }
-apply from: '../javadoc_library.gradle'
+
+// build a jar with javadoc
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+}
