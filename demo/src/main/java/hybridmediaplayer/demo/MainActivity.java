@@ -110,15 +110,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer = new ExoMediaPlayer(this, castContext);
         //mediaPlayer.setDataSource(url);
         MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
-                .setTitle("Podcast Stream")
+                .setTitle("Podcast 0")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
         MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3")
-                .setTitle("Podcast 2")
+                .setTitle("Podcast 1")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://stream3.polskieradio.pl:8904/;")
-                .setTitle("Podcast 3")
+        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
+                .setTitle("Podcast 2")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
         MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url3)
@@ -201,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer = null;
         } else if (view.getId() == R.id.btNext) {
 //            pm.selectQueueItem(pm.getCurrentItemIndex()+1);
+            KLog.i("abc "+ mediaPlayer.getCurrentWindow() + " / "+mediaPlayer.getWindowCount());
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
         } else if (view.getId() == R.id.btCreatePlayer) {
 //            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {
