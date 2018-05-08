@@ -9,6 +9,7 @@ import android.view.SurfaceView;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -79,7 +80,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         final TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        LoadControl loadControl = new MyLoadControl();
+
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector, loadControl);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
