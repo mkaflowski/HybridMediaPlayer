@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
@@ -324,6 +325,12 @@ public final class CastPlayer implements Player {
         return playbackState;
     }
 
+    @Nullable
+    @Override
+    public ExoPlaybackException getPlaybackError() {
+        return null;
+    }
+
     @Override
     public void setPlayWhenReady(boolean playWhenReady) {
         if (remoteMediaClient == null) {
@@ -498,6 +505,12 @@ public final class CastPlayer implements Player {
     public int getPreviousWindowIndex() {
         return currentTimeline.isEmpty() ? C.INDEX_UNSET
                 : currentTimeline.getPreviousWindowIndex(getCurrentWindowIndex(), repeatMode, false);
+    }
+
+    @Nullable
+    @Override
+    public Object getCurrentTag() {
+        return null;
     }
 
     // TODO: Fill the cast timeline information with ProgressListener's duration updates.

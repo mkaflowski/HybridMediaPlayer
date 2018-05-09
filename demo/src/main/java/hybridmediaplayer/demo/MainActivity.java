@@ -168,6 +168,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        mediaPlayer.setOnLoadingChanged(new ExoMediaPlayer.OnLoadingChanged() {
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+                KLog.d("loadd "+isLoading);
+            }
+        });
+
         mediaPlayer.setInitialWindowNum(1);
         mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.prepare();
@@ -188,13 +195,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             KLog.d(mediaPlayer.getCurrentPosition());
             KLog.i(mediaPlayer.getDuration());
         } else if (view.getId() == R.id.fastForward) {
-            mediaPlayer.seekTo(mediaPlayer.getDuration() - 1500);
+            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 2000);
         } else if (view.getId() == R.id.btSpeed) {
 //            if (speed == 1)
 //                speed = 2f;
 //            else speed = 1;
 //            mediaPlayer.setPlaybackParams(speed, 1);
-            loadOtherSources();
+
+
+            int msec = mediaPlayer.getCurrentPosition() - 2000;
+            if(msec<0)
+                msec = 1;
+            mediaPlayer.seekTo(msec);
+
+//            loadOtherSources();
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;

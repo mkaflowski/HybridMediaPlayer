@@ -6,12 +6,14 @@ import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.view.SurfaceView;
 
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
@@ -80,9 +82,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         final TrackSelector trackSelector =
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
+        RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
         LoadControl loadControl = new MyLoadControl();
 
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector, loadControl);
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
