@@ -194,10 +194,10 @@ public final class CastPlayer implements Player {
             waitingForInitialTimeline = true;
             pendingSeekWindowIndex = startIndex;
             currentWindowIndex = startIndex;
+            currentTimeline = CastTimeline.EMPTY_CAST_TIMELINE;
             return remoteMediaClient.queueLoad(items, startIndex, getCastRepeatMode(repeatMode),
                     positionMs, null);
         }
-
 
         return null;
     }

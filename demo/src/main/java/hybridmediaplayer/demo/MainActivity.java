@@ -130,14 +130,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        sources.add(source1);
         sources.add(source3);
         sources.add(source4);
-        sources.add(source2);
+//        sources.add(source2);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
             public void onTrackChanged(boolean isFinished) {
                 KLog.w("abc isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
-                KLog.trace();
             }
         });
 
@@ -203,12 +202,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            mediaPlayer.setPlaybackParams(speed, 1);
 
 
-            int msec = mediaPlayer.getCurrentPosition() - 2000;
-            if(msec<0)
-                msec = 1;
-            mediaPlayer.seekTo(msec);
+//            int msec = mediaPlayer.getCurrentPosition() - 2000;
+//            if(msec<0)
+//                msec = 1;
+//            mediaPlayer.seekTo(msec);
 
-//            loadOtherSources();
+            loadOtherSources();
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
@@ -252,7 +251,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .build();
         sources2.add(source);
         sources2.add(source2);
-        mediaPlayer.setInitialWindowNum(1);
+        sources2.add(source2);
+        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.setDataSource(sources2, sources2);
         mediaPlayer.prepare();
         mediaPlayer.seekTo(10000);
