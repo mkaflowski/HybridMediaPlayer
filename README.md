@@ -13,7 +13,7 @@ To use the library, first include it your project using Gradle
     }
 
 	dependencies {
-	        compile 'com.github.mkaflowski:HybridMediaPlayer:1.x'
+	        compile 'com.github.mkaflowski:HybridMediaPlayer:1.x' //CHANGE X TO CURRENT VERSION!!!
 	}
 	
 
