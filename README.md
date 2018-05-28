@@ -6,18 +6,21 @@ Android music player from URL. Uses ExoPlayer and MediaPlayer for lower APIs.
 To use the library, first include it your project using Gradle.
 
 Add JitPack in your root build.gradle at the end of repositories:
-    ```allprojects {
+```
+    allprojects {
         repositories {
             jcenter()
             maven { url "https://jitpack.io" }
         }
-    }```
+    }
+```
 
 Add it as a dependency in your app's build.gradle file:
-
-```dependencies {
+```
+	dependencies {
 	        compile 'com.github.mkaflowski:HybridMediaPlayer:1.x' //CHANGE X TO CURRENT VERSION!!!
-	}```
+	}
+```
 
 ## How to use
 
