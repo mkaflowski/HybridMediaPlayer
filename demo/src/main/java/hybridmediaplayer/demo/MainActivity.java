@@ -176,6 +176,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mediaPlayer.setInitialWindowNum(0);
         mediaPlayer.setDataSource(sources, sources);
+        mediaPlayer.setOnAudioSessionIdSetListener(new ExoMediaPlayer.OnAudioSessionIdSetListener() {
+            @Override
+            public void onAudioSessionIdset(int audioSessionId) {
+                KLog.d("audio session id = "+audioSessionId);
+            }
+        });
         mediaPlayer.prepare();
         mediaPlayer.play();
 

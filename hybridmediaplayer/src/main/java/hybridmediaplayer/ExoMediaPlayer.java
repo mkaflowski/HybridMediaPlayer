@@ -53,7 +53,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private CastPlayer castPlayer;
     private int currentWindow = -1;
 
-
     private Context context;
     private MediaSource exoMediaSource;
     private MediaQueueItem[] mediaItems;
@@ -69,6 +68,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private List<MediaSourceInfo> mediaSourceInfoList;
     private boolean isCasting;
     private OnCastAvailabilityChangeListener onCastAvailabilityChangeListener;
+    private OnAudioSessionIdSetListener onAudioSessionIdSetListener;
     private boolean isChangingWindowByUser;
 
     private int initialWindowNum;
@@ -192,6 +192,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             @Override
             public void onAudioSessionId(int audioSessionId) {
                 setEqualizer();
+                if(onAudioSessionIdSetListener!=null)
+                    onAudioSessionIdSetListener.onAudioSessionIdset(audioSessionId);
             }
 
             @Override
@@ -450,12 +452,22 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         this.onCastAvailabilityChangeListener = onCastAvailabilityChangeListener;
     }
 
+    public void setOnAudioSessionIdSetListener(OnAudioSessionIdSetListener onAudioSessionIdSetListener) {
+        this.onAudioSessionIdSetListener = onAudioSessionIdSetListener;
+    }
 
     public interface OnTrackChangedListener{
         /**
          * @param isFinished is track finished, if false it was changed by user
          */
         void onTrackChanged(boolean isFinished);
+    }
+
+    public interface OnAudioSessionIdSetListener{
+        /**
+         * @param isFinished is track finished, if false it was changed by user
+         */
+        void onAudioSessionIdset(int audioSessionId);
     }
 
     public interface OnPositionDiscontinuityListener {
