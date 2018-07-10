@@ -74,6 +74,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     private int initialWindowNum;
 
     public ExoMediaPlayer(Context context, CastContext castContext) {
+        this(context, castContext, 20000);
+    }
+
+    public ExoMediaPlayer(Context context, CastContext castContext, long backBufferMs) {
         this.context = context;
 
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -83,7 +87,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                 new DefaultTrackSelector(videoTrackSelectionFactory);
 
         RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
-        LoadControl loadControl = new MyLoadControl();
+        LoadControl loadControl = new MyLoadControl(backBufferMs);
 
         exoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
@@ -192,7 +196,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             @Override
             public void onAudioSessionId(int audioSessionId) {
                 setEqualizer();
-                if(onAudioSessionIdSetListener!=null)
+                if (onAudioSessionIdSetListener != null)
                     onAudioSessionIdSetListener.onAudioSessionIdset(audioSessionId);
             }
 
@@ -456,14 +460,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         this.onAudioSessionIdSetListener = onAudioSessionIdSetListener;
     }
 
-    public interface OnTrackChangedListener{
+    public interface OnTrackChangedListener {
         /**
          * @param isFinished is track finished, if false it was changed by user
          */
         void onTrackChanged(boolean isFinished);
     }
 
-    public interface OnAudioSessionIdSetListener{
+    public interface OnAudioSessionIdSetListener {
         /**
          * @param isFinished is track finished, if false it was changed by user
          */

@@ -33,7 +33,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.github.zhaokaiqiang.klog:library:1.6.0'
     compile 'com.google.android.exoplayer:exoplayer:2.8.1'
-    compile 'com.google.android.exoplayer:extension-cast:2.8.1'
+    compile 'com.google.android.exoplayer:extension-cast:2.8.2'
 }
 
 // build a jar with source files

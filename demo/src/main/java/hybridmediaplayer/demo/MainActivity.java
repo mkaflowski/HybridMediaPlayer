@@ -104,9 +104,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer.release();
         }
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
-        String url2 = "http://stream3.polskieradio.pl:8904/";
+        String url2 = "http://217.74.72.11/RADIOFONIA";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
-        mediaPlayer = new ExoMediaPlayer(this, castContext);
+        mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
         //mediaPlayer.setDataSource(url);
         MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
                 .setTitle("Podcast 0")
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setTitle("Podcast 2")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url3)
+        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url2)
                 .setTitle("Movie")
                 .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
                 .isVideo(true)
@@ -193,8 +193,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (view.getId() == R.id.btPlay) {
             if (mediaPlayer == null)
                 createPlayer();
-            else
+            else {
                 mediaPlayer.play();
+            }
         } else if (view.getId() == R.id.btPause) {
             mediaPlayer.pause();
             KLog.d(mediaPlayer.getCurrentPosition());
