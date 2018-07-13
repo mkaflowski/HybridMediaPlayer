@@ -517,9 +517,14 @@ public final class CastPlayer implements Player {
     // See [Internal: b/65152553].
     @Override
     public long getDuration() {
-        return currentTimeline.isEmpty() ? C.TIME_UNSET
-                : currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(),
-                window).getDurationMs();
+        try {
+            return currentTimeline.isEmpty() ? C.TIME_UNSET
+                    : currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(),
+                    window).getDurationMs();
+        }catch (Exception e){
+            e.printStackTrace();
+            return C.TIME_UNSET;
+        }
     }
 
     @Override
