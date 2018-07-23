@@ -327,9 +327,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
     @Override
     public int getDuration() {
-        if (currentPlayer.getDuration() < 0)
+        try {
+            if (currentPlayer.getDuration() < 0)
+                return -1;
+            return (int) currentPlayer.getDuration();
+        } catch (Exception e) {
             return -1;
-        return (int) currentPlayer.getDuration();
+        }
     }
 
     @Override

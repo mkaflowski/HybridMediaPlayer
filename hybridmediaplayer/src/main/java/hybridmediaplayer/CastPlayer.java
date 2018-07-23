@@ -558,8 +558,12 @@ public final class CastPlayer implements Player {
 
     @Override
     public boolean isCurrentWindowSeekable() {
-        return !currentTimeline.isEmpty()
-                && currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(), window).isSeekable;
+        try {
+            return !currentTimeline.isEmpty()
+                    && currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(), window).isSeekable;
+        } catch (ArrayIndexOutOfBoundsException e){
+            return true;
+        }
     }
 
     @Override
