@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
     }
 
     @Override

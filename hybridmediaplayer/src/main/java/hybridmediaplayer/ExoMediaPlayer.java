@@ -77,6 +77,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         this(context, castContext, 20000);
     }
 
+    public ExoMediaPlayer(Context context) {
+        this(context, null);
+    }
+
     public ExoMediaPlayer(Context context, CastContext castContext, long backBufferMs) {
         this.context = context;
 
