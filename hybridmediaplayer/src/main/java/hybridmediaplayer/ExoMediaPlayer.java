@@ -89,7 +89,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
         LoadControl loadControl = new MyLoadControl(backBufferMs);
 
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
@@ -175,7 +175,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         movieMetadata.putString(MediaMetadata.KEY_TITLE, mediaSourceInfo.getTitle());
         movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, mediaSourceInfo.getAuthor());
         movieMetadata.putInt(MediaMetadata.KEY_TRACK_NUMBER, position);
-        movieMetadata.addImage(new WebImage(Uri.parse(mediaSourceInfo.getImageUrl())));
+        String imageUrl = mediaSourceInfo.getImageUrl();
+        if (imageUrl != null) {
+            Uri parse = Uri.parse(imageUrl);
+            movieMetadata.addImage(new WebImage(parse));
+        }
         MediaInfo mediaInfo = new MediaInfo.Builder(url)
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN)
