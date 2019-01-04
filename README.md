@@ -15,6 +15,14 @@ Add JitPack in your root build.gradle at the end of repositories:
     }
 ```
 
+If not enabled already, you also need to turn on Java 8 support in all `build.gradle` files depending on ExoPlayer, by adding the following to the `android` section:
+
+```gradle
+compileOptions {
+    targetCompatibility JavaVersion.VERSION_1_8
+}
+```
+
 Add it as a dependency in your app's build.gradle file:
 ```
     dependencies {
