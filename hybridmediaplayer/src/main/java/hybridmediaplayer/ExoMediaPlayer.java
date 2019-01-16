@@ -245,7 +245,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
         if (castPlayer != null && isCasting()) {
             castPlayer.loadItems(mediaItems, initialWindowNum, 0, Player.REPEAT_MODE_OFF);
-            castPlayer.setPlayWhenReady(true);
+//            castPlayer.setPlayWhenReady(true);
         }
 
         if (onTrackChangedListener != null)
