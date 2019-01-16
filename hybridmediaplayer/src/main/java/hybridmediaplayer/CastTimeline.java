@@ -21,7 +21,6 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaQueueItem;
-import com.socks.library.KLog;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,9 +77,15 @@ import java.util.Map;
     @Override
     public Window getWindow(
             int windowIndex, Window window, boolean setTag, long defaultPositionProjectionUs) {
-        KLog.d(windowIndex + " / " +durationsUs.length);
-        KLog.trace();
+
+        if (windowIndex > 0)
+            windowIndex = durationsUs.length - 1;
+
+        if (durationsUs.length == 3)
+            windowIndex = 1;
+
         long durationUs = durationsUs[windowIndex];
+
         boolean isDynamic = durationUs == C.TIME_UNSET;
         Object tag = setTag ? ids[windowIndex] : null;
         return window.set(
@@ -112,13 +117,7 @@ import java.util.Map;
         return uid instanceof Integer ? idsToIndex.get((int) uid, C.INDEX_UNSET) : C.INDEX_UNSET;
     }
 
-    @Override
-    public Object getUidOfPeriod(int periodIndex) {
-        return ids[periodIndex];
-    }
-
     // equals and hashCode implementations.
-
     @Override
     public boolean equals(Object other) {
         if (this == other) {

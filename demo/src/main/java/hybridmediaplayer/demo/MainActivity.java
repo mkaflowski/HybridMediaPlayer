@@ -117,21 +117,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setTitle("Source 2")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
+        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("https://sample-videos.com/audio/mp3/crowd-cheering.mp3") //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 3")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url2)
+        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url3) //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 4")
-                .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
-                .isVideo(true)
+                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
+        MediaSourceInfo source5 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
+                .setTitle("Source 5")
+                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .build();
+//        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url2)
+//                .setTitle("Source 4")
+//                .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
+//                .isVideo(true)
+//                .build();
 
         sources = new ArrayList<>();
 //        sources.add(source1);
         sources.add(source1);
         sources.add(source2);
         sources.add(source3);
+        sources.add(source4);
+        sources.add(source5);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
@@ -176,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        mediaPlayer.setInitialWindowNum(0);
         mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.setOnAudioSessionIdSetListener(new ExoMediaPlayer.OnAudioSessionIdSetListener() {
             @Override
@@ -184,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 KLog.d("audio session id = "+audioSessionId);
             }
         });
-        mediaPlayer.setInitialWindowNum(2);
+//        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
         mediaPlayer.play();
 
@@ -219,7 +228,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                msec = 1;
 //            mediaPlayer.seekTo(msec);
 
-            loadOtherSources();
+//            loadOtherSources();
+            KLog.d("<ini "+mediaPlayer.getDuration());
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;

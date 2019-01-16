@@ -15,12 +15,10 @@
  */
 package hybridmediaplayer;
 
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.google.android.exoplayer2.BasePlayer;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -33,6 +31,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.MimeTypes;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaQueueItem;
@@ -64,7 +63,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * <p>
  * <p>Methods should be called on the application's main thread.</p>
  */
-public final class CastPlayer extends BasePlayer {
+public final class CastPlayer implements Player {
 
     /**
      * Listener of changes in the cast session availability.
@@ -97,6 +96,7 @@ public final class CastPlayer extends BasePlayer {
     private final CastContext castContext;
     // TODO: Allow custom implementations of CastTimelineTracker.
     private final CastTimelineTracker timelineTracker;
+    private final Timeline.Window window;
     private final Timeline.Period period;
 
     private RemoteMediaClient remoteMediaClient;
@@ -129,6 +129,7 @@ public final class CastPlayer extends BasePlayer {
     public CastPlayer(CastContext castContext) {
         this.castContext = castContext;
         timelineTracker = new CastTimelineTracker();
+        window = new Timeline.Window();
         period = new Timeline.Period();
         statusListener = new StatusListener();
         seekResultCallback = new SeekResultCallback();
@@ -197,6 +198,7 @@ public final class CastPlayer extends BasePlayer {
             return remoteMediaClient.queueLoad(items, startIndex, getCastRepeatMode(repeatMode),
                     positionMs, null);
         }
+
         return null;
     }
 
@@ -299,32 +301,13 @@ public final class CastPlayer extends BasePlayer {
     // Player implementation.
 
     @Override
-    @Nullable
-    public AudioComponent getAudioComponent() {
-        return null;
-    }
-
-    @Override
-    @Nullable
     public VideoComponent getVideoComponent() {
         return null;
     }
 
     @Override
-    @Nullable
     public TextComponent getTextComponent() {
         return null;
-    }
-
-    @Override
-    @Nullable
-    public MetadataComponent getMetadataComponent() {
-        return null;
-    }
-
-    @Override
-    public Looper getApplicationLooper() {
-        return Looper.getMainLooper();
     }
 
     @Override
@@ -342,6 +325,7 @@ public final class CastPlayer extends BasePlayer {
         return playbackState;
     }
 
+    @Nullable
     @Override
     public ExoPlaybackException getPlaybackError() {
         return null;
@@ -362,6 +346,21 @@ public final class CastPlayer extends BasePlayer {
     @Override
     public boolean getPlayWhenReady() {
         return playWhenReady;
+    }
+
+    @Override
+    public void seekToDefaultPosition() {
+        seekTo(0);
+    }
+
+    @Override
+    public void seekToDefaultPosition(int windowIndex) {
+        seekTo(windowIndex, 0);
+    }
+
+    @Override
+    public void seekTo(long positionMs) {
+        seekTo(getCurrentWindowIndex(), positionMs);
     }
 
     @Override
@@ -398,6 +397,11 @@ public final class CastPlayer extends BasePlayer {
     @Override
     public PlaybackParameters getPlaybackParameters() {
         return PlaybackParameters.DEFAULT;
+    }
+
+    @Override
+    public void stop() {
+        stop(/* reset= */ false);
     }
 
     @Override
@@ -491,6 +495,24 @@ public final class CastPlayer extends BasePlayer {
         return pendingSeekWindowIndex != C.INDEX_UNSET ? pendingSeekWindowIndex : currentWindowIndex;
     }
 
+    @Override
+    public int getNextWindowIndex() {
+        return currentTimeline.isEmpty() ? C.INDEX_UNSET
+                : currentTimeline.getNextWindowIndex(getCurrentWindowIndex(), repeatMode, false);
+    }
+
+    @Override
+    public int getPreviousWindowIndex() {
+        return currentTimeline.isEmpty() ? C.INDEX_UNSET
+                : currentTimeline.getPreviousWindowIndex(getCurrentWindowIndex(), repeatMode, false);
+    }
+
+    @Nullable
+    @Override
+    public Object getCurrentTag() {
+        return null;
+    }
+
     // TODO: Fill the cast timeline information with ProgressListener's duration updates.
     // See [Internal: b/65152553].
     @Override
@@ -499,7 +521,7 @@ public final class CastPlayer extends BasePlayer {
             return currentTimeline.isEmpty() ? C.TIME_UNSET
                     : currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(),
                     window).getDurationMs();
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
             return C.TIME_UNSET;
         }
@@ -520,12 +542,28 @@ public final class CastPlayer extends BasePlayer {
     }
 
     @Override
-    public long getTotalBufferedDuration() {
-        long bufferedPosition = getBufferedPosition();
-        long currentPosition = getCurrentPosition();
-        return bufferedPosition == C.TIME_UNSET || currentPosition == C.TIME_UNSET
+    public int getBufferedPercentage() {
+        long position = getBufferedPosition();
+        long duration = getDuration();
+        return position == C.TIME_UNSET || duration == C.TIME_UNSET
                 ? 0
-                : bufferedPosition - currentPosition;
+                : duration == 0 ? 100 : Util.constrainValue((int) ((position * 100) / duration), 0, 100);
+    }
+
+    @Override
+    public boolean isCurrentWindowDynamic() {
+        return !currentTimeline.isEmpty()
+                && currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(), window).isDynamic;
+    }
+
+    @Override
+    public boolean isCurrentWindowSeekable() {
+        try {
+            return !currentTimeline.isEmpty()
+                    && currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(), window).isSeekable;
+        } catch (ArrayIndexOutOfBoundsException e){
+            return true;
+        }
     }
 
     @Override
@@ -551,11 +589,6 @@ public final class CastPlayer extends BasePlayer {
     @Override
     public long getContentPosition() {
         return getCurrentPosition();
-    }
-
-    @Override
-    public long getContentBufferedPosition() {
-        return getBufferedPosition();
     }
 
     // Internal methods.
@@ -819,6 +852,7 @@ public final class CastPlayer extends BasePlayer {
         @Override
         public void onAdBreakStatusUpdated() {
         }
+
 
         // SessionManagerListener implementation.
 

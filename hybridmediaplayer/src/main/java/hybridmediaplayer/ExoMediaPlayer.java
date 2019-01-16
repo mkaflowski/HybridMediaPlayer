@@ -94,7 +94,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
         LoadControl loadControl = new MyLoadControl(backBufferMs);
 
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
@@ -548,6 +548,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                     case Player.STATE_READY:
                         if (isPreparing && onPreparedListener != null && shouldBeWindow == getCurrentWindow()) {
+                            KLog.d("ret "+currentPlayer.getDuration());
                             if ((currentPlayer.getDuration() < 0 && currentPlayer.isCurrentWindowSeekable())
                                     || currentPlayer.getCurrentWindowIndex() >= getWindowCount())
                                 return;
