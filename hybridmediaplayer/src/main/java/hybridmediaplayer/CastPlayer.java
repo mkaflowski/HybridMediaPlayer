@@ -170,6 +170,8 @@ public final class CastPlayer extends BasePlayer {
      * @return The Cast {@code PendingResult}, or null if no session is available.
      */
     public PendingResult<MediaChannelResult> loadItem(MediaQueueItem item, long positionMs) {
+        pendingSeekWindowIndex = 0;
+        currentWindowIndex = 0;
         return loadItems(new MediaQueueItem[]{item}, 0, positionMs, REPEAT_MODE_OFF);
     }
 
@@ -189,6 +191,9 @@ public final class CastPlayer extends BasePlayer {
         if (remoteMediaClient != null) {
             positionMs = positionMs != C.TIME_UNSET ? positionMs : 0;
             waitingForInitialTimeline = true;
+            pendingSeekWindowIndex = startIndex;
+            currentWindowIndex = startIndex;
+            currentTimeline = CastTimeline.EMPTY_CAST_TIMELINE;
             return remoteMediaClient.queueLoad(items, startIndex, getCastRepeatMode(repeatMode),
                     positionMs, null);
         }

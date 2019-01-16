@@ -110,33 +110,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
         //mediaPlayer.setDataSource(url);
         MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
-                .setTitle("Podcast 0")
+                .setTitle("Source 1")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3")
-                .setTitle("Podcast 1")
+        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3")
+                .setTitle("Source 2")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
-                .setTitle("Podcast 2")
+        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
+                .setTitle("Source 3")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url2)
-                .setTitle("Movie")
+        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url2)
+                .setTitle("Source 4")
                 .setImageUrl("http://www.pvhc.net/img29/amkulkkbogfvmihgspru.png")
                 .isVideo(true)
                 .build();
 
         sources = new ArrayList<>();
 //        sources.add(source1);
+        sources.add(source1);
         sources.add(source2);
         sources.add(source3);
-        sources.add(source4);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
             @Override
             public void onTrackChanged(boolean isFinished) {
+                KLog.trace();
                 KLog.w("abc isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
             }
         });
@@ -183,10 +184,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 KLog.d("audio session id = "+audioSessionId);
             }
         });
+        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
         mediaPlayer.play();
 
-        mediaPlayer.seekTo(2,0);
         KLog.w(mediaPlayer.getWindowCount());
 
     }
@@ -254,16 +255,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void loadOtherSources() {
         List<MediaSourceInfo> sources2 = new ArrayList<>();
         MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
-                .setTitle("NEW Podcast")
+                .setTitle("Source 1")
                 .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
                 .build();
         MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
-                .setTitle("NEW Podcast 2")
+                .setTitle("Source 2")
                 .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
                 .build();
+        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
+                .setTitle("Source 3")
+                .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
+                .build();
+
         sources2.add(source);
         sources2.add(source2);
-        sources2.add(source2);
+        sources2.add(source3);
         mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.setDataSource(sources2, sources2);
         mediaPlayer.prepare();

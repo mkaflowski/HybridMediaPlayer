@@ -38,6 +38,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -480,9 +481,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
     }
 
     public interface OnAudioSessionIdSetListener {
-        /**
-         * @param isFinished is track finished, if false it was changed by user
-         */
+
         void onAudioSessionIdset(int audioSessionId);
     }
 
@@ -586,6 +585,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             int newIndex = currentPlayer.getCurrentWindowIndex();
             if (newIndex < 0)
                 return;
+
+            KLog.d("onTrackChanged currentWindow "+currentWindow);
+            KLog.d("onTrackChanged newIndex "+newIndex);
+            KLog.d("onTrackChanged shouldBeWindow "+shouldBeWindow);
+            KLog.d("onTrackChanged player.getDuration() "+player.getDuration());
 
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex

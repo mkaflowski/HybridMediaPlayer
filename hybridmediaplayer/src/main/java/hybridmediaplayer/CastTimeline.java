@@ -21,6 +21,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaQueueItem;
+import com.socks.library.KLog;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +78,8 @@ import java.util.Map;
     @Override
     public Window getWindow(
             int windowIndex, Window window, boolean setTag, long defaultPositionProjectionUs) {
+        KLog.d(windowIndex + " / " +durationsUs.length);
+        KLog.trace();
         long durationUs = durationsUs[windowIndex];
         boolean isDynamic = durationUs == C.TIME_UNSET;
         Object tag = setTag ? ids[windowIndex] : null;
