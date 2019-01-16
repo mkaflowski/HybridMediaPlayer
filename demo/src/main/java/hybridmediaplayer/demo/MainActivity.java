@@ -130,8 +130,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sources = new ArrayList<>();
 //        sources.add(source1);
         sources.add(source2);
+        sources.add(source3);
         sources.add(source4);
-//        sources.add(source2);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
@@ -186,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.prepare();
         mediaPlayer.play();
 
+        mediaPlayer.seekTo(2,0);
+        KLog.w(mediaPlayer.getWindowCount());
+
     }
 
 
@@ -221,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer = null;
         } else if (view.getId() == R.id.btNext) {
 //            pm.selectQueueItem(pm.getCurrentItemIndex()+1);
+            KLog.d(mediaPlayer.getCurrentWindow());
             KLog.i("abc "+ mediaPlayer.getCurrentWindow() + " / "+mediaPlayer.getWindowCount());
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
         } else if (view.getId() == R.id.btCreatePlayer) {

@@ -97,7 +97,6 @@ public final class CastPlayer extends BasePlayer {
     private final CastContext castContext;
     // TODO: Allow custom implementations of CastTimelineTracker.
     private final CastTimelineTracker timelineTracker;
-    private final Timeline.Window window;
     private final Timeline.Period period;
 
     private RemoteMediaClient remoteMediaClient;
@@ -130,7 +129,6 @@ public final class CastPlayer extends BasePlayer {
     public CastPlayer(CastContext castContext) {
         this.castContext = castContext;
         timelineTracker = new CastTimelineTracker();
-        window = new Timeline.Window();
         period = new Timeline.Period();
         statusListener = new StatusListener();
         seekResultCallback = new SeekResultCallback();
@@ -172,8 +170,6 @@ public final class CastPlayer extends BasePlayer {
      * @return The Cast {@code PendingResult}, or null if no session is available.
      */
     public PendingResult<MediaChannelResult> loadItem(MediaQueueItem item, long positionMs) {
-        pendingSeekWindowIndex = 0;
-        currentWindowIndex = 0;
         return loadItems(new MediaQueueItem[]{item}, 0, positionMs, REPEAT_MODE_OFF);
     }
 
@@ -193,13 +189,9 @@ public final class CastPlayer extends BasePlayer {
         if (remoteMediaClient != null) {
             positionMs = positionMs != C.TIME_UNSET ? positionMs : 0;
             waitingForInitialTimeline = true;
-            pendingSeekWindowIndex = startIndex;
-            currentWindowIndex = startIndex;
-            currentTimeline = CastTimeline.EMPTY_CAST_TIMELINE;
             return remoteMediaClient.queueLoad(items, startIndex, getCastRepeatMode(repeatMode),
                     positionMs, null);
         }
-
         return null;
     }
 
@@ -301,9 +293,21 @@ public final class CastPlayer extends BasePlayer {
 
     // Player implementation.
 
-    @Nullable
     @Override
+    @Nullable
     public AudioComponent getAudioComponent() {
+        return null;
+    }
+
+    @Override
+    @Nullable
+    public VideoComponent getVideoComponent() {
+        return null;
+    }
+
+    @Override
+    @Nullable
+    public TextComponent getTextComponent() {
         return null;
     }
 
@@ -316,16 +320,6 @@ public final class CastPlayer extends BasePlayer {
     @Override
     public Looper getApplicationLooper() {
         return Looper.getMainLooper();
-    }
-
-    @Override
-    public VideoComponent getVideoComponent() {
-        return null;
-    }
-
-    @Override
-    public TextComponent getTextComponent() {
-        return null;
     }
 
     @Override
@@ -343,7 +337,6 @@ public final class CastPlayer extends BasePlayer {
         return playbackState;
     }
 
-    @Nullable
     @Override
     public ExoPlaybackException getPlaybackError() {
         return null;
@@ -365,7 +358,6 @@ public final class CastPlayer extends BasePlayer {
     public boolean getPlayWhenReady() {
         return playWhenReady;
     }
-
 
     @Override
     public void seekTo(int windowIndex, long positionMs) {
@@ -402,8 +394,6 @@ public final class CastPlayer extends BasePlayer {
     public PlaybackParameters getPlaybackParameters() {
         return PlaybackParameters.DEFAULT;
     }
-
-
 
     @Override
     public void stop(boolean reset) {
@@ -496,7 +486,6 @@ public final class CastPlayer extends BasePlayer {
         return pendingSeekWindowIndex != C.INDEX_UNSET ? pendingSeekWindowIndex : currentWindowIndex;
     }
 
-
     // TODO: Fill the cast timeline information with ProgressListener's duration updates.
     // See [Internal: b/65152553].
     @Override
@@ -505,7 +494,7 @@ public final class CastPlayer extends BasePlayer {
             return currentTimeline.isEmpty() ? C.TIME_UNSET
                     : currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(),
                     window).getDurationMs();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return C.TIME_UNSET;
         }
@@ -525,8 +514,6 @@ public final class CastPlayer extends BasePlayer {
         return getCurrentPosition();
     }
 
-
-
     @Override
     public long getTotalBufferedDuration() {
         long bufferedPosition = getBufferedPosition();
@@ -535,7 +522,6 @@ public final class CastPlayer extends BasePlayer {
                 ? 0
                 : bufferedPosition - currentPosition;
     }
-
 
     @Override
     public boolean isPlayingAd() {
@@ -726,8 +712,6 @@ public final class CastPlayer extends BasePlayer {
         }
     }
 
-
-
     /**
      * Retrieves the repeat mode from {@code remoteMediaClient} and maps it into a
      * {@link Player.RepeatMode}.
@@ -830,7 +814,6 @@ public final class CastPlayer extends BasePlayer {
         @Override
         public void onAdBreakStatusUpdated() {
         }
-
 
         // SessionManagerListener implementation.
 
