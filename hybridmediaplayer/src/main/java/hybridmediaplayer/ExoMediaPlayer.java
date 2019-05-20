@@ -38,7 +38,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.common.images.WebImage;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +93,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
         LoadControl loadControl = new MyLoadControl(backBufferMs);
 
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
@@ -548,7 +547,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
 
                     case Player.STATE_READY:
                         if (isPreparing && onPreparedListener != null && shouldBeWindow == getCurrentWindow()) {
-                            KLog.d("ret "+currentPlayer.getDuration());
+//                            KLog.d("ret " + currentPlayer.getDuration());
                             if ((currentPlayer.getDuration() < 0 && currentPlayer.isCurrentWindowSeekable())
                                     || currentPlayer.getCurrentWindowIndex() >= getWindowCount())
                                 return;
@@ -587,10 +586,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
             if (newIndex < 0)
                 return;
 
-            KLog.d("onTrackChanged currentWindow "+currentWindow);
-            KLog.d("onTrackChanged newIndex "+newIndex);
-            KLog.d("onTrackChanged shouldBeWindow "+shouldBeWindow);
-            KLog.d("onTrackChanged player.getDuration() "+player.getDuration());
+//            KLog.d("onTrackChanged currentWindow " + currentWindow);
+//            KLog.d("onTrackChanged newIndex " + newIndex);
+//            KLog.d("onTrackChanged shouldBeWindow " + shouldBeWindow);
+//            KLog.d("onTrackChanged player.getDuration() " + player.getDuration());
 
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex

@@ -1,13 +1,25 @@
 package hybridmediaplayer.demo;
 
+
+
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.MediaRouteButton;
+import android.service.notification.StatusBarNotification;
 import android.view.Menu;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.mediarouter.app.MediaRouteButton;
 
 import com.google.android.exoplayer2.Player;
 import com.google.android.gms.cast.framework.CastButtonFactory;
@@ -24,8 +36,10 @@ import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
 import hybridplayer.demo.R;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
 
+    public static final String TESTCHANNEL = "testchannel5";
+    private static final String GROUP_1 = "GROUP_1";
     private ExoMediaPlayer mediaPlayer;
     private boolean isPrepared;
     private int time;
@@ -123,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .build();
         MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url3) //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 4")
+                .isVideo(true)
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
         MediaSourceInfo source5 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
@@ -153,7 +168,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
 
-
         mediaPlayer.setOnPreparedListener(new HybridMediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(HybridMediaPlayer player) {
@@ -166,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 KLog.d("cvv " + playbackState);
-                if(mediaPlayer.isCasting() && playbackState == Player.STATE_IDLE)
+                if (mediaPlayer.isCasting() && playbackState == Player.STATE_IDLE)
                     mediaPlayer.pause();
             }
         });
@@ -182,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.setOnLoadingChanged(new ExoMediaPlayer.OnLoadingChanged() {
             @Override
             public void onLoadingChanged(boolean isLoading) {
-                KLog.d("loadd "+isLoading);
+                KLog.d("loadd " + isLoading);
             }
         });
 
@@ -190,10 +204,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.setOnAudioSessionIdSetListener(new ExoMediaPlayer.OnAudioSessionIdSetListener() {
             @Override
             public void onAudioSessionIdset(int audioSessionId) {
-                KLog.d("audio session id = "+audioSessionId);
+                KLog.d("audio session id = " + audioSessionId);
             }
         });
-//        mediaPlayer.setInitialWindowNum(2);
+        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
         mediaPlayer.play();
 
@@ -211,9 +225,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mediaPlayer.play();
             }
         } else if (view.getId() == R.id.btPause) {
-            mediaPlayer.pause();
-            KLog.d(mediaPlayer.getCurrentPosition());
-            KLog.i(mediaPlayer.getDuration());
+            showTestNotification();
+
+            if (mediaPlayer != null) {
+                mediaPlayer.pause();
+
+                KLog.d(mediaPlayer.getCurrentPosition());
+                KLog.i(mediaPlayer.getDuration());
+            }
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 2000);
         } else if (view.getId() == R.id.btSpeed) {
@@ -229,14 +248,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            mediaPlayer.seekTo(msec);
 
 //            loadOtherSources();
-            KLog.d("<ini "+mediaPlayer.getDuration());
+            KLog.w(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex());
+            KLog.i(mediaPlayer.getCurrentWindow());
+            KLog.d("<ini " + mediaPlayer.getDuration());
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
         } else if (view.getId() == R.id.btNext) {
 //            pm.selectQueueItem(pm.getCurrentItemIndex()+1);
             KLog.d(mediaPlayer.getCurrentWindow());
-            KLog.i("abc "+ mediaPlayer.getCurrentWindow() + " / "+mediaPlayer.getWindowCount());
+            KLog.i("abc " + mediaPlayer.getCurrentWindow() + " / " + mediaPlayer.getWindowCount());
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
         } else if (view.getId() == R.id.btCreatePlayer) {
 //            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {
@@ -260,6 +281,75 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             createPlayer();
 
         }
+    }
+
+    private int notificationCounter = 1;
+
+    private void showTestNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createChannel(this);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, TESTCHANNEL)
+                .setSmallIcon(R.drawable.exo_notification_small_icon)
+                .setContentTitle(Integer.toString(notificationCounter))
+                .setContentText("noti")
+                .setGroup(GROUP_1)
+                .setColor(ContextCompat.getColor(this, R.color.cast_expanded_controller_ad_container_white_stripe_color));
+
+
+        NotificationCompat.Builder gruobuilder = new NotificationCompat.Builder(this, TESTCHANNEL)
+                .setSmallIcon(R.drawable.exo_notification_small_icon)
+                .setContentTitle("GROUP " + Integer.toString(notificationCounter))
+                .setContentText("noti")
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setGroup(GROUP_1)
+                .setGroupSummary(true)
+                .setColor(ContextCompat.getColor(this, R.color.cast_expanded_controller_ad_container_white_stripe_color));
+
+
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationCounter == 1)
+            manager.notify(999, gruobuilder.build());
+        manager.notify(notificationCounter, builder.build());
+//        manager.notify(id, builder.build());
+
+
+        notificationCounter++;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            StatusBarNotification[] statusBarNotifications = manager.getActiveNotifications();
+            int counter = 0;
+            for (StatusBarNotification statusBarNotification : statusBarNotifications) {
+                if (statusBarNotification.getGroupKey().contains(GROUP_1))
+                    counter++;
+            }
+
+            if (counter == 1) {
+                manager.cancel(999);
+            }
+        }
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static void createChannel(Context context) {
+        NotificationManager
+                mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        // The id of the channel.
+        String id = TESTCHANNEL;
+        // The user-visible name of the channel.
+        CharSequence name = id;
+        // The user-visible description of the channel.
+        String description = id;
+        int importance = NotificationManager.IMPORTANCE_HIGH;
+
+        NotificationChannel mChannel = new NotificationChannel(id, name, importance);
+        // Configure the notification channel.
+        mChannel.setDescription(description);
+        mChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        mNotificationManager.createNotificationChannel(mChannel);
     }
 
     private void loadOtherSources() {

@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId "hybridplayer.demo"
-        minSdkVersion 15
-        targetSdkVersion 26
+        minSdkVersion 16
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -29,9 +29,9 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:26.1.0'
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:support-compat:28.0.0'
+    compile 'androidx.mediarouter:mediarouter:1.1.0-beta01'
     compile 'com.github.zhaokaiqiang.klog:library:1.6.0'
-
     compile project(':hybridmediaplayer')
 }
