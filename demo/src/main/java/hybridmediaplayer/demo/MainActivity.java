@@ -1,8 +1,6 @@
 package hybridmediaplayer.demo;
 
 
-
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -19,9 +17,9 @@ import android.widget.Button;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.mediarouter.app.MediaRouteButton;
 
-import com.google.android.exoplayer2.Player;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastState;
@@ -32,11 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hybridmediaplayer.ExoMediaPlayer;
-import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
 import hybridplayer.demo.R;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
     public static final String TESTCHANNEL = "testchannel5";
     private static final String GROUP_1 = "GROUP_1";
@@ -121,13 +118,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
         String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
         String url2 = "http://217.74.72.11/RADIOFONIA";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
+        String url4 = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
         mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
         //mediaPlayer.setDataSource(url);
         MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
                 .setTitle("Source 1")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
-        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3")
+        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url4)
                 .setTitle("Source 2")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
@@ -154,60 +152,34 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //        sources.add(source1);
         sources.add(source1);
         sources.add(source2);
-        sources.add(source3);
-        sources.add(source4);
-        sources.add(source5);
+//        sources.add(source3);
+//        sources.add(source4);
+//        sources.add(source5);
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
-        mediaPlayer.setOnTrackChangedListener(new ExoMediaPlayer.OnTrackChangedListener() {
-            @Override
-            public void onTrackChanged(boolean isFinished) {
-                KLog.trace();
-                KLog.w("abc isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
-            }
+        mediaPlayer.setOnTrackChangedListener(isFinished -> {
+            KLog.w("onTrackChanged isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
         });
 
 
-        mediaPlayer.setOnPreparedListener(new HybridMediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(HybridMediaPlayer player) {
-                KLog.w(mediaPlayer.hasVideo());
-                KLog.d("ppp " + mediaPlayer.getCurrentPlayer());
-            }
+        mediaPlayer.setOnPreparedListener(player -> {
+            KLog.w(mediaPlayer.hasVideo());
+            KLog.d("onPrepared " + mediaPlayer.getCurrentPlayer());
         });
 
-        mediaPlayer.setOnPlayerStateChanged(new ExoMediaPlayer.OnPlayerStateChanged() {
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                KLog.d("cvv " + playbackState);
-                if (mediaPlayer.isCasting() && playbackState == Player.STATE_IDLE)
-                    mediaPlayer.pause();
-            }
+        mediaPlayer.setOnPlayerStateChanged((playWhenReady, playbackState) -> {
+            KLog.d("onPlayerStateChanged playbackState " + playbackState + " position " + mediaPlayer.getCurrentWindow());
         });
 
-        mediaPlayer.setOnCompletionListener(new HybridMediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(HybridMediaPlayer player) {
-                KLog.i("cvv complete");
+        mediaPlayer.setOnCompletionListener(player -> KLog.i("onCompletion"));
 
-            }
-        });
-
-        mediaPlayer.setOnLoadingChanged(new ExoMediaPlayer.OnLoadingChanged() {
-            @Override
-            public void onLoadingChanged(boolean isLoading) {
-                KLog.d("loadd " + isLoading);
-            }
-        });
+        mediaPlayer.setOnLoadingChanged(isLoading -> KLog.d("setOnLoadingChanged " + isLoading));
 
         mediaPlayer.setDataSource(sources, sources);
-        mediaPlayer.setOnAudioSessionIdSetListener(new ExoMediaPlayer.OnAudioSessionIdSetListener() {
-            @Override
-            public void onAudioSessionIdset(int audioSessionId) {
-                KLog.d("audio session id = " + audioSessionId);
-            }
-        });
-        mediaPlayer.setInitialWindowNum(2);
+        mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> KLog.d("onAudioSessionIdset audio session id = " + audioSessionId));
+
+        mediaPlayer.setOnPositionDiscontinuityListener((reason, currentWindowIndex) -> KLog.w("onPositionDiscontinuity reason " + reason + " position " + mediaPlayer.getCurrentWindow() + " currentWindowIndex " + currentWindowIndex));
+//        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
         mediaPlayer.play();
 
@@ -234,7 +206,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 KLog.i(mediaPlayer.getDuration());
             }
         } else if (view.getId() == R.id.fastForward) {
-            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 2000);
+            mediaPlayer.seekTo(mediaPlayer.getDuration() - 2000);
         } else if (view.getId() == R.id.btSpeed) {
 //            if (speed == 1)
 //                speed = 2f;
@@ -248,16 +220,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //            mediaPlayer.seekTo(msec);
 
 //            loadOtherSources();
-            KLog.w(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex());
+            KLog.w(mediaPlayer.getCurrentPosition());
             KLog.i(mediaPlayer.getCurrentWindow());
-            KLog.d("<ini " + mediaPlayer.getDuration());
+            KLog.w(mediaPlayer.getWindowCount());
+            KLog.d("duration " + mediaPlayer.getDuration());
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
         } else if (view.getId() == R.id.btNext) {
 //            pm.selectQueueItem(pm.getCurrentItemIndex()+1);
             KLog.d(mediaPlayer.getCurrentWindow());
-            KLog.i("abc " + mediaPlayer.getCurrentWindow() + " / " + mediaPlayer.getWindowCount());
+            KLog.i("abc " + (mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount() + " / " + mediaPlayer.getWindowCount());
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
         } else if (view.getId() == R.id.btCreatePlayer) {
 //            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {

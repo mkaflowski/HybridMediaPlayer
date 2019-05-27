@@ -17,6 +17,7 @@ import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
+import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -36,7 +37,11 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
+import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.SessionManager;
+import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.common.images.WebImage;
 
 import java.util.ArrayList;
@@ -46,7 +51,7 @@ import java.util.List;
 /**
  * Main player class.
  */
-public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.SessionAvailabilityListener {
+public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabilityListener {
 
     private Player currentPlayer;
     private SimpleExoPlayer exoPlayer;
@@ -422,7 +427,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
         if (currentPlayer == player)
             return;
 
-        boolean shouldPlay = isPlaying();
+        boolean shouldPlay = isPlaying() && currentPlayer.getPlaybackState() != Player.STATE_IDLE;
 
         pause();
 
@@ -557,10 +562,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements CastPlayer.Sess
                         break;
 
                     case Player.STATE_IDLE:
-                        if (isCasting) {
-//                            if (player.getDuration() > 0 && player.getCurrentWindowIndex() == getWindowCount())
-//                                if (onCompletionListener != null)
-//                                    onCompletionListener.onCompletion(ExoMediaPlayer.this);
+                        if (isCasting && currentWindow == getWindowCount() - 1) {
+                            SessionManager sessionManager = CastContext.getSharedInstance(context).getSessionManager();
+                            CastSession castSession = sessionManager.getCurrentCastSession();
+                            if (castSession != null) {
+                                RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
+                                if (remoteMediaClient != null) {
+                                    if (MediaStatus.IDLE_REASON_FINISHED == remoteMediaClient.getIdleReason()) {
+                                        if (onCompletionListener != null) {
+                                            currentPlayer.setPlayWhenReady(false);
+                                            onCompletionListener.onCompletion(ExoMediaPlayer.this);
+                                        }
+                                    }
+                                }
+                            }
                             break;
                         }
                 }

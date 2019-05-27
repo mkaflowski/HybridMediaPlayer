@@ -27,6 +27,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
@@ -65,24 +66,22 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * <p>
  * <p>Methods should be called on the application's main thread.</p>
  */
+
+/**
+ * {@link Player} implementation that communicates with a Cast receiver app.
+ *
+ * <p>The behavior of this class depends on the underlying Cast session, which is obtained from the
+ * Cast context passed to {@link #CastPlayer}. To keep track of the session, {@link
+ * #isCastSessionAvailable()} can be queried and {@link SessionAvailabilityListener} can be
+ * implemented and attached to the player.
+ *
+ * <p>If no session is available, the player state will remain unchanged and calls to methods that
+ * alter it will be ignored. Querying the player state is possible even when no session is
+ * available, in which case, the last observed receiver app state is reported.
+ *
+ * <p>Methods should be called on the application's main thread.
+ */
 public final class CastPlayer extends BasePlayer {
-
-    /**
-     * Listener of changes in the cast session availability.
-     */
-    public interface SessionAvailabilityListener {
-
-        /**
-         * Called when a cast session becomes available to the player.
-         */
-        void onCastSessionAvailable();
-
-        /**
-         * Called when the cast session becomes unavailable.
-         */
-        void onCastSessionUnavailable();
-
-    }
 
     private static final String TAG = "CastPlayer";
 
@@ -98,7 +97,6 @@ public final class CastPlayer extends BasePlayer {
     private final CastContext castContext;
     // TODO: Allow custom implementations of CastTimelineTracker.
     private final CastTimelineTracker timelineTracker;
-    private final Timeline.Window window;
     private final Timeline.Period period;
 
     private RemoteMediaClient remoteMediaClient;
@@ -131,7 +129,6 @@ public final class CastPlayer extends BasePlayer {
     public CastPlayer(CastContext castContext) {
         this.castContext = castContext;
         timelineTracker = new CastTimelineTracker();
-        window = new Timeline.Window();
         period = new Timeline.Period();
         statusListener = new StatusListener();
         seekResultCallback = new SeekResultCallback();
@@ -196,11 +193,9 @@ public final class CastPlayer extends BasePlayer {
             waitingForInitialTimeline = true;
             pendingSeekWindowIndex = startIndex;
             currentWindowIndex = startIndex;
-            currentTimeline = CastTimeline.EMPTY_CAST_TIMELINE;
             return remoteMediaClient.queueLoad(items, startIndex, getCastRepeatMode(repeatMode),
                     positionMs, null);
         }
-
         return null;
     }
 
@@ -308,6 +303,17 @@ public final class CastPlayer extends BasePlayer {
         return null;
     }
 
+    @Override
+    @Nullable
+    public VideoComponent getVideoComponent() {
+        return null;
+    }
+
+    @Override
+    @Nullable
+    public TextComponent getTextComponent() {
+        return null;
+    }
 
     @Override
     @Nullable
@@ -318,16 +324,6 @@ public final class CastPlayer extends BasePlayer {
     @Override
     public Looper getApplicationLooper() {
         return Looper.getMainLooper();
-    }
-
-    @Override
-    public VideoComponent getVideoComponent() {
-        return null;
-    }
-
-    @Override
-    public TextComponent getTextComponent() {
-        return null;
     }
 
     @Override
@@ -345,7 +341,6 @@ public final class CastPlayer extends BasePlayer {
         return playbackState;
     }
 
-    @Nullable
     @Override
     public ExoPlaybackException getPlaybackError() {
         return null;
@@ -367,8 +362,6 @@ public final class CastPlayer extends BasePlayer {
     public boolean getPlayWhenReady() {
         return playWhenReady;
     }
-
-
 
     @Override
     public void seekTo(int windowIndex, long positionMs) {
@@ -497,15 +490,13 @@ public final class CastPlayer extends BasePlayer {
         return pendingSeekWindowIndex != C.INDEX_UNSET ? pendingSeekWindowIndex : currentWindowIndex;
     }
 
-    // TODO: Fill the cast timeline information with ProgressListener's duration updates.
-    // See [Internal: b/65152553].
     @Override
     public long getDuration() {
         try {
             return currentTimeline.isEmpty() ? C.TIME_UNSET
                     : currentTimeline.getWindow(getCurrentWindowIndex() < 0 ? 0 : getCurrentWindowIndex(),
                     window).getDurationMs();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return C.TIME_UNSET;
         }
@@ -531,8 +522,8 @@ public final class CastPlayer extends BasePlayer {
         long currentPosition = getCurrentPosition();
         return bufferedPosition == C.TIME_UNSET || currentPosition == C.TIME_UNSET
                 ? 0
-                : bufferedPosition - currentPosition;    }
-
+                : bufferedPosition - currentPosition;
+    }
 
     @Override
     public boolean isPlayingAd() {
@@ -622,7 +613,9 @@ public final class CastPlayer extends BasePlayer {
         CastTimeline oldTimeline = currentTimeline;
         MediaStatus status = getMediaStatus();
         currentTimeline =
-                status != null ? timelineTracker.getCastTimeline(status) : CastTimeline.EMPTY_CAST_TIMELINE;
+                status != null
+                        ? timelineTracker.getCastTimeline(remoteMediaClient)
+                        : CastTimeline.EMPTY_CAST_TIMELINE;
         return !oldTimeline.equals(currentTimeline);
     }
 
@@ -750,7 +743,7 @@ public final class CastPlayer extends BasePlayer {
 
     /**
      * Retrieves the current item index from {@code mediaStatus} and maps it into a window index. If
-     * there is no media session, returns -1.
+     * there is no media session, returns 0.
      */
     private static int fetchCurrentWindowIndex(@Nullable MediaStatus mediaStatus) {
         Integer currentItemId = mediaStatus != null
@@ -825,7 +818,6 @@ public final class CastPlayer extends BasePlayer {
         @Override
         public void onAdBreakStatusUpdated() {
         }
-
 
         // SessionManagerListener implementation.
 
