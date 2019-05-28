@@ -48,7 +48,9 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient.MediaChannelResult;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.socks.library.KLog;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -487,6 +489,8 @@ public final class CastPlayer extends BasePlayer {
 
     @Override
     public int getCurrentWindowIndex() {
+        KLog.d(fetchCurrentWindowIndex(getMediaStatus()));
+        KLog.e(pendingSeekWindowIndex);
         return pendingSeekWindowIndex != C.INDEX_UNSET ? pendingSeekWindowIndex : currentWindowIndex;
     }
 
@@ -581,6 +585,7 @@ public final class CastPlayer extends BasePlayer {
             }
         }
         int currentWindowIndex = fetchCurrentWindowIndex(getMediaStatus());
+        KLog.d("cdcd "+currentWindowIndex);
         if (this.currentWindowIndex != currentWindowIndex && pendingSeekCount == 0) {
             this.currentWindowIndex = currentWindowIndex;
             for (EventListener listener : listeners) {
@@ -745,9 +750,9 @@ public final class CastPlayer extends BasePlayer {
      * Retrieves the current item index from {@code mediaStatus} and maps it into a window index. If
      * there is no media session, returns 0.
      */
-    private static int fetchCurrentWindowIndex(@Nullable MediaStatus mediaStatus) {
+    private int fetchCurrentWindowIndex(@Nullable MediaStatus mediaStatus) {
         Integer currentItemId = mediaStatus != null
-                ? mediaStatus.getIndexById(mediaStatus.getCurrentItemId()) : null;
+                ? Arrays.binarySearch(remoteMediaClient.getMediaQueue().getItemIds(),remoteMediaClient.getMediaStatus().getCurrentItemId() ) : null;
         return currentItemId != null ? currentItemId : -1;
     }
 

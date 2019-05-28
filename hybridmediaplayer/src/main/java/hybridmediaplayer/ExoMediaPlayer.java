@@ -43,6 +43,7 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -562,12 +563,17 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                         break;
 
                     case Player.STATE_IDLE:
+                        KLog.e(currentWindow);
+                        KLog.w(getWindowCount());
                         if (isCasting && currentWindow == getWindowCount() - 1) {
                             SessionManager sessionManager = CastContext.getSharedInstance(context).getSessionManager();
                             CastSession castSession = sessionManager.getCurrentCastSession();
                             if (castSession != null) {
+                                KLog.e();
                                 RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
                                 if (remoteMediaClient != null) {
+                                    KLog.e(remoteMediaClient.getIdleReason());
+
                                     if (MediaStatus.IDLE_REASON_FINISHED == remoteMediaClient.getIdleReason()) {
                                         if (onCompletionListener != null) {
                                             currentPlayer.setPlayWhenReady(false);
