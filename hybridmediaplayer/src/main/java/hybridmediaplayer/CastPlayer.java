@@ -48,7 +48,6 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient.MediaChannelResult;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.socks.library.KLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -489,8 +488,6 @@ public final class CastPlayer extends BasePlayer {
 
     @Override
     public int getCurrentWindowIndex() {
-        KLog.d(fetchCurrentWindowIndex(getMediaStatus()));
-        KLog.e(pendingSeekWindowIndex);
         return pendingSeekWindowIndex != C.INDEX_UNSET ? pendingSeekWindowIndex : currentWindowIndex;
     }
 
@@ -585,7 +582,6 @@ public final class CastPlayer extends BasePlayer {
             }
         }
         int currentWindowIndex = fetchCurrentWindowIndex(getMediaStatus());
-        KLog.d("cdcd "+currentWindowIndex);
         if (this.currentWindowIndex != currentWindowIndex && pendingSeekCount == 0) {
             this.currentWindowIndex = currentWindowIndex;
             for (EventListener listener : listeners) {

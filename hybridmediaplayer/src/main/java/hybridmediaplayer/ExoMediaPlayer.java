@@ -563,13 +563,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                         break;
 
                     case Player.STATE_IDLE:
-                        KLog.e(currentWindow);
-                        KLog.w(getWindowCount());
-                        if (isCasting && currentWindow == getWindowCount() - 1) {
+                        if (isCasting && getCurrentWindow() == getWindowCount() - 1) {
                             SessionManager sessionManager = CastContext.getSharedInstance(context).getSessionManager();
                             CastSession castSession = sessionManager.getCurrentCastSession();
                             if (castSession != null) {
-                                KLog.e();
                                 RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
                                 if (remoteMediaClient != null) {
                                     KLog.e(remoteMediaClient.getIdleReason());

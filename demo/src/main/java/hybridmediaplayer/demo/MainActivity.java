@@ -152,10 +152,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //        sources.add(source1);
         sources.add(source1);
         sources.add(source2);
-        sources.add(source3);
-        sources.add(source1);
-        sources.add(source2);
-        sources.add(source3);
+//        sources.add(source3);
+//        sources.add(source1);
+//        sources.add(source2);
+//        sources.add(source3);
 //        sources.add(source4);
 //        sources.add(source5);
         mediaPlayer.setPlayerView(this, playerView);
