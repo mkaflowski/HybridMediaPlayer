@@ -31,7 +31,7 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:support-compat:28.0.0'
-    compile 'androidx.mediarouter:mediarouter:1.1.0-beta01'
+    compile 'androidx.mediarouter:mediarouter:1.1.0'
     compile 'com.github.zhaokaiqiang.klog:library:1.6.0'
     compile project(':hybridmediaplayer')
 }

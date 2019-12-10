@@ -115,7 +115,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.stop();
             mediaPlayer.release();
         }
-        String url = "https://play.podtrac.com/npr-510289/npr.mc.tritondigital.com/NPR_510289/media/anon.npr-mp3/npr/pmoney/2017/03/20170322_pmoney_20170322_pmoney_pmpod.mp3";
+        String url = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
         String url2 = "http://217.74.72.11/RADIOFONIA";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         String url4 = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
@@ -152,7 +152,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //        sources.add(source1);
         sources.add(source1);
         sources.add(source2);
-//        sources.add(source3);
+        sources.add(source3);
 //        sources.add(source1);
 //        sources.add(source2);
 //        sources.add(source3);
@@ -211,6 +211,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getDuration() - 200);
         } else if (view.getId() == R.id.btSpeed) {
+//            loadOtherSources();
 //            if (speed == 1)
 //                speed = 2f;
 //            else speed = 1;
@@ -235,6 +236,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             KLog.d(mediaPlayer.getCurrentWindow());
             KLog.i("abc " + (mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount() + " / " + mediaPlayer.getWindowCount());
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
+            mediaPlayer.seekTo(1000);
         } else if (view.getId() == R.id.btCreatePlayer) {
 //            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {
 //                @Override

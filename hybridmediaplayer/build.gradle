@@ -38,8 +38,8 @@ dependencies {
 
     implementation 'com.android.support:support-compat:28.0.0'
     implementation 'com.github.zhaokaiqiang.klog:library:1.6.0'
-    api 'com.google.android.exoplayer:exoplayer:2.10.0'
-    api 'com.google.android.exoplayer:extension-cast:2.10.0'
+    api 'com.google.android.exoplayer:exoplayer:2.10.8'
+    api 'com.google.android.exoplayer:extension-cast:2.10.8'
 }
 
 // build a jar with source files
