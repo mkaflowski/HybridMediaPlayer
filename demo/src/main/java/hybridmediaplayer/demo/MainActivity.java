@@ -153,6 +153,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         sources.add(source1);
         sources.add(source2);
         sources.add(source3);
+        sources.add(source4);
+
 //        sources.add(source1);
 //        sources.add(source2);
 //        sources.add(source3);
@@ -209,7 +211,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 KLog.i(mediaPlayer.getDuration());
             }
         } else if (view.getId() == R.id.fastForward) {
-            mediaPlayer.seekTo(mediaPlayer.getDuration() - 200);
+            mediaPlayer.seekTo(mediaPlayer.getDuration() - 1500);
+//            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 2000);
         } else if (view.getId() == R.id.btSpeed) {
 //            loadOtherSources();
 //            if (speed == 1)
@@ -347,8 +350,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         sources2.add(source);
         sources2.add(source2);
-        sources2.add(source3);
-        mediaPlayer.setInitialWindowNum(2);
+//        sources2.add(source3);
+        mediaPlayer.setInitialWindowNum(1);
         mediaPlayer.setDataSource(sources2, sources2);
         mediaPlayer.prepare();
         mediaPlayer.seekTo(10000);

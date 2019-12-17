@@ -17,12 +17,16 @@ package hybridmediaplayer;
 
 import android.util.SparseArray;
 
+import androidx.annotation.Nullable;
+
 import com.google.android.exoplayer2.C;
+import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 
 import java.util.HashSet;
+
 
 /**
  * Creates {@link CastTimeline CastTimelines} from cast receiver app status updates.
@@ -32,69 +36,77 @@ import java.util.HashSet;
  */
 /* package */ final class CastTimelineTracker {
 
-  private final SparseArray<CastTimeline.ItemData> itemIdToData;
+    private final SparseArray<CastTimeline.ItemData> itemIdToData;
 
-  public CastTimelineTracker() {
-    itemIdToData = new SparseArray<>();
-  }
-
-  /**
-   * Returns a {@link CastTimeline} that represents the state of the given {@code
-   * remoteMediaClient}.
-   *
-   * <p>Returned timelines may contain values obtained from {@code remoteMediaClient} in previous
-   * invocations of this method.
-   *
-   * @param remoteMediaClient The Cast media client.
-   * @return A {@link CastTimeline} that represents the given {@code remoteMediaClient} status.
-   */
-  public CastTimeline getCastTimeline(RemoteMediaClient remoteMediaClient) {
-    int[] itemIds = remoteMediaClient.getMediaQueue().getItemIds();
-    if (itemIds.length > 0) {
-      // Only remove unused items when there is something in the queue to avoid removing all entries
-      // if the remote media client clears the queue temporarily. See [Internal ref: b/128825216].
-      removeUnusedItemDataEntries(itemIds);
+    public CastTimelineTracker() {
+        itemIdToData = new SparseArray<>();
     }
 
-    // TODO: Reset state when the app instance changes [Internal ref: b/129672468].
-    MediaStatus mediaStatus = remoteMediaClient.getMediaStatus();
-    if (mediaStatus == null) {
-      return CastTimeline.EMPTY_CAST_TIMELINE;
+    /**
+     * Returns a {@link CastTimeline} that represents the state of the given {@code
+     * remoteMediaClient}.
+     *
+     * <p>Returned timelines may contain values obtained from {@code remoteMediaClient} in previous
+     * invocations of this method.
+     *
+     * @param remoteMediaClient The Cast media client.
+     * @return A {@link CastTimeline} that represents the given {@code remoteMediaClient} status.
+     */
+    public CastTimeline getCastTimeline(RemoteMediaClient remoteMediaClient) {
+        int[] itemIds = remoteMediaClient.getMediaQueue().getItemIds();
+        if (itemIds.length > 0) {
+            // Only remove unused items when there is something in the queue to avoid removing all entries
+            // if the remote media client clears the queue temporarily. See [Internal ref: b/128825216].
+            removeUnusedItemDataEntries(itemIds);
+        }
+
+        // TODO: Reset state when the app instance changes [Internal ref: b/129672468].
+        MediaStatus mediaStatus = remoteMediaClient.getMediaStatus();
+        if (mediaStatus == null) {
+            return CastTimeline.EMPTY_CAST_TIMELINE;
+        }
+
+        int currentItemId = mediaStatus.getCurrentItemId();
+        updateItemData(
+                currentItemId, mediaStatus.getMediaInfo(), /* defaultPositionUs= */ C.TIME_UNSET);
+
+        for (MediaQueueItem item : mediaStatus.getQueueItems()) {
+            long defaultPositionUs = (long) (item.getStartTime() * C.MICROS_PER_SECOND);
+            updateItemData(item.getItemId(), item.getMedia(), defaultPositionUs);
+        }
+
+        return new CastTimeline(itemIds, itemIdToData);
     }
 
-    int currentItemId = mediaStatus.getCurrentItemId();
-    long durationUs = CastUtils.getStreamDurationUs(mediaStatus.getMediaInfo());
-    itemIdToData.put(
-            currentItemId,
-            itemIdToData
-                    .get(currentItemId, CastTimeline.ItemData.EMPTY)
-                    .copyWithDurationUs(durationUs));
-
-    for (MediaQueueItem item : mediaStatus.getQueueItems()) {
-      int itemId = item.getItemId();
-      itemIdToData.put(
-              itemId,
-              itemIdToData
-                      .get(itemId, CastTimeline.ItemData.EMPTY)
-                      .copyWithDefaultPositionUs((long) (item.getStartTime() * C.MICROS_PER_SECOND)));
+    private void updateItemData(int itemId, @Nullable MediaInfo mediaInfo, long defaultPositionUs) {
+        CastTimeline.ItemData previousData = itemIdToData.get(itemId, CastTimeline.ItemData.EMPTY);
+        long durationUs = CastUtils.getStreamDurationUs(mediaInfo);
+        if (durationUs == C.TIME_UNSET) {
+            durationUs = previousData.durationUs;
+        }
+        boolean isLive =
+                mediaInfo == null
+                        ? previousData.isLive
+                        : mediaInfo.getStreamType() == MediaInfo.STREAM_TYPE_LIVE;
+        if (defaultPositionUs == C.TIME_UNSET) {
+            defaultPositionUs = previousData.defaultPositionUs;
+        }
+        itemIdToData.put(itemId, previousData.copyWithNewValues(durationUs, defaultPositionUs, isLive));
     }
 
-    return new CastTimeline(itemIds, itemIdToData);
-  }
+    private void removeUnusedItemDataEntries(int[] itemIds) {
+        HashSet<Integer> scratchItemIds = new HashSet<>(/* initialCapacity= */ itemIds.length * 2);
+        for (int id : itemIds) {
+            scratchItemIds.add(id);
+        }
 
-  private void removeUnusedItemDataEntries(int[] itemIds) {
-    HashSet<Integer> scratchItemIds = new HashSet<>(/* initialCapacity= */ itemIds.length * 2);
-    for (int id : itemIds) {
-      scratchItemIds.add(id);
+        int index = 0;
+        while (index < itemIdToData.size()) {
+            if (!scratchItemIds.contains(itemIdToData.keyAt(index))) {
+                itemIdToData.removeAt(index);
+            } else {
+                index++;
+            }
+        }
     }
-
-    int index = 0;
-    while (index < itemIdToData.size()) {
-      if (!scratchItemIds.contains(itemIdToData.keyAt(index))) {
-        itemIdToData.removeAt(index);
-      } else {
-        index++;
-      }
-    }
-  }
 }

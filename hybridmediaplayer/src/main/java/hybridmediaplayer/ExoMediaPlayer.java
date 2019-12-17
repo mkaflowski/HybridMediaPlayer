@@ -17,7 +17,6 @@ import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
-import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
@@ -44,6 +43,7 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.common.images.WebImage;
+import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -532,6 +532,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             super.onPlayerStateChanged(playWhenReady, playbackState);
 
+            KLog.d("playback state = " + playbackState);
+
             if (currentPlayer != player)
                 return;
 
@@ -543,6 +545,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                 // handling: https://github.com/google/ExoPlayer/issues/4049
                 if (playbackState == Player.STATE_READY)
                     checkWindowChanged();
+
 
                 switch (playbackState) {
                     case Player.STATE_ENDED:
@@ -569,6 +572,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                             if (castSession != null) {
                                 RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
                                 if (remoteMediaClient != null) {
+                                    KLog.i("playback state session= " + remoteMediaClient.getIdleReason());
+
                                     if (MediaStatus.IDLE_REASON_FINISHED == remoteMediaClient.getIdleReason()) {
                                         if (onCompletionListener != null) {
                                             currentPlayer.setPlayWhenReady(false);
