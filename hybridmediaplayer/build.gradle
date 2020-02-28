@@ -40,6 +40,10 @@ dependencies {
     implementation 'com.github.zhaokaiqiang.klog:library:1.6.0'
     api 'com.google.android.exoplayer:exoplayer:2.11.3'
     api 'com.google.android.exoplayer:extension-cast:2.11.3'
+
+    //workaround for https://stackoverflow.com/questions/60148919/large-number-of-remoteserviceexceptions-in-googles-cast-medianotificationservic
+    api 'com.google.android.gms:play-services-cast-framework:18.1.0'
+
 }
 
 // build a jar with source files
