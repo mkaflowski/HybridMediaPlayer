@@ -127,7 +127,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 .build();
         MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url4)
                 .setTitle("Source 2")
-                .setImageUrl("https://2.bp.blogspot.com/--2GFqiAJxF0/WdOtQiVmOWI/AAAAAAAAA40/-oUeH5YuOw4zDlemGkndOpuwSPMNzATrQCLcBGAs/s1600/DSCF4413.jpg")
+                .setImageUrl("https://www.benq.com/content/dam/b2c/en-au/campaign/4k-monitor/kv-city-m.jpg")
                 .build();
         MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("https://sample-videos.com/audio/mp3/crowd-cheering.mp3") //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 3")
@@ -136,7 +136,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url3) //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 4")
                 .isVideo(true)
-                .setImageUrl("https://d12xoj7p9moygp.cloudfront.net/images/anchor-logo-header@2x.png")
+                .setImageUrl("https://images.podigee.com/0x,sHM1hqLl0xbqhcudNgPC1zIAQxNU0Zegm6V3mEOyurEc=/https://cdn.podigee.com/uploads/u10930/194e8b53-e0c3-449f-9c36-3a522f1c5e3c.png")
                 .build();
         MediaSourceInfo source5 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 5")

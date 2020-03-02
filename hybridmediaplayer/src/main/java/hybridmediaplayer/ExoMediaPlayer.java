@@ -629,13 +629,19 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
                 // TODO: 02/03/2020 delete this with new library:
                 //workaround for bug in cast library 18.1 - covers sometimes doesn't load after track changed (play/pause/seek helps)
-                if (isCasting)
-                    new Handler().postDelayed(() -> {
+                if (isCasting) {
+                    Runnable reloadNotificationImageRunnable = () -> {
+                        if(player==null)
+                            return;
                         if (player.getPlayWhenReady())
                             player.setPlayWhenReady(true);
                         else
                             player.setPlayWhenReady(false);
-                    }, 4000);
+                    };
+                    Handler handler = new Handler();
+                    handler.postDelayed(reloadNotificationImageRunnable, 3000);
+                    handler.postDelayed(reloadNotificationImageRunnable, 6000);
+                }
                 /// TODO: 02/03/2020 end of the workaround
             }
         }
