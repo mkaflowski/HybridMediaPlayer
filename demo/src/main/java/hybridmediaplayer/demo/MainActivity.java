@@ -127,20 +127,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 .build();
         MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url4)
                 .setTitle("Source 2")
-                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .setImageUrl("https://i.scdn.co/image/629683ca8102ff6ac666183d9d33575c6475e742")
                 .build();
         MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("https://sample-videos.com/audio/mp3/crowd-cheering.mp3") //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 3")
-                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .setImageUrl("https://s3-us-west-2.amazonaws.com/anchor-generated-image-bank/production/podcast_uploaded400/1415185/1415185-1549732984963-ac8825f57f7a6.jpg")
                 .build();
         MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url3) //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 4")
                 .isVideo(true)
-                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .setImageUrl("https://d12xoj7p9moygp.cloudfront.net/images/anchor-logo-header@2x.png")
                 .build();
         MediaSourceInfo source5 = new MediaSourceInfo.Builder().setUrl("http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3") //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 5")
-                .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
+                .setImageUrl("https://apynews.pl/~i/2019/08/Calcio_Truck-1.jpg")
                 .build();
 //        MediaSourceInfo source4 = new MediaSourceInfo.Builder().setUrl(url2)
 //                .setTitle("Source 4")
@@ -154,6 +154,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         sources.add(source2);
         sources.add(source3);
         sources.add(source4);
+        sources.add(source5);
 
 //        sources.add(source1);
 //        sources.add(source2);

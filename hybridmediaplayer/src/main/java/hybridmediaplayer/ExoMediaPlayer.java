@@ -532,7 +532,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             super.onPlayerStateChanged(playWhenReady, playbackState);
 
-            KLog.d("playback state = " + playbackState);
+//            KLog.d("playback state = " + playbackState);
 
             if (currentPlayer != player)
                 return;
@@ -624,6 +624,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                     onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
 
                 isChangingWindowByUser = false;
+
+
+                // TODO: 02/03/2020 delete this with new library:
+                //workaround for bug in cast library 18.1 - covers sometimes doesn't load after track changed (play/pause/seek helps)
+                if(player.getPlayWhenReady())
+                    player.setPlayWhenReady(true);
+                else
+                    player.setPlayWhenReady(false);
+                /// TODO: 02/03/2020 end of the workaround
             }
         }
 
