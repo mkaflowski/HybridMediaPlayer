@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
+import android.os.Handler;
 import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -628,10 +629,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
                 // TODO: 02/03/2020 delete this with new library:
                 //workaround for bug in cast library 18.1 - covers sometimes doesn't load after track changed (play/pause/seek helps)
-                if(player.getPlayWhenReady())
-                    player.setPlayWhenReady(true);
-                else
-                    player.setPlayWhenReady(false);
+                if (isCasting)
+                    new Handler().postDelayed(() -> {
+                        if (player.getPlayWhenReady())
+                            player.setPlayWhenReady(true);
+                        else
+                            player.setPlayWhenReady(false);
+                    }, 4000);
                 /// TODO: 02/03/2020 end of the workaround
             }
         }

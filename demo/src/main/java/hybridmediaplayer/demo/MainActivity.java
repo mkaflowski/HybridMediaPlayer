@@ -127,7 +127,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 .build();
         MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl(url4)
                 .setTitle("Source 2")
-                .setImageUrl("https://i.scdn.co/image/629683ca8102ff6ac666183d9d33575c6475e742")
+                .setImageUrl("https://2.bp.blogspot.com/--2GFqiAJxF0/WdOtQiVmOWI/AAAAAAAAA40/-oUeH5YuOw4zDlemGkndOpuwSPMNzATrQCLcBGAs/s1600/DSCF4413.jpg")
                 .build();
         MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("https://sample-videos.com/audio/mp3/crowd-cheering.mp3") //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 3")
