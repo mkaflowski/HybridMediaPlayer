@@ -21,8 +21,8 @@ import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.cast.MediaInfo;
@@ -79,6 +80,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private boolean isChangingWindowByUser;
 
     private int initialWindowNum;
+    private BandwidthMeter bandwidthMeter;
+
+    private LoadErrorHandlingPolicy loadErrorHandlingPolicy;
 
     public ExoMediaPlayer(Context context, CastContext castContext) {
         this(context, castContext, 20000);
@@ -91,7 +95,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     public ExoMediaPlayer(Context context, CastContext castContext, long backBufferMs) {
         this.context = context;
 
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory =
                 new AdaptiveTrackSelection.Factory(bandwidthMeter);
         final TrackSelector trackSelector =
@@ -154,8 +158,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         MediaSource[] sources = new MediaSource[normalSources.size()];
         for (int i = 0; i < normalSources.size(); i++) {
             // This is the MediaSource representing the media to be played.
-            sources[i] = new ExtractorMediaSource(Uri.parse(normalSources.get(i).getUrl()),
-                    dataSourceFactory, extractorsFactory, null, null);
+            ProgressiveMediaSource.Factory factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
+            if (loadErrorHandlingPolicy != null)
+                factory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
+            sources[i] = factory
+                    .createMediaSource(Uri.parse(normalSources.get(i).getUrl()));
         }
 
         exoMediaSource = new ConcatenatingMediaSource(sources);
@@ -407,6 +414,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         this.onPositionDiscontinuityListener = onPositionDiscontinuityListener;
     }
 
+    public void setLoadErrorHandlingPolicy(LoadErrorHandlingPolicy loadErrorHandlingPolicy) {
+        this.loadErrorHandlingPolicy = loadErrorHandlingPolicy;
+    }
+
     @Override
     public void onCastSessionAvailable() {
         setCurrentPlayer(castPlayer);
@@ -631,7 +642,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                 //workaround for bug in cast library 18.1 - covers sometimes doesn't load after track changed (play/pause/seek helps)
                 if (isCasting) {
                     Runnable reloadNotificationImageRunnable = () -> {
-                        if(player==null)
+                        if (player == null)
                             return;
                         if (player.getPlayWhenReady())
                             player.setPlayWhenReady(true);
