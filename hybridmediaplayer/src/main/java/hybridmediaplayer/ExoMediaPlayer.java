@@ -63,7 +63,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     private Context context;
     private MediaSource exoMediaSource;
-    private MediaQueueItem[] mediaItems;
+    private MediaQueueItem[] mediaItems = new MediaQueueItem[0];
     private int currentState;
     private boolean isPreparing = false;
     private OnTrackChangedListener onTrackChangedListener;
@@ -73,7 +73,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private boolean isSupportingSystemEqualizer;
     private int shouldBeWindow;
 
-    private List<MediaSourceInfo> mediaSourceInfoList;
+    private List<MediaSourceInfo> mediaSourceInfoList = new ArrayList<>();
     private boolean isCasting;
     private OnCastAvailabilityChangeListener onCastAvailabilityChangeListener;
     private OnAudioSessionIdSetListener onAudioSessionIdSetListener;
@@ -479,6 +479,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
     public int getWindowCount() {
+
         return mediaSourceInfoList.size();
     }
 
