@@ -453,7 +453,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         if (currentPlayer == castPlayer) {
             isCasting = true;
-            castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
+            if (mediaItems.length != 0)
+                castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
         }
 
         if (currentPlayer == exoPlayer) {

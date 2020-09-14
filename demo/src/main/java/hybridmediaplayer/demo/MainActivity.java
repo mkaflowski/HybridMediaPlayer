@@ -94,6 +94,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
+        mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
+
     }
 
     @Override
