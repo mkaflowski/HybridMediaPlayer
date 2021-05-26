@@ -7,29 +7,20 @@ import android.net.Uri;
 import android.os.Handler;
 import android.view.SurfaceView;
 
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.audio.AudioRendererEventListener;
-import com.google.android.exoplayer2.decoder.DecoderCounters;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
+import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
@@ -80,7 +71,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private boolean isChangingWindowByUser;
 
     private int initialWindowNum;
-    private BandwidthMeter bandwidthMeter;
 
     private LoadErrorHandlingPolicy loadErrorHandlingPolicy;
 
@@ -95,16 +85,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     public ExoMediaPlayer(Context context, CastContext castContext, long backBufferMs) {
         this.context = context;
 
-        bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        final TrackSelector trackSelector =
-                new DefaultTrackSelector(videoTrackSelectionFactory);
+//        bandwidthMeter = new DefaultBandwidthMeter();
+//        TrackSelection.Factory videoTrackSelectionFactory =
+//                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+//        final TrackSelector trackSelector =
+//                new DefaultTrackSelector(videoTrackSelectionFactory);
+//
+        DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);
 
-        RenderersFactory renderersFactory = new DefaultRenderersFactory(context);
+
         LoadControl loadControl = new MyLoadControl(backBufferMs);
 
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
+        exoPlayer = new SimpleExoPlayer.Builder(context).setTrackSelector(trackSelector)
+                .setLoadControl(loadControl).build();
+//        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
@@ -209,38 +203,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void prepare() {
-        exoPlayer.setAudioDebugListener(new AudioRendererEventListener() {
+        exoPlayer.addAnalyticsListener(new AnalyticsListener() {
             @Override
-            public void onAudioEnabled(DecoderCounters counters) {
-
-            }
-
-            @Override
-            public void onAudioSessionId(int audioSessionId) {
+            public void onAudioSessionIdChanged(EventTime eventTime, int audioSessionId) {
                 setEqualizer();
                 if (onAudioSessionIdSetListener != null)
                     onAudioSessionIdSetListener.onAudioSessionIdset(audioSessionId);
-            }
-
-            @Override
-            public void onAudioDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-
-            }
-
-            @Override
-            public void onAudioInputFormatChanged(Format format) {
-
-            }
-
-            @Override
-            public void onAudioSinkUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
-
-            }
-
-
-            @Override
-            public void onAudioDisabled(DecoderCounters counters) {
-
             }
         });
 
@@ -535,7 +503,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
 
-    class MyPlayerEventListener extends Player.DefaultEventListener {
+    class MyPlayerEventListener implements Player.Listener {
         private Player player;
 
         public MyPlayerEventListener(Player player) {
@@ -544,7 +512,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            super.onPlayerStateChanged(playWhenReady, playbackState);
+//            super.onPlayerStateChanged(playWhenReady, playbackState);
 
 //            KLog.d("playback state = " + playbackState);
 
@@ -606,7 +574,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         @Override
         public void onPositionDiscontinuity(int reason) {
-            super.onPositionDiscontinuity(reason);
             if (currentPlayer != player)
                 return;
 
@@ -671,7 +638,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         @Override
         public void onLoadingChanged(boolean isLoading) {
-            super.onLoadingChanged(isLoading);
             if (onLoadingChanged != null)
                 onLoadingChanged.onLoadingChanged(isLoading);
         }

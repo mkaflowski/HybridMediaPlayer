@@ -13,9 +13,10 @@ public class MyLoadControl extends DefaultLoadControl {
                 DEFAULT_MIN_BUFFER_MS,
                 DEFAULT_MAX_BUFFER_MS,
                 DEFAULT_BUFFER_FOR_PLAYBACK_MS / 5,
-                DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS / 5,
+                DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS / 2,
                 DEFAULT_TARGET_BUFFER_BYTES,
-                DEFAULT_PRIORITIZE_TIME_OVER_SIZE_THRESHOLDS);
+                DEFAULT_PRIORITIZE_TIME_OVER_SIZE_THRESHOLDS,
+                DEFAULT_BACK_BUFFER_DURATION_MS, DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME);
 
         backBufferUs = backBufferMs*1000;
     }
