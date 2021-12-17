@@ -119,6 +119,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
         String url = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
         String url2 = "http://217.74.72.11/RADIOFONIA";
+
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         String url4 = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
         mediaPlayer = new ExoMediaPlayer(this, castContext, 0);

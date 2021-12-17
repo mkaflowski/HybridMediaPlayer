@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/HybridMediaPlayer.iml" filepath="$PROJECT_DIR$/HybridMediaPlayer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/HybridMediaPlayer.iml" filepath="$PROJECT_DIR$/.idea/modules/HybridMediaPlayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.iml" filepath="$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.iml" filepath="$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.iml" />
     </modules>
