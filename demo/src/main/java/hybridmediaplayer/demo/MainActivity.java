@@ -117,7 +117,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.stop();
             mediaPlayer.release();
         }
-        String url = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
+        String url = "https://radio357.s3.eu-central-1.amazonaws.com/stream/3a81a8c4-4713-44bf-b800-031945ef90cftest.m3u8";
         String url2 = "http://217.74.72.11/RADIOFONIA";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         String url4 = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
@@ -205,7 +205,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 mediaPlayer.play();
             }
         } else if (view.getId() == R.id.btPause) {
-            showTestNotification();
+//            showTestNotification();
 
             if (mediaPlayer != null) {
                 mediaPlayer.pause();

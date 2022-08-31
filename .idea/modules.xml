@@ -4,7 +4,13 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HybridMediaPlayer.iml" filepath="$PROJECT_DIR$/.idea/modules/HybridMediaPlayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.iml" filepath="$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.main.iml" filepath="$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/demo/HybridMediaPlayer.demo.unitTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.iml" filepath="$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.main.iml" filepath="$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/hybridmediaplayer/HybridMediaPlayer.hybridmediaplayer.unitTest.iml" />
     </modules>
   </component>
 </project>

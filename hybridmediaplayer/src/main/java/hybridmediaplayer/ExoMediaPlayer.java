@@ -18,7 +18,9 @@ import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MediaSourceFactory;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -151,8 +153,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         MediaSource[] sources = new MediaSource[normalSources.size()];
         for (int i = 0; i < normalSources.size(); i++) {
+            MediaSourceFactory factory = null;
             // This is the MediaSource representing the media to be played.
-            ProgressiveMediaSource.Factory factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
+            if (normalSources.get(i).getUrl().endsWith(".m3u8"))
+                factory = new HlsMediaSource.Factory(dataSourceFactory);
+            else
+                factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
             if (loadErrorHandlingPolicy != null)
                 factory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
             sources[i] = factory
