@@ -157,7 +157,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             // This is the MediaSource representing the media to be played.
             MediaSourceFactory factory = new DefaultMediaSourceFactory(dataSourceFactory);
 
-            if (normalSources.get(i).getUrl().contains("m3u8"))
+            if (normalSources.get(i).getUrl().contains(".m3u8"))
                 factory = new HlsMediaSource.Factory(dataSourceFactory);
             else
                 factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
