@@ -155,8 +155,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         MediaSource[] sources = new MediaSource[normalSources.size()];
         for (int i = 0; i < normalSources.size(); i++) {
             // This is the MediaSource representing the media to be played.
-            MediaSourceFactory factory = new DefaultMediaSourceFactory(context);
-            //factory = new ProgressiveMediaSource.Factory(dataSourceFactory); //nie wspiera m3u8
+            MediaSourceFactory factory = new DefaultMediaSourceFactory(dataSourceFactory);
+
+            if (normalSources.get(i).getUrl().contains("m3u8"))
+                factory = new HlsMediaSource.Factory(dataSourceFactory);
+            else
+                factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
+
+
             if (loadErrorHandlingPolicy != null)
                 factory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
             sources[i] = factory

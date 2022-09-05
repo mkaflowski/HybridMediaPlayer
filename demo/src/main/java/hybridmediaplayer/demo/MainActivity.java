@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hybridmediaplayer.ExoMediaPlayer;
+import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
 import hybridplayer.demo.R;
 
@@ -117,7 +118,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.stop();
             mediaPlayer.release();
         }
-        String url = "https://radio357.s3.eu-central-1.amazonaws.com/stream/3a81a8c4-4713-44bf-b800-031945ef90cf.m3u8";
+        String url = "http://217.74.72.11/RADIOFONIA";
+
         String url2 = "http://217.74.72.11/RADIOFONIA";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         String url4 = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
@@ -182,6 +184,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mediaPlayer.setOnCompletionListener(player -> KLog.i("onCompletion"));
 
         mediaPlayer.setOnLoadingChanged(isLoading -> KLog.d("setOnLoadingChanged " + isLoading));
+
+        mediaPlayer.setOnErrorListener(new HybridMediaPlayer.OnErrorListener() {
+            @Override
+            public void onError(Exception error, HybridMediaPlayer player) {
+                KLog.e(error);
+                KLog.e(player);
+            }
+        });
 
         mediaPlayer.setDataSource(sources, sources);
         mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> KLog.d("onAudioSessionIdset audio session id = " + audioSessionId));
