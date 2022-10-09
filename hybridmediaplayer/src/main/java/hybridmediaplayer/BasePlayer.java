@@ -80,14 +80,13 @@ public abstract class BasePlayer implements Player {
                 getCurrentWindowIndex(), getRepeatModeForNavigation(), getShuffleModeEnabled());
     }
 
-    @Override
     @Nullable
     public final Object getCurrentTag() {
         int windowIndex = getCurrentWindowIndex();
         Timeline timeline = getCurrentTimeline();
         return windowIndex >= timeline.getWindowCount()
                 ? null
-                : timeline.getWindow(windowIndex, window, /* setTag= */ true).tag;
+                : timeline.getWindow(windowIndex, window).tag;
     }
 
     @Override

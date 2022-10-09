@@ -254,7 +254,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
             mediaPlayer.seekTo(1000);
             KLog.i(mediaPlayer.getCurrentPlayer().getPlaybackState());
-            KLog.i(mediaPlayer.getCurrentPlayer().getPlaybackError());
+//            KLog.i(mediaPlayer.getCurrentPlayer().getPlaybackError());
         } else if (view.getId() == R.id.btCreatePlayer) {
 //            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {
 //                @Override

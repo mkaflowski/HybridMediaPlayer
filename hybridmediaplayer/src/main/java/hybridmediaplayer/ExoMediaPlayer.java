@@ -9,6 +9,7 @@ import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -636,15 +637,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             }
         }
 
-
         @Override
-        public void onPlayerError(ExoPlaybackException error) {
+        public void onPlayerError(PlaybackException error) {
             if (currentPlayer != player)
                 return;
 
             if (onErrorListener != null)
                 onErrorListener.onError(error, ExoMediaPlayer.this);
         }
+
 
         @Override
         public void onLoadingChanged(boolean isLoading) {
