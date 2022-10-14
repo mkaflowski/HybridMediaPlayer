@@ -7,8 +7,9 @@ import android.net.Uri;
 import android.os.Handler;
 import android.view.SurfaceView;
 
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.MediaMetadata;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
@@ -31,15 +32,11 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
-import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
-import com.google.android.gms.common.images.WebImage;
 import com.socks.library.KLog;
 
 import java.util.ArrayList;
@@ -58,7 +55,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     private Context context;
     private MediaSource exoMediaSource;
-    private MediaQueueItem[] mediaItems = new MediaQueueItem[0];
+    private List<MediaItem> mediaItems;
     private int currentState;
     private boolean isPreparing = false;
     private OnTrackChangedListener onTrackChangedListener;
@@ -184,31 +181,41 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private void prepareCastMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
         this.mediaSourceInfoList = mediaSourceInfoList;
         //media sources for CastPlayer
-        mediaItems = new MediaQueueItem[mediaSourceInfoList.size()];
+        mediaItems = new ArrayList<>();
         for (int i = 0; i < mediaSourceInfoList.size(); i++) {
-            mediaItems[i] = buildMediaQueueItem(mediaSourceInfoList.get(i).getUrl(), mediaSourceInfoList.get(i), i + 1);
+            MediaItem mediaItem = buildMediaQueueItem(mediaSourceInfoList.get(i), i + 1);
+            mediaItems.add(mediaItem);
         }
     }
 
-    private MediaQueueItem buildMediaQueueItem(String url, MediaSourceInfo mediaSourceInfo, int position) {
+    private MediaItem buildMediaQueueItem(MediaSourceInfo mediaSourceInfo, int position) {
         if (mediaSourceInfo == null)
             mediaSourceInfo = MediaSourceInfo.PLACEHOLDER;
 
-        MediaMetadata movieMetadata = new MediaMetadata(mediaSourceInfo.isVideo() ? MediaMetadata.MEDIA_TYPE_MOVIE : MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
-        movieMetadata.putString(MediaMetadata.KEY_TITLE, mediaSourceInfo.getTitle());
-        movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, mediaSourceInfo.getAuthor());
-        movieMetadata.putInt(MediaMetadata.KEY_TRACK_NUMBER, position);
-        String imageUrl = mediaSourceInfo.getImageUrl();
-        if (imageUrl != null) {
-            Uri parse = Uri.parse(imageUrl);
-            movieMetadata.addImage(new WebImage(parse));
-        }
-        MediaInfo mediaInfo = new MediaInfo.Builder(url)
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setContentType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN)
-                .setMetadata(movieMetadata).build();
+        MediaMetadata.Builder movieMetadata = new MediaMetadata.Builder();
+        movieMetadata.setTitle(mediaSourceInfo.getTitle());
+        movieMetadata.setArtist(mediaSourceInfo.getAuthor());
 
-        return new MediaQueueItem.Builder(mediaInfo).build();
+//        MediaMetadata movieMetadata = new MediaMetadata(mediaSourceInfo.isVideo() ? MediaMetadata.MEDIA_TYPE_MOVIE : MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
+//        movieMetadata.putString(MediaMetadata.KEY_TITLE, mediaSourceInfo.getTitle());
+//        movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, mediaSourceInfo.getAuthor());
+//        movieMetadata.putInt(MediaMetadata.KEY_TRACK_NUMBER, position);
+//        String imageUrl = mediaSourceInfo.getImageUrl();
+//        if (imageUrl != null) {
+//            Uri parse = Uri.parse(imageUrl);
+//            movieMetadata.addImage(new WebImage(parse));
+//        }
+//        MediaInfo mediaInfo = new MediaInfo.Builder(url)
+//                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+//                .setContentType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN)
+//                .setMetadata(movieMetadata).build();
+
+        MediaItem.Builder builder = new MediaItem.Builder();
+        builder.setMimeType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN);
+        builder.setUri(mediaSourceInfo.getUrl());
+        builder.setMediaMetadata(movieMetadata.build());
+
+        return builder.build();
     }
 
 
@@ -237,12 +244,24 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             init();
 
         if (castPlayer != null && isCasting()) {
-            castPlayer.loadItems(mediaItems, initialWindowNum, 0, Player.REPEAT_MODE_OFF);
-//            castPlayer.setPlayWhenReady(true);
+            castPlayer.setPlayWhenReady(true);
         }
 
         if (onTrackChangedListener != null)
             onTrackChangedListener.onTrackChanged(false);
+    }
+
+    private void setCastItems() {
+//        castPlayer.clearMediaItems();
+        ArrayList<MediaItem> mediaItemsCast = new ArrayList<>();
+        int i = 0;
+        for (MediaSourceInfo mediaItem : mediaSourceInfoList) {
+            mediaItemsCast.add(buildMediaQueueItem(mediaItem, i));
+            i++;
+        }
+        KLog.d(mediaItemsCast.size());
+        castPlayer.setMediaItems(mediaItemsCast, currentWindow, exoPlayer.getCurrentPosition());
+        castPlayer.play();
     }
 
     private void setEqualizer() {
@@ -315,7 +334,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             }
             try {
                 if (currentPlayer == castPlayer)
-                    castPlayer.loadItems(mediaItems, windowIndex, msec, Player.REPEAT_MODE_OFF);
+                    castPlayer.seekTo(windowIndex, msec);
+//                    castPlayer.loadItems(mediaItems, windowIndex, msec, Player.REPEAT_MODE_OFF);
                 else
                     currentPlayer.seekTo(windowIndex, msec);
             } catch (ArrayIndexOutOfBoundsException e) {
@@ -399,13 +419,17 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void onCastSessionAvailable() {
-        setCurrentPlayer(castPlayer);
+        KLog.d();
+        if (currentPlayer != castPlayer)
+            setCurrentPlayer(castPlayer);
         if (onCastAvailabilityChangeListener != null)
             onCastAvailabilityChangeListener.onCastAvailabilityChange(true);
     }
 
     @Override
     public void onCastSessionUnavailable() {
+        KLog.e(castPlayer.getCurrentWindowIndex());
+        KLog.e(exoPlayer.getCurrentWindowIndex());
         setCurrentPlayer(exoPlayer);
         if (onCastAvailabilityChangeListener != null)
             onCastAvailabilityChangeListener.onCastAvailabilityChange(false);
@@ -426,18 +450,21 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         long time = currentPlayer.getCurrentPosition();
         int window = currentPlayer.getCurrentWindowIndex();
 
+        KLog.d(window);
+        KLog.i(time);
+
         currentPlayer = player;
         isPreparing = true;
 
-
         if (currentPlayer == castPlayer) {
+            KLog.d();
             isCasting = true;
-            if (mediaItems.length != 0)
-                castPlayer.loadItems(mediaItems, window, time, Player.REPEAT_MODE_OFF);
+            if (mediaItems != null && mediaItems.size() != 0)
+                setCastItems();
         }
 
         if (currentPlayer == exoPlayer) {
-            seekTo(window, (int) time);
+            seekTo(currentWindow, (int) time);
             if (shouldPlay)
                 play();
             else

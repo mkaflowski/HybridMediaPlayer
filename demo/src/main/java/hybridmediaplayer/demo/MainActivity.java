@@ -118,7 +118,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.stop();
             mediaPlayer.release();
         }
-        String url = "http://217.74.72.11/RADIOFONIA";
+        String url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
 
         String url2 = "http://217.74.72.11/RADIOFONIA";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
@@ -224,7 +224,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 KLog.i(mediaPlayer.getDuration());
             }
         } else if (view.getId() == R.id.fastForward) {
-            mediaPlayer.seekTo(mediaPlayer.getDuration() - 1500);
+            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 1500);
+            KLog.e(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex());
 //            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 2000);
         } else if (view.getId() == R.id.btSpeed) {
 //            loadOtherSources();
@@ -252,7 +253,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             KLog.d(mediaPlayer.getCurrentWindow());
             KLog.i("abc " + (mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount() + " / " + mediaPlayer.getWindowCount());
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
-            mediaPlayer.seekTo(1000);
             KLog.i(mediaPlayer.getCurrentPlayer().getPlaybackState());
 //            KLog.i(mediaPlayer.getCurrentPlayer().getPlaybackError());
         } else if (view.getId() == R.id.btCreatePlayer) {
