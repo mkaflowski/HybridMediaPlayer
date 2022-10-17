@@ -131,11 +131,11 @@ public abstract class BasePlayer implements Player {
          * The listener on which {link #invoke} will execute {@link ListenerInvocation listener
          * invocations}.
          */
-        public final Player.EventListener listener;
+        public final Player.Listener listener;
 
         private boolean released;
 
-        public ListenerHolder(Player.EventListener listener) {
+        public ListenerHolder(Player.Listener listener) {
             this.listener = listener;
         }
 
@@ -171,10 +171,10 @@ public abstract class BasePlayer implements Player {
         }
     }
 
-    /** Parameterized invocation of a {@link Player.EventListener} method. */
+    /** Parameterized invocation of a {@link Player.Listener} method. */
     protected interface ListenerInvocation {
 
-        /** Executes the invocation on the given {@link Player.EventListener}. */
-        void invokeListener(Player.EventListener listener);
+        /** Executes the invocation on the given {@link Player.Listener}. */
+        void invokeListener(Player.Listener listener);
     }
 }

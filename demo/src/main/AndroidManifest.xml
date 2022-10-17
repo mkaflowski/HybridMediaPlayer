@@ -16,7 +16,8 @@
             android:value="hybridmediaplayer.demo.CastOptionsProvider" />
         <activity
             android:name="hybridmediaplayer.demo.MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

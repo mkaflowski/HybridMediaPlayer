@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -12,7 +12,7 @@ android {
         applicationId "hybridplayer.demo"
         multiDexEnabled true
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -31,8 +31,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation 'junit:junit:4.12'
-    implementation 'com.android.support:support-compat:28.0.0'
-    implementation 'androidx.mediarouter:mediarouter:1.1.0'
+    implementation 'androidx.mediarouter:mediarouter:1.3.1'
     implementation 'com.github.zhaokaiqiang.klog:library:1.6.0'
     implementation 'com.android.support:multidex:1.0.3'
     implementation project(':hybridmediaplayer')

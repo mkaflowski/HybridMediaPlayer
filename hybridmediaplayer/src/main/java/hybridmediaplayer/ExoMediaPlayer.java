@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.view.SurfaceView;
 
+import androidx.media2.exoplayer.external.upstream.DefaultHttpDataSourceFactory;
+
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.MediaMetadata;
@@ -18,6 +20,8 @@ import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+
+
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -26,9 +30,9 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
@@ -136,16 +140,13 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             exoPlayer.stop();
 
         String userAgent = Util.getUserAgent(context, "yourApplicationName");
-        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory(
-                userAgent,
-                null /* listener */,
-                DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-                DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
-                true /* allowCrossProtocolRedirects */
-        );
+        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory();
+        httpDataSourceFactory.setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS);
+        httpDataSourceFactory.setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS);
+        httpDataSourceFactory.setAllowCrossProtocolRedirects(true);
 
         // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, null, httpDataSourceFactory);
+        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
         // Produces Extractor instances for parsing the media data.
         ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
 
@@ -156,6 +157,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             MediaSourceFactory factory = new DefaultMediaSourceFactory(dataSourceFactory);
 
             if (normalSources.get(i).getUrl().contains(".m3u8"))
+
                 factory = new HlsMediaSource.Factory(dataSourceFactory);
             else
                 factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
@@ -163,8 +165,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
             if (loadErrorHandlingPolicy != null)
                 factory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
+
             sources[i] = factory
-                    .createMediaSource(Uri.parse(normalSources.get(i).getUrl()));
+                    .createMediaSource(MediaItem.fromUri(Uri.parse(normalSources.get(i).getUrl())));
         }
 
         exoMediaSource = new ConcatenatingMediaSource(sources);
@@ -195,20 +198,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         MediaMetadata.Builder movieMetadata = new MediaMetadata.Builder();
         movieMetadata.setTitle(mediaSourceInfo.getTitle());
         movieMetadata.setArtist(mediaSourceInfo.getAuthor());
-
-//        MediaMetadata movieMetadata = new MediaMetadata(mediaSourceInfo.isVideo() ? MediaMetadata.MEDIA_TYPE_MOVIE : MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
-//        movieMetadata.putString(MediaMetadata.KEY_TITLE, mediaSourceInfo.getTitle());
-//        movieMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST, mediaSourceInfo.getAuthor());
-//        movieMetadata.putInt(MediaMetadata.KEY_TRACK_NUMBER, position);
-//        String imageUrl = mediaSourceInfo.getImageUrl();
-//        if (imageUrl != null) {
-//            Uri parse = Uri.parse(imageUrl);
-//            movieMetadata.addImage(new WebImage(parse));
-//        }
-//        MediaInfo mediaInfo = new MediaInfo.Builder(url)
-//                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-//                .setContentType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN)
-//                .setMetadata(movieMetadata).build();
+        movieMetadata.setArtworkUri(Uri.parse(mediaSourceInfo.getImageUrl()));
+        movieMetadata.setTrackNumber(position);
 
         MediaItem.Builder builder = new MediaItem.Builder();
         builder.setMimeType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN);
