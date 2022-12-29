@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.view.SurfaceView;
 
-import androidx.media2.exoplayer.external.upstream.DefaultHttpDataSourceFactory;
+import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.MediaItem;
@@ -20,18 +20,17 @@ import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-
-
+import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.text.CueGroup;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
@@ -98,7 +97,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 //
         DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);
 
-
         LoadControl loadControl = new MyLoadControl(backBufferMs);
 
         exoPlayer = new SimpleExoPlayer.Builder(context).setTrackSelector(trackSelector)
@@ -157,7 +155,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             MediaSourceFactory factory = new DefaultMediaSourceFactory(dataSourceFactory);
 
             if (normalSources.get(i).getUrl().contains(".m3u8"))
-
                 factory = new HlsMediaSource.Factory(dataSourceFactory);
             else
                 factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
@@ -173,6 +170,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         exoMediaSource = new ConcatenatingMediaSource(sources);
 
         prepareCastMediaSourceInfoList(castSources);
+        if (isCasting)
+            setCastItems();
     }
 
     private void init() {
@@ -203,8 +202,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         MediaItem.Builder builder = new MediaItem.Builder();
         builder.setMimeType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN);
+        if (mediaSourceInfo.getUrl().contains(".m3u8"))
+            builder.setMimeType(MimeTypes.APPLICATION_M3U8);
         builder.setUri(mediaSourceInfo.getUrl());
         builder.setMediaMetadata(movieMetadata.build());
+
 
         return builder.build();
     }
