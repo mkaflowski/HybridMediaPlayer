@@ -90,7 +90,9 @@ public class HlsMediaItemConverter implements MediaItemConverter {
         if (mediaItem.localConfiguration.mimeType == null) {
             throw new IllegalArgumentException("The item must specify its mimeType");
         } else {
-            com.google.android.gms.cast.MediaMetadata metadata = new com.google.android.gms.cast.MediaMetadata(MimeTypes.isAudio(mediaItem.localConfiguration.mimeType) ? 3 : 1);
+            String contentUrl = mediaItem.localConfiguration.uri.toString();
+
+            com.google.android.gms.cast.MediaMetadata metadata = new com.google.android.gms.cast.MediaMetadata(MimeTypes.isAudio(mediaItem.localConfiguration.mimeType) || contentUrl.contains("radio") ? 3 : 1);
             if (mediaItem.mediaMetadata.title != null) {
                 metadata.putString("com.google.android.gms.cast.metadata.TITLE", mediaItem.mediaMetadata.title.toString());
             }
@@ -127,7 +129,6 @@ public class HlsMediaItemConverter implements MediaItemConverter {
                 metadata.putInt("com.google.android.gms.cast.metadata.TRACK_NUMBER", mediaItem.mediaMetadata.trackNumber);
             }
 
-            String contentUrl = mediaItem.localConfiguration.uri.toString();
             String contentId = mediaItem.mediaId.equals("") ? contentUrl : mediaItem.mediaId;
             MediaInfo.Builder mediaInfoBuilder = new MediaInfo.Builder(contentId);
             if (contentUrl.contains(".m3u8")) {

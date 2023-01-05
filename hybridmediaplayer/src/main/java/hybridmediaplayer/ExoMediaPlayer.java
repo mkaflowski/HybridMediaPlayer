@@ -247,6 +247,24 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
     private void setCastItems() {
+//        if (normalSources.get(i).getUrl().contains(".m3u8")) {
+//        com.google.android.gms.cast.MediaMetadata mediaMetadata = new  com.google.android.gms.cast.MediaMetadata( com.google.android.gms.cast.MediaMetadata.MEDIA_TYPE_MOVIE);
+//        mediaMetadata.putString(com.google.android.gms.cast.MediaMetadata.KEY_TITLE, "Test title");
+//        mediaMetadata.putString(com.google.android.gms.cast.MediaMetadata.KEY_ARTIST, "Test Author");
+//
+//        MediaInfo.Builder builder = new MediaInfo.Builder("https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8");
+//        builder.setHlsSegmentFormat(HlsSegmentFormat.AAC);
+//        builder.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED);
+//        builder.setContentType("application/x-mpegURL");
+//        builder.setMetadata(mediaMetadata);
+//
+//        CastContext castContext = CastContext.getSharedInstance(context);
+//        CastSession castSession = castContext.getSessionManager().getCurrentCastSession();
+//        RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
+//        remoteMediaClient.load(builder.build());
+//        }
+
+
         ArrayList<MediaItem> mediaItemsCast = new ArrayList<>();
         int i = 0;
         for (MediaSourceInfo mediaItem : mediaSourceInfoList) {
