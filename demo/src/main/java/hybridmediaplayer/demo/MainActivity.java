@@ -208,8 +208,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
     private void createSources() {
-        String url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-//        String url = "https://radio357.s3.eu-central-1.amazonaws.com/stream/c4223621-2600-45e4-93f1-ebe936f3c9b5.m3u8";
+//        String url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+        String url = "https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8";
 //        url = "http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8";
 
         String url2 = "https://stream.rcs.revma.com/an1ugyygzk8uv";

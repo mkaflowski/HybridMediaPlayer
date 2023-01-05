@@ -18,6 +18,7 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
+import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.metadata.Metadata;
@@ -35,6 +36,8 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.cast.HlsSegmentFormat;
+import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
@@ -106,7 +109,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         currentPlayer = exoPlayer;
 
         if (castContext != null) {
-            castPlayer = new CastPlayer(castContext);
+            castPlayer = new CastPlayer(castContext, new HlsMediaItemConverter());
             castPlayer.setSessionAvailabilityListener(this);
             castPlayer.addListener(new MyPlayerEventListener(castPlayer));
         }
@@ -145,17 +148,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
-        // Produces Extractor instances for parsing the media data.
-        ExtractorsFactory extractorsFactory = new SeekableExtractorsFactory();
-
 
         MediaSource[] sources = new MediaSource[normalSources.size()];
         for (int i = 0; i < normalSources.size(); i++) {
             // This is the MediaSource representing the media to be played.
             MediaSourceFactory factory = new DefaultMediaSourceFactory(dataSourceFactory);
 
-            if (normalSources.get(i).getUrl().contains(".m3u8"))
+            if (normalSources.get(i).getUrl().contains(".m3u8")) {
                 factory = new HlsMediaSource.Factory(dataSourceFactory);
+            }
             else
                 factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
 
@@ -199,6 +200,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         movieMetadata.setArtist(mediaSourceInfo.getAuthor());
         movieMetadata.setArtworkUri(Uri.parse(mediaSourceInfo.getImageUrl()));
         movieMetadata.setTrackNumber(position);
+
 
         MediaItem.Builder builder = new MediaItem.Builder();
         builder.setMimeType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN);
@@ -245,7 +247,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
     private void setCastItems() {
-//        castPlayer.clearMediaItems();
         ArrayList<MediaItem> mediaItemsCast = new ArrayList<>();
         int i = 0;
         for (MediaSourceInfo mediaItem : mediaSourceInfoList) {
