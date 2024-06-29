@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-
-group = 'com.github.mkaflowski'
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion 33
@@ -27,6 +25,27 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    task androidJavadocs(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        android.libraryVariants.all { variant ->
+            if (variant.name == 'release') {
+                owner.classpath += variant.javaCompileProvider.get().classpath
+            }
+        }
+        exclude '**/R.html', '**/R.*.html', '**/index.html'
+    }
+
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        archiveClassifier.set('javadoc')
+        from androidJavadocs.destinationDir
+    }
+
+    task androidSourcesJar(type: Jar) {
+        archiveClassifier.set('sources')
+        from android.sourceSets.main.java.srcDirs
+    }
 }
 
 dependencies {
@@ -44,26 +63,15 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.7.1'
 }
 
-// build a jar with source files
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    failOnError  false
-    source = android.sourceSets.main.java.sourceFiles
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
-}
-
-// build a jar with javadoc
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github'
+                artifactId = 'mkaflowski'
+                version = '1.9.4'
+            }
+        }
+    }
 }
