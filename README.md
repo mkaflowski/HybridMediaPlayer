@@ -9,7 +9,7 @@ Add JitPack in your root build.gradle at the end of repositories:
 ```
     allprojects {
         repositories {
-            jcenter()
+            mavenCentral()
             maven { url "https://jitpack.io" }
         }
     }

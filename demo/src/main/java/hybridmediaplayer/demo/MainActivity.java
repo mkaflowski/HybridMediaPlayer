@@ -29,7 +29,6 @@ import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastState;
 import com.google.android.gms.cast.framework.CastStateListener;
-import com.socks.library.KLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +37,7 @@ import hybridmediaplayer.ExoMediaPlayer;
 import hybridmediaplayer.HybridMediaPlayer;
 import hybridmediaplayer.MediaSourceInfo;
 import hybridplayer.demo.R;
+import timber.log.Timber;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
@@ -132,73 +132,74 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);
         mediaPlayer.setOnTrackChangedListener(isFinished -> {
-            KLog.w("onTrackChanged isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
+            Timber.w("onTrackChanged isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
         });
 
 
         mediaPlayer.setOnPreparedListener(player -> {
-            KLog.w(mediaPlayer.hasVideo());
-            KLog.d("onPrepared " + mediaPlayer.getCurrentPlayer());
+            Timber.w(String.valueOf(mediaPlayer.hasVideo()));
+            Timber.d("onPrepared " + mediaPlayer.getCurrentPlayer());
         });
 
         mediaPlayer.setOnPlayerStateChanged((playWhenReady, playbackState) -> {
-//            KLog.d("onPlayerStateChanged playbackState " + playbackState + " position " + mediaPlayer.getCurrentWindow());
+//            Timber.d("onPlayerStateChanged playbackState " + playbackState + " position " + mediaPlayer.getCurrentWindow());
         });
 
-        mediaPlayer.setOnCompletionListener(player -> KLog.i("onCompletion"));
+        mediaPlayer.setOnCompletionListener(player -> Timber.i("onCompletion"));
 
-        mediaPlayer.setOnLoadingChanged(isLoading -> KLog.d("setOnLoadingChanged " + isLoading));
+        mediaPlayer.setOnLoadingChanged(isLoading -> Timber.d("setOnLoadingChanged " + isLoading));
 
         mediaPlayer.setOnErrorListener(new HybridMediaPlayer.OnErrorListener() {
             @Override
             public void onError(Exception error, HybridMediaPlayer player) {
-                KLog.e(error);
-                KLog.e(player);
+                Timber.e(error);
+                Timber.e(String.valueOf(player));
             }
         });
 
         mediaPlayer.setDataSource(sources, sources);
-        mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> KLog.d("onAudioSessionIdset audio session id = " + audioSessionId));
+        mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> Timber.d("onAudioSessionIdset audio session id = " + audioSessionId));
 
-        mediaPlayer.setOnPositionDiscontinuityListener((reason, currentWindowIndex) -> KLog.w("onPositionDiscontinuity reason " + reason + " position " + mediaPlayer.getCurrentWindow() + " currentWindowIndex " + currentWindowIndex));
+        mediaPlayer.setOnPositionDiscontinuityListener((reason, currentWindowIndex) -> Timber.w("onPositionDiscontinuity reason " + reason + " position " + mediaPlayer.getCurrentWindow() + " currentWindowIndex " + currentWindowIndex));
+//        mediaPlayer.setInitialWindowNum(2);
 //        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
         mediaPlayer.play();
 
-        KLog.w(mediaPlayer.getWindowCount());
+        Timber.w(String.valueOf(mediaPlayer.getWindowCount()));
 
 
         mediaPlayer.getExoPlayer().addListener(new Player.Listener() {
             @Override
             public void onMediaMetadataChanged(MediaMetadata mediaMetadata) {
                 Player.Listener.super.onMediaMetadataChanged(mediaMetadata);
-                KLog.w(mediaMetadata.artist);
-                KLog.w(mediaMetadata.title);
-                KLog.w(mediaMetadata.displayTitle);
+                Timber.w((String) mediaMetadata.artist);
+                Timber.w((String) mediaMetadata.title);
+                Timber.w((String) mediaMetadata.displayTitle);
             }
 
             @Override
             public void onMetadata(Metadata metadata) {
                 Player.Listener.super.onMetadata(metadata);
-                KLog.d("metadata: " + metadata);
+                Timber.d("metadata: " + metadata);
                 if (metadata.length() > 0) {
                     if (metadata.get(0) instanceof IcyInfo) {
 
                         IcyInfo data = (IcyInfo) metadata.get(0);
                         String metadataTitle = data.title;
-                        KLog.d(data.toString());
+                        Timber.d(data.toString());
                         String track = data.title;
                         //updateMediaSessionMetadata(true);
-                        KLog.e(metadataTitle);
-                        KLog.e(track);
+                        Timber.e(metadataTitle);
+                        Timber.e(track);
                     }
                     if (metadata.get(0) instanceof IcyHeaders) {
                         IcyHeaders data = (IcyHeaders) metadata.get(0);
-                        KLog.d(data.name);
-                        KLog.d(data.genre);
-                        KLog.d(data.bitrate);
-                        KLog.d(data.metadataInterval);
-                        KLog.d(data.url);
+                        Timber.d(data.name);
+                        Timber.d(data.genre);
+                        Timber.d(String.valueOf(data.bitrate));
+                        Timber.d(String.valueOf(data.metadataInterval));
+                        Timber.d(data.url);
                     }
                 }
             }
@@ -209,7 +210,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     private void createSources() {
 //        String url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-        String url = "https://radio357.s3.eu-central-1.amazonaws.com/stream/5f2e42cf-6632-4c8b-b2f6-0b5275232ffb.m3u8";
+        String url = "https://streaming.live365.com/a72282";
 //        String url = "https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8";
 //        url = "http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8";
 
@@ -313,8 +314,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             if (mediaPlayer != null) {
                 mediaPlayer.pause();
 
-                KLog.d(mediaPlayer.getCurrentPosition());
-                KLog.i(mediaPlayer.getDuration());
+                Timber.d(String.valueOf(mediaPlayer.getCurrentPosition()));
+                Timber.i(String.valueOf(mediaPlayer.getDuration()));
             }
         } else if (view.getId() == R.id.btSetSources) {
             createSources2();
@@ -323,7 +324,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.seekTo(0,0);
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 1500);
-            KLog.e(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex());
+            Timber.e(String.valueOf(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex()));
 //            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 2000);
         } else if (view.getId() == R.id.btSpeed) {
 //            loadOtherSources();
@@ -339,20 +340,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //            mediaPlayer.seekTo(msec);
 
 //            loadOtherSources();
-            KLog.w(mediaPlayer.getCurrentPosition());
-            KLog.i(mediaPlayer.getCurrentWindow());
-            KLog.w(mediaPlayer.getWindowCount());
-            KLog.d("duration " + mediaPlayer.getDuration());
+            Timber.w(String.valueOf(mediaPlayer.getCurrentPosition()));
+            Timber.i(String.valueOf(mediaPlayer.getCurrentWindow()));
+            Timber.w(String.valueOf(mediaPlayer.getWindowCount()));
+            Timber.d("duration " + mediaPlayer.getDuration());
         } else if (view.getId() == R.id.btStop) {
             mediaPlayer.release();
             mediaPlayer = null;
         } else if (view.getId() == R.id.btNext) {
 //            pm.selectQueueItem(pm.getCurrentItemIndex()+1);
-            KLog.d(mediaPlayer.getCurrentWindow());
-            KLog.i("abc " + (mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount() + " / " + mediaPlayer.getWindowCount());
+            Timber.d(String.valueOf(mediaPlayer.getCurrentWindow()));
+            Timber.i("abc " + (mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount() + " / " + mediaPlayer.getWindowCount());
             mediaPlayer.seekTo((mediaPlayer.getCurrentWindow() + 1) % mediaPlayer.getWindowCount(), 0);
-            KLog.i(mediaPlayer.getCurrentPlayer().getPlaybackState());
-//            KLog.i(mediaPlayer.getCurrentPlayer().getPlaybackError());
+            Timber.i(String.valueOf(mediaPlayer.getCurrentPlayer().getPlaybackState()));
+//            Timber.i(mediaPlayer.getCurrentPlayer().getPlaybackError());
         } else if (view.getId() == R.id.btCreatePlayer) {
 //            pm = PlayerManager.createPlayerManager(new PlayerManager.QueuePositionListener() {
 //                @Override

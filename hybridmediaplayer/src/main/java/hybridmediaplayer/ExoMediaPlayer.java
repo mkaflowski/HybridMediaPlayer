@@ -7,8 +7,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.view.SurfaceView;
 
-import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.MediaMetadata;
@@ -18,17 +16,13 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
-import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.text.CueGroup;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
@@ -36,17 +30,19 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
-import com.google.android.gms.cast.HlsSegmentFormat;
-import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
-import com.socks.library.KLog;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 
 /**
@@ -140,11 +136,21 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         if (exoPlayer != null)
             exoPlayer.stop();
 
-        String userAgent = Util.getUserAgent(context, "yourApplicationName");
+        // Set user agent
+        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
         DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory();
+        httpDataSourceFactory.setUserAgent(userAgent);
+
         httpDataSourceFactory.setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS);
         httpDataSourceFactory.setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS);
+
+        // Set AllowCrossProtocolRedirects
         httpDataSourceFactory.setAllowCrossProtocolRedirects(true);
+
+        // Set default cookie manager
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
+        CookieHandler.setDefault(cookieManager);
 
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
@@ -163,6 +169,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
             if (loadErrorHandlingPolicy != null)
                 factory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
+
+
 
             sources[i] = factory
                     .createMediaSource(MediaItem.fromUri(Uri.parse(normalSources.get(i).getUrl())));
@@ -271,7 +279,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             mediaItemsCast.add(buildMediaQueueItem(mediaItem, i));
             i++;
         }
-        KLog.d(mediaItemsCast.size());
+        Timber.d(String.valueOf(mediaItemsCast.size()));
         castPlayer.setMediaItems(mediaItemsCast, currentWindow, exoPlayer.getCurrentPosition());
         castPlayer.play();
     }
@@ -431,7 +439,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void onCastSessionAvailable() {
-        KLog.d();
+        Timber.d("");
         if (currentPlayer != castPlayer)
             setCurrentPlayer(castPlayer);
         if (onCastAvailabilityChangeListener != null)
@@ -440,8 +448,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void onCastSessionUnavailable() {
-        KLog.e(castPlayer.getCurrentWindowIndex());
-        KLog.e(exoPlayer.getCurrentWindowIndex());
+        Timber.e(String.valueOf(castPlayer.getCurrentWindowIndex()));
+        Timber.e(String.valueOf(exoPlayer.getCurrentWindowIndex()));
         setCurrentPlayer(exoPlayer);
         if (onCastAvailabilityChangeListener != null)
             onCastAvailabilityChangeListener.onCastAvailabilityChange(false);
@@ -462,14 +470,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         long time = currentPlayer.getCurrentPosition();
         int window = currentPlayer.getCurrentWindowIndex();
 
-        KLog.d(window);
-        KLog.i(time);
+        Timber.d(String.valueOf(window));
+        Timber.i(String.valueOf(time));
 
         currentPlayer = player;
         isPreparing = true;
 
         if (currentPlayer == castPlayer) {
-            KLog.d();
+            Timber.d("");
             isCasting = true;
             if (mediaItems != null && mediaItems.size() != 0)
                 setCastItems();
@@ -564,7 +572,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
 //            super.onPlayerStateChanged(playWhenReady, playbackState);
 
-//            KLog.d("playback state = " + playbackState);
+//            Timber.d("playback state = " + playbackState);
 
             if (currentPlayer != player)
                 return;
@@ -588,7 +596,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
                     case Player.STATE_READY:
                         if (isPreparing && onPreparedListener != null && shouldBeWindow == getCurrentWindow()) {
-//                            KLog.d("ret " + currentPlayer.getDuration());
+//                            Timber.d("ret " + currentPlayer.getDuration());
                             if ((currentPlayer.getDuration() < 0 && currentPlayer.isCurrentWindowSeekable())
                                     || currentPlayer.getCurrentWindowIndex() >= getWindowCount())
                                 return;
@@ -604,7 +612,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                             if (castSession != null) {
                                 RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
                                 if (remoteMediaClient != null) {
-                                    KLog.i("playback state session= " + remoteMediaClient.getIdleReason());
+                                    Timber.i("playback state session= " + remoteMediaClient.getIdleReason());
 
                                     if (MediaStatus.IDLE_REASON_FINISHED == remoteMediaClient.getIdleReason()) {
                                         if (onCompletionListener != null) {
@@ -638,10 +646,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             if (newIndex < 0)
                 return;
 
-//            KLog.d("onTrackChanged currentWindow " + currentWindow);
-//            KLog.d("onTrackChanged newIndex " + newIndex);
-//            KLog.d("onTrackChanged shouldBeWindow " + shouldBeWindow);
-//            KLog.d("onTrackChanged player.getDuration() " + player.getDuration());
+//            Timber.d("onTrackChanged currentWindow " + currentWindow);
+//            Timber.d("onTrackChanged newIndex " + newIndex);
+//            Timber.d("onTrackChanged shouldBeWindow " + shouldBeWindow);
+//            Timber.d("onTrackChanged player.getDuration() " + player.getDuration());
 
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
                 // The index has changed; update the UI to show info for source at newIndex
