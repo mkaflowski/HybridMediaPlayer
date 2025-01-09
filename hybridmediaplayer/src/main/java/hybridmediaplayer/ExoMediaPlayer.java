@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.LoadControl;
@@ -76,6 +77,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private int initialWindowNum;
 
     private LoadErrorHandlingPolicy loadErrorHandlingPolicy;
+    private long defaultCastPosition;
 
     public ExoMediaPlayer(Context context, CastContext castContext) {
         this(context, castContext, 20000);
@@ -255,24 +257,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
     private void setCastItems() {
-//        if (normalSources.get(i).getUrl().contains(".m3u8")) {
-//        com.google.android.gms.cast.MediaMetadata mediaMetadata = new  com.google.android.gms.cast.MediaMetadata( com.google.android.gms.cast.MediaMetadata.MEDIA_TYPE_MOVIE);
-//        mediaMetadata.putString(com.google.android.gms.cast.MediaMetadata.KEY_TITLE, "Test title");
-//        mediaMetadata.putString(com.google.android.gms.cast.MediaMetadata.KEY_ARTIST, "Test Author");
-//
-//        MediaInfo.Builder builder = new MediaInfo.Builder("https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8");
-//        builder.setHlsSegmentFormat(HlsSegmentFormat.AAC);
-//        builder.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED);
-//        builder.setContentType("application/x-mpegURL");
-//        builder.setMetadata(mediaMetadata);
-//
-//        CastContext castContext = CastContext.getSharedInstance(context);
-//        CastSession castSession = castContext.getSessionManager().getCurrentCastSession();
-//        RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
-//        remoteMediaClient.load(builder.build());
-//        }
-
-
         ArrayList<MediaItem> mediaItemsCast = new ArrayList<>();
         int i = 0;
         for (MediaSourceInfo mediaItem : mediaSourceInfoList) {
@@ -280,7 +264,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             i++;
         }
         Timber.d(String.valueOf(mediaItemsCast.size()));
-        castPlayer.setMediaItems(mediaItemsCast, currentWindow, exoPlayer.getCurrentPosition());
+        castPlayer.setMediaItems(mediaItemsCast, currentWindow, defaultCastPosition);
         castPlayer.play();
     }
 
@@ -314,7 +298,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         return isSupportingSystemEqualizer;
     }
 
-
     public CastPlayer getCastPlayer() {
         return castPlayer;
     }
@@ -339,31 +322,41 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void seekTo(int msec) {
+        if(currentPlayer == castPlayer){
+            if(castPlayer.getPlaybackState() == Player.STATE_IDLE){
+                defaultCastPosition = msec;
+                setCastItems();
+            }
+        }
+
+        defaultCastPosition = msec;
         currentPlayer.seekTo(msec);
     }
 
-    public void stop() {
-        currentPlayer.stop();
-    }
-
     public void seekTo(int windowIndex, int msec) {
+        if(currentPlayer == castPlayer){
+            if(castPlayer.getPlaybackState() == Player.STATE_IDLE){
+                defaultCastPosition = msec;
+                setCastItems();
+            }
+        }
         try {
             if (getCurrentWindow() != windowIndex) {
                 isChangingWindowByUser = true;
                 shouldBeWindow = windowIndex;
             }
             try {
-                if (currentPlayer == castPlayer)
-                    castPlayer.seekTo(windowIndex, msec);
-//                    castPlayer.loadItems(mediaItems, windowIndex, msec, Player.REPEAT_MODE_OFF);
-                else
-                    currentPlayer.seekTo(windowIndex, msec);
+                currentPlayer.seekTo(windowIndex, msec);
             } catch (ArrayIndexOutOfBoundsException e) {
                 // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
             }
         } catch (Exception ignored) {
 
         }
+    }
+
+    public void stop() {
+        currentPlayer.stop();
     }
 
     @Override
@@ -440,8 +433,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     @Override
     public void onCastSessionAvailable() {
         Timber.d("");
-        if (currentPlayer != castPlayer)
+        if (currentPlayer != castPlayer) {
+            defaultCastPosition = exoPlayer.getCurrentPosition();
             setCurrentPlayer(castPlayer);
+        }
         if (onCastAvailabilityChangeListener != null)
             onCastAvailabilityChangeListener.onCastAvailabilityChange(true);
     }

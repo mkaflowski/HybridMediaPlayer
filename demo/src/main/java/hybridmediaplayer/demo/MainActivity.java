@@ -164,6 +164,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //        mediaPlayer.setInitialWindowNum(2);
 //        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
+        mediaPlayer.seekTo(0,1000*30);
         mediaPlayer.play();
 
         Timber.w(String.valueOf(mediaPlayer.getWindowCount()));
@@ -218,7 +219,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
         String url4 = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
         //mediaPlayer.setDataSource(url);
-        MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url)
+        MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url4)
                 .setTitle("Source 1")
                 .setImageUrl("https://cdn.dribbble.com/users/20781/screenshots/573506/podcast_logo.jpg")
                 .build();
