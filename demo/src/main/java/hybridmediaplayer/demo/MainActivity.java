@@ -85,6 +85,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         //Chromecast:
         mediaRouteButton = findViewById(R.id.media_route_button);
 
+//        // Ensure volume control is updated
+//        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
         castContext = CastContext.getSharedInstance(this);
         castContext.addCastStateListener(new CastStateListener() {
             @Override
@@ -157,7 +160,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             }
         });
 
-        mediaPlayer.setDataSource(sources, sources);
+        mediaPlayer.setDataSource(sources, sources, 0);
         mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> Timber.d("onAudioSessionIdset audio session id = " + audioSessionId));
 
         mediaPlayer.setOnPositionDiscontinuityListener((reason, currentWindowIndex) -> Timber.w("onPositionDiscontinuity reason " + reason + " position " + mediaPlayer.getCurrentWindow() + " currentWindowIndex " + currentWindowIndex));
@@ -320,7 +323,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             }
         } else if (view.getId() == R.id.btSetSources) {
             createSources2();
-            mediaPlayer.setDataSource(sources, sources);
+            mediaPlayer.setDataSource(sources, sources, 0);
             mediaPlayer.prepare();
             mediaPlayer.seekTo(0,0);
         } else if (view.getId() == R.id.fastForward) {
@@ -467,7 +470,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         sources2.add(source2);
 //        sources2.add(source3);
         mediaPlayer.setInitialWindowNum(1);
-        mediaPlayer.setDataSource(sources2, sources2);
+        mediaPlayer.setDataSource(sources2, sources2, 0);
         mediaPlayer.prepare();
         mediaPlayer.seekTo(10000);
 

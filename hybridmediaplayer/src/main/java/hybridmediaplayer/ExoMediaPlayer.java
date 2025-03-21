@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Handler;
-import android.util.Log;
 import android.view.SurfaceView;
 
 import com.google.android.exoplayer2.LoadControl;
@@ -30,7 +29,6 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
@@ -131,12 +129,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
 
     public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList) {
-        setDataSource(mediaSourceInfoList, mediaSourceInfoList);
+        setDataSource(mediaSourceInfoList, mediaSourceInfoList,0);
     }
 
-    public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources) {
+    public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources, long defaultCastPosition) {
         if (exoPlayer != null)
             exoPlayer.stop();
+
+        this.defaultCastPosition = defaultCastPosition;
 
         // Set user agent
         String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
@@ -164,14 +164,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
             if (normalSources.get(i).getUrl().contains(".m3u8")) {
                 factory = new HlsMediaSource.Factory(dataSourceFactory);
-            }
-            else
+            } else
                 factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
 
 
             if (loadErrorHandlingPolicy != null)
                 factory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
-
 
 
             sources[i] = factory
@@ -322,8 +320,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void seekTo(int msec) {
-        if(currentPlayer == castPlayer){
-            if(castPlayer.getPlaybackState() == Player.STATE_IDLE){
+        if (currentPlayer == castPlayer) {
+            if (castPlayer.getPlaybackState() == Player.STATE_IDLE) {
                 defaultCastPosition = msec;
                 setCastItems();
             }
@@ -334,8 +332,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
     public void seekTo(int windowIndex, int msec) {
-        if(currentPlayer == castPlayer){
-            if(castPlayer.getPlaybackState() == Player.STATE_IDLE){
+        if (currentPlayer == castPlayer) {
+            if (castPlayer.getPlaybackState() == Player.STATE_IDLE) {
                 defaultCastPosition = msec;
                 setCastItems();
             }
@@ -383,6 +381,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     @Override
     public void setVolume(float level) {
         exoPlayer.setVolume(level);
+    }
+
+    public void setDefaultCastPosition(long defaultCastPosition) {
+        this.defaultCastPosition = defaultCastPosition;
     }
 
     @Override
