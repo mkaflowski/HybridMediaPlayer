@@ -160,14 +160,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             }
         });
 
+//        mediaPlayer.setAppUserAgent("HybridPlayer");
         mediaPlayer.setDataSource(sources, sources, 0);
         mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> Timber.d("onAudioSessionIdset audio session id = " + audioSessionId));
-
         mediaPlayer.setOnPositionDiscontinuityListener((reason, currentWindowIndex) -> Timber.w("onPositionDiscontinuity reason " + reason + " position " + mediaPlayer.getCurrentWindow() + " currentWindowIndex " + currentWindowIndex));
 //        mediaPlayer.setInitialWindowNum(2);
 //        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
-        mediaPlayer.seekTo(0,1000*30);
+        mediaPlayer.seekTo(0, 1000 * 30);
         mediaPlayer.play();
 
         Timber.w(String.valueOf(mediaPlayer.getWindowCount()));
@@ -220,7 +220,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         String url2 = "https://stream.rcs.revma.com/an1ugyygzk8uv";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
-        String url4 = "http://rss.art19.com/episodes/d93a35f0-e171-4a92-887b-35cee645f835.mp3";
+        String url4 = "http://15113.live.streamtheworld.com/977_MIX_SC";
         //mediaPlayer.setDataSource(url);
         MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url4)
                 .setTitle("Source 1")
@@ -325,7 +325,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             createSources2();
             mediaPlayer.setDataSource(sources, sources, 0);
             mediaPlayer.prepare();
-            mediaPlayer.seekTo(0,0);
+            mediaPlayer.seekTo(0, 0);
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 1500);
             Timber.e(String.valueOf(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex()));

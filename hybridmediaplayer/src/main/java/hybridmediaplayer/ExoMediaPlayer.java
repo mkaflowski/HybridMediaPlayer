@@ -29,6 +29,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
@@ -39,7 +40,9 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -76,6 +79,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     private LoadErrorHandlingPolicy loadErrorHandlingPolicy;
     private long defaultCastPosition;
+    private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
     public ExoMediaPlayer(Context context, CastContext castContext) {
         this(context, castContext, 20000);
@@ -132,6 +136,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         setDataSource(mediaSourceInfoList, mediaSourceInfoList,0);
     }
 
+    /*
+    Must be set before setDataSource()
+     */
+    public void setAppUserAgent(String appName){
+        this.userAgent = Util.getUserAgent(context, appName);
+    }
+
+    /*
+    Must be set before setDataSource()
+     */
+    public void setUserAgent(String userAgent){
+        this.userAgent = userAgent;
+    }
+
     public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources, long defaultCastPosition) {
         if (exoPlayer != null)
             exoPlayer.stop();
@@ -139,7 +157,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         this.defaultCastPosition = defaultCastPosition;
 
         // Set user agent
-        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
         DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory();
         httpDataSourceFactory.setUserAgent(userAgent);
 
