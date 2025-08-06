@@ -130,7 +130,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
 
         createSources();
-        mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
+        mediaPlayer = new ExoMediaPlayer(this, null, 0);
+        mediaPlayer.setCastContext(castContext);
+//        mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
 
         mediaPlayer.setPlayerView(this, playerView);
         mediaPlayer.setSupportingSystemEqualizer(true);

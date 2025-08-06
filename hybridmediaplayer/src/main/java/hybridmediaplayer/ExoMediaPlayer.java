@@ -80,6 +80,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private LoadErrorHandlingPolicy loadErrorHandlingPolicy;
     private long defaultCastPosition;
     private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    private CastContext castContext;
 
     public ExoMediaPlayer(Context context, CastContext castContext) {
         this(context, castContext, 20000);
@@ -108,13 +109,17 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
+        createCastPlayer(castContext);
+
+        initialWindowNum = 0;
+    }
+
+    private void createCastPlayer(CastContext castContext) {
         if (castContext != null) {
             castPlayer = new CastPlayer(castContext, new HlsMediaItemConverter());
             castPlayer.setSessionAvailabilityListener(this);
             castPlayer.addListener(new MyPlayerEventListener(castPlayer));
         }
-
-        initialWindowNum = 0;
     }
 
     @Override
@@ -532,6 +537,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         this.onAudioSessionIdSetListener = onAudioSessionIdSetListener;
     }
 
+    public void setCastContext(CastContext castContext) {
+        this.castContext = castContext;
+        createCastPlayer(castContext);
+//        init();
+    }
+
     public interface OnTrackChangedListener {
         /**
          * @param isFinished is track finished, if false it was changed by user
@@ -621,7 +632,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
                     case Player.STATE_IDLE:
                         if (isCasting && getCurrentWindow() == getWindowCount() - 1) {
-                            SessionManager sessionManager = CastContext.getSharedInstance(context).getSessionManager();
+                            SessionManager sessionManager = castContext.getSessionManager();
                             CastSession castSession = sessionManager.getCurrentCastSession();
                             if (castSession != null) {
                                 RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
