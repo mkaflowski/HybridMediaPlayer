@@ -3,11 +3,15 @@ package hybridmediaplayer;
 import android.content.Context;
 import android.view.SurfaceView;
 
+import androidx.annotation.OptIn;
+import androidx.media3.common.util.UnstableApi;
+
 public abstract class HybridMediaPlayer {
     OnPreparedListener onPreparedListener = null;
     OnCompletionListener onCompletionListener = null;
     OnErrorListener onErrorListener = null;
 
+    @OptIn(markerClass = UnstableApi.class)
     public static HybridMediaPlayer getInstance(Context context) {
         HybridMediaPlayer res;
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;

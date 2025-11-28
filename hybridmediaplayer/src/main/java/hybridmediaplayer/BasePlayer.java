@@ -1,13 +1,14 @@
 package hybridmediaplayer;
 
 import androidx.annotation.Nullable;
-
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.C;
+import androidx.media3.common.Player;
+import androidx.media3.common.Timeline;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.common.util.Util;
 
 /** Abstract base {@link Player} which implements common implementation independent methods. */
+@UnstableApi
 public abstract class BasePlayer implements Player {
 
     protected final Timeline.Window window;
@@ -18,70 +19,74 @@ public abstract class BasePlayer implements Player {
 
     @Override
     public final void seekToDefaultPosition() {
-        seekToDefaultPosition(getCurrentWindowIndex());
+        seekToDefaultPosition(getCurrentMediaItemIndex());
     }
 
     @Override
-    public final void seekToDefaultPosition(int windowIndex) {
-        seekTo(windowIndex, /* positionMs= */ C.TIME_UNSET);
+    public final void seekToDefaultPosition(int mediaItemIndex) {
+        seekTo(mediaItemIndex, /* positionMs= */ C.TIME_UNSET);
     }
 
     @Override
     public final void seekTo(long positionMs) {
-        seekTo(getCurrentWindowIndex(), positionMs);
+        seekTo(getCurrentMediaItemIndex(), positionMs);
     }
 
     @Override
-    public final boolean hasPrevious() {
-        return getPreviousWindowIndex() != C.INDEX_UNSET;
+    public final boolean hasPreviousMediaItem() {
+        return getPreviousMediaItemIndex() != C.INDEX_UNSET;
     }
 
     @Override
-    public final void previous() {
-        int previousWindowIndex = getPreviousWindowIndex();
-        if (previousWindowIndex != C.INDEX_UNSET) {
-            seekToDefaultPosition(previousWindowIndex);
+    public final void seekToPreviousMediaItem() {
+        int previousIndex = getPreviousMediaItemIndex();
+        if (previousIndex != C.INDEX_UNSET) {
+            seekToDefaultPosition(previousIndex);
         }
     }
 
     @Override
-    public final boolean hasNext() {
-        return getNextWindowIndex() != C.INDEX_UNSET;
+    public final boolean hasNextMediaItem() {
+        return getNextMediaItemIndex() != C.INDEX_UNSET;
     }
 
     @Override
-    public final void next() {
-        int nextWindowIndex = getNextWindowIndex();
-        if (nextWindowIndex != C.INDEX_UNSET) {
-            seekToDefaultPosition(nextWindowIndex);
+    public final void seekToNextMediaItem() {
+        int nextIndex = getNextMediaItemIndex();
+        if (nextIndex != C.INDEX_UNSET) {
+            seekToDefaultPosition(nextIndex);
         }
     }
 
     @Override
-    public final int getNextWindowIndex() {
+    public final int getNextMediaItemIndex() {
         Timeline timeline = getCurrentTimeline();
         return timeline.isEmpty()
                 ? C.INDEX_UNSET
                 : timeline.getNextWindowIndex(
-                getCurrentWindowIndex(), getRepeatModeForNavigation(), getShuffleModeEnabled());
+                getCurrentMediaItemIndex(),
+                getRepeatModeForNavigation(),
+                getShuffleModeEnabled());
     }
 
     @Override
-    public final int getPreviousWindowIndex() {
+    public final int getPreviousMediaItemIndex() {
         Timeline timeline = getCurrentTimeline();
         return timeline.isEmpty()
                 ? C.INDEX_UNSET
                 : timeline.getPreviousWindowIndex(
-                getCurrentWindowIndex(), getRepeatModeForNavigation(), getShuffleModeEnabled());
+                getCurrentMediaItemIndex(),
+                getRepeatModeForNavigation(),
+                getShuffleModeEnabled());
     }
 
     @Nullable
     public final Object getCurrentTag() {
-        int windowIndex = getCurrentWindowIndex();
+        int mediaItemIndex = getCurrentMediaItemIndex();
         Timeline timeline = getCurrentTimeline();
-        return windowIndex >= timeline.getWindowCount()
+        return mediaItemIndex >= timeline.getWindowCount()
                 ? null
-                : timeline.getWindow(windowIndex, window).tag;
+                : timeline.getWindow(mediaItemIndex, window).tag;
     }
 
     @Override
@@ -94,15 +99,15 @@ public abstract class BasePlayer implements Player {
     }
 
     @Override
-    public final boolean isCurrentWindowDynamic() {
+    public final boolean isCurrentMediaItemDynamic() {
         Timeline timeline = getCurrentTimeline();
-        return !timeline.isEmpty() && timeline.getWindow(getCurrentWindowIndex(), window).isDynamic;
+        return !timeline.isEmpty() && timeline.getWindow(getCurrentMediaItemIndex(), window).isDynamic;
     }
 
     @Override
-    public final boolean isCurrentWindowSeekable() {
+    public final boolean isCurrentMediaItemSeekable() {
         Timeline timeline = getCurrentTimeline();
-        return !timeline.isEmpty() && timeline.getWindow(getCurrentWindowIndex(), window).isSeekable;
+        return !timeline.isEmpty() && timeline.getWindow(getCurrentMediaItemIndex(), window).isSeekable;
     }
 
     @Override
@@ -110,7 +115,7 @@ public abstract class BasePlayer implements Player {
         Timeline timeline = getCurrentTimeline();
         return timeline.isEmpty()
                 ? C.TIME_UNSET
-                : timeline.getWindow(getCurrentWindowIndex(), window).getDurationMs();
+                : timeline.getWindow(getCurrentMediaItemIndex(), window).getDurationMs();
     }
 
     @RepeatMode
@@ -123,7 +128,7 @@ public abstract class BasePlayer implements Player {
     protected static final class ListenerHolder {
 
         /**
-         * The listener on which {link #invoke} will execute {@link ListenerInvocation listener
+         * The listener on which {@link #invoke} will execute {@link ListenerInvocation listener
          * invocations}.
          */
         public final Player.Listener listener;

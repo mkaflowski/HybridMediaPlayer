@@ -14,17 +14,19 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.OptIn;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.Metadata;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.extractor.metadata.icy.IcyHeaders;
+import androidx.media3.extractor.metadata.icy.IcyInfo;
 import androidx.mediarouter.app.MediaRouteButton;
 
-import com.google.android.exoplayer2.MediaMetadata;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.metadata.Metadata;
-import com.google.android.exoplayer2.metadata.icy.IcyHeaders;
-import com.google.android.exoplayer2.metadata.icy.IcyInfo;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastState;
@@ -39,6 +41,7 @@ import hybridmediaplayer.MediaSourceInfo;
 import hybridplayer.demo.R;
 import timber.log.Timber;
 
+@UnstableApi
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
     public static final String TESTCHANNEL = "testchannel5";
@@ -56,6 +59,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private List<MediaSourceInfo> sources;
 
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,6 +113,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     protected void onPause() {
         super.onPause();
@@ -116,6 +121,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.pause();
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -123,6 +129,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.release();
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private void createPlayer() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -306,6 +313,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btPlay) {
@@ -392,21 +400,21 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, TESTCHANNEL)
-                .setSmallIcon(R.drawable.exo_notification_small_icon)
+                .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_shuffle_on)
                 .setContentTitle(Integer.toString(notificationCounter))
                 .setContentText("noti")
                 .setGroup(GROUP_1)
-                .setColor(ContextCompat.getColor(this, R.color.cast_expanded_controller_ad_container_white_stripe_color));
+                .setColor(ContextCompat.getColor(this, R.color.colorAccent));
 
 
         NotificationCompat.Builder gruobuilder = new NotificationCompat.Builder(this, TESTCHANNEL)
-                .setSmallIcon(R.drawable.exo_notification_small_icon)
+                .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_shuffle_on)
                 .setContentTitle("GROUP " + Integer.toString(notificationCounter))
                 .setContentText("noti")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setGroup(GROUP_1)
                 .setGroupSummary(true)
-                .setColor(ContextCompat.getColor(this, R.color.cast_expanded_controller_ad_container_white_stripe_color));
+                .setColor(ContextCompat.getColor(this, R.color.colorAccent));
 
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -453,6 +461,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mNotificationManager.createNotificationChannel(mChannel);
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private void loadOtherSources() {
         List<MediaSourceInfo> sources2 = new ArrayList<>();
         MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")

@@ -5,31 +5,28 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.SurfaceView;
 
-import com.google.android.exoplayer2.LoadControl;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.MediaMetadata;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.analytics.AnalyticsListener;
-import com.google.android.exoplayer2.ext.cast.CastPlayer;
-import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
-import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MediaSourceFactory;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
-import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.Util;
+import androidx.media3.common.C;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.PlaybackParameters;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.common.util.Util;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.LoadControl;
+import androidx.media3.exoplayer.analytics.AnalyticsListener;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy;
+import androidx.media3.cast.CastPlayer;
+import androidx.media3.cast.SessionAvailabilityListener;
+
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
@@ -40,26 +37,24 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import timber.log.Timber;
 
-
 /**
- * Main player class.
+ * Main player class - Media3 version
  */
+@UnstableApi
 public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabilityListener {
 
     private Player currentPlayer;
-    private SimpleExoPlayer exoPlayer;
+    private ExoPlayer exoPlayer;
     private CastPlayer castPlayer;
     private int currentWindow = -1;
 
     private Context context;
-    private MediaSource exoMediaSource;
-    private List<MediaItem> mediaItems;
+    private List<MediaItem> localMediaItems;
+    private List<MediaItem> castMediaItems;
     private int currentState;
     private boolean isPreparing = false;
     private OnTrackChangedListener onTrackChangedListener;
@@ -81,6 +76,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private long defaultCastPosition;
     private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     private CastContext castContext;
+    private DataSource.Factory dataSourceFactory;
 
     public ExoMediaPlayer(Context context, CastContext castContext) {
         this(context, castContext, 20000);
@@ -90,27 +86,21 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         this(context, null);
     }
 
-    public ExoMediaPlayer(Context context, CastContext castContext, long backBufferMs) {
+    public ExoMediaPlayer(Context context, CastContext castContext, int backBufferMs) {
         this.context = context;
 
-//        bandwidthMeter = new DefaultBandwidthMeter();
-//        TrackSelection.Factory videoTrackSelectionFactory =
-//                new AdaptiveTrackSelection.Factory(bandwidthMeter);
-//        final TrackSelector trackSelector =
-//                new DefaultTrackSelector(videoTrackSelectionFactory);
-//
         DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);
-
         LoadControl loadControl = new MyLoadControl(backBufferMs);
 
-        exoPlayer = new SimpleExoPlayer.Builder(context).setTrackSelector(trackSelector)
-                .setLoadControl(loadControl).build();
-//        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
+        exoPlayer = new ExoPlayer.Builder(context)
+                .setTrackSelector(trackSelector)
+                .setLoadControl(loadControl)
+                .build();
+
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
         currentPlayer = exoPlayer;
 
         createCastPlayer(castContext);
-
         initialWindowNum = 0;
     }
 
@@ -124,7 +114,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void setDataSource(String path) {
-        MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl(path)
+        MediaSourceInfo source = new MediaSourceInfo.Builder()
+                .setUrl(path)
                 .setTitle("Title")
                 .build();
         setDataSource(source);
@@ -136,22 +127,21 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         setDataSource(list);
     }
 
-
     public void setDataSource(List<MediaSourceInfo> mediaSourceInfoList) {
-        setDataSource(mediaSourceInfoList, mediaSourceInfoList,0);
+        setDataSource(mediaSourceInfoList, mediaSourceInfoList, 0);
     }
 
     /*
     Must be set before setDataSource()
      */
-    public void setAppUserAgent(String appName){
+    public void setAppUserAgent(String appName) {
         this.userAgent = Util.getUserAgent(context, appName);
     }
 
     /*
     Must be set before setDataSource()
      */
-    public void setUserAgent(String userAgent){
+    public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
 
@@ -161,46 +151,38 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         this.defaultCastPosition = defaultCastPosition;
 
-        // Set user agent
-        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory();
-        httpDataSourceFactory.setUserAgent(userAgent);
-
-        httpDataSourceFactory.setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS);
-        httpDataSourceFactory.setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS);
-
-        // Set AllowCrossProtocolRedirects
-        httpDataSourceFactory.setAllowCrossProtocolRedirects(true);
+        // Set up HTTP data source
+        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setUserAgent(userAgent)
+                .setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS)
+                .setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS)
+                .setAllowCrossProtocolRedirects(true);
 
         // Set default cookie manager
         CookieManager cookieManager = new CookieManager();
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
         CookieHandler.setDefault(cookieManager);
 
-        // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
+        // Create data source factory
+        dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
 
-        MediaSource[] sources = new MediaSource[normalSources.size()];
-        for (int i = 0; i < normalSources.size(); i++) {
-            // This is the MediaSource representing the media to be played.
-            MediaSourceFactory factory = new DefaultMediaSourceFactory(dataSourceFactory);
+        // Build MediaItems for local playback
+        localMediaItems = new ArrayList<>();
+        for (MediaSourceInfo source : normalSources) {
+            MediaItem.Builder builder = new MediaItem.Builder()
+                    .setUri(Uri.parse(source.getUrl()));
 
-            if (normalSources.get(i).getUrl().contains(".m3u8")) {
-                factory = new HlsMediaSource.Factory(dataSourceFactory);
-            } else
-                factory = new ProgressiveMediaSource.Factory(dataSourceFactory);
+            // Set mime type if it's HLS
+            if (source.getUrl().contains(".m3u8")) {
+                builder.setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8);
+            }
 
-
-            if (loadErrorHandlingPolicy != null)
-                factory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
-
-
-            sources[i] = factory
-                    .createMediaSource(MediaItem.fromUri(Uri.parse(normalSources.get(i).getUrl())));
+            localMediaItems.add(builder.build());
         }
 
-        exoMediaSource = new ConcatenatingMediaSource(sources);
-
+        // Prepare cast items
         prepareCastMediaSourceInfoList(castSources);
+
         if (isCasting)
             setCastItems();
     }
@@ -210,14 +192,14 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             setCurrentPlayer(castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
     }
 
-
     private void prepareCastMediaSourceInfoList(List<MediaSourceInfo> mediaSourceInfoList) {
         this.mediaSourceInfoList = mediaSourceInfoList;
-        //media sources for CastPlayer
-        mediaItems = new ArrayList<>();
+
+        // Media items for CastPlayer
+        castMediaItems = new ArrayList<>();
         for (int i = 0; i < mediaSourceInfoList.size(); i++) {
             MediaItem mediaItem = buildMediaQueueItem(mediaSourceInfoList.get(i), i + 1);
-            mediaItems.add(mediaItem);
+            castMediaItems.add(mediaItem);
         }
     }
 
@@ -225,24 +207,29 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         if (mediaSourceInfo == null)
             mediaSourceInfo = MediaSourceInfo.PLACEHOLDER;
 
-        MediaMetadata.Builder movieMetadata = new MediaMetadata.Builder();
-        movieMetadata.setTitle(mediaSourceInfo.getTitle());
-        movieMetadata.setArtist(mediaSourceInfo.getAuthor());
-        movieMetadata.setArtworkUri(Uri.parse(mediaSourceInfo.getImageUrl()));
-        movieMetadata.setTrackNumber(position);
+        MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder()
+                .setTitle(mediaSourceInfo.getTitle())
+                .setArtist(mediaSourceInfo.getAuthor())
+                .setArtworkUri(Uri.parse(mediaSourceInfo.getImageUrl()))
+                .setTrackNumber(position);
 
+        MediaItem.Builder builder = new MediaItem.Builder()
+                .setUri(mediaSourceInfo.getUrl())
+                .setMediaMetadata(metadataBuilder.build());
 
-        MediaItem.Builder builder = new MediaItem.Builder();
-        builder.setMimeType(mediaSourceInfo.isVideo() ? MimeTypes.VIDEO_UNKNOWN : MimeTypes.AUDIO_UNKNOWN);
-        if (mediaSourceInfo.getUrl().contains(".m3u8"))
-            builder.setMimeType(MimeTypes.APPLICATION_M3U8);
-        builder.setUri(mediaSourceInfo.getUrl());
-        builder.setMediaMetadata(movieMetadata.build());
+        // Set mime type
+        if (mediaSourceInfo.isVideo()) {
+            builder.setMimeType(androidx.media3.common.MimeTypes.VIDEO_UNKNOWN);
+        } else {
+            builder.setMimeType(androidx.media3.common.MimeTypes.AUDIO_UNKNOWN);
+        }
 
+        if (mediaSourceInfo.getUrl().contains(".m3u8")) {
+            builder.setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8);
+        }
 
         return builder.build();
     }
-
 
     @Override
     public void prepare() {
@@ -256,10 +243,12 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         });
 
         isPreparing = true;
-        exoPlayer.prepare(exoMediaSource);
+
+        // Set media items and prepare
+        exoPlayer.setMediaItems(localMediaItems);
+        exoPlayer.prepare();
 
         shouldBeWindow = initialWindowNum;
-
         currentWindow = initialWindowNum;
 
         if (initialWindowNum != 0)
@@ -277,14 +266,11 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
     private void setCastItems() {
-        ArrayList<MediaItem> mediaItemsCast = new ArrayList<>();
-        int i = 0;
-        for (MediaSourceInfo mediaItem : mediaSourceInfoList) {
-            mediaItemsCast.add(buildMediaQueueItem(mediaItem, i));
-            i++;
-        }
-        Timber.d(String.valueOf(mediaItemsCast.size()));
-        castPlayer.setMediaItems(mediaItemsCast, currentWindow, defaultCastPosition);
+        if (castMediaItems == null || castMediaItems.isEmpty())
+            return;
+
+        Timber.d("Setting cast items: " + castMediaItems.size());
+        castPlayer.setMediaItems(castMediaItems, currentWindow, defaultCastPosition);
         castPlayer.play();
     }
 
@@ -346,6 +332,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             if (castPlayer.getPlaybackState() == Player.STATE_IDLE) {
                 defaultCastPosition = msec;
                 setCastItems();
+                return;
             }
         }
 
@@ -358,20 +345,18 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             if (castPlayer.getPlaybackState() == Player.STATE_IDLE) {
                 defaultCastPosition = msec;
                 setCastItems();
+                return;
             }
         }
+
         try {
             if (getCurrentWindow() != windowIndex) {
                 isChangingWindowByUser = true;
                 shouldBeWindow = windowIndex;
             }
-            try {
-                currentPlayer.seekTo(windowIndex, msec);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                // TODO: 30.03.2018 https://github.com/google/ExoPlayer/issues/4063
-            }
-        } catch (Exception ignored) {
-
+            currentPlayer.seekTo(windowIndex, msec);
+        } catch (Exception e) {
+            Timber.e(e, "Error seeking to window");
         }
     }
 
@@ -382,9 +367,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     @Override
     public int getDuration() {
         try {
-            if (currentPlayer.getDuration() < 0)
+            long duration = currentPlayer.getDuration();
+            if (duration == C.TIME_UNSET || duration < 0)
                 return -1;
-            return (int) currentPlayer.getDuration();
+            return (int) duration;
         } catch (Exception e) {
             return -1;
         }
@@ -417,7 +403,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public boolean isPlaying() {
-        return currentPlayer.getPlayWhenReady();
+        return currentPlayer.getPlayWhenReady() &&
+                currentPlayer.getPlaybackState() == Player.STATE_READY;
     }
 
     @Override
@@ -434,7 +421,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         return currentPlayer;
     }
 
-    public SimpleExoPlayer getExoPlayer() {
+    public ExoPlayer getExoPlayer() {
         return exoPlayer;
     }
 
@@ -456,7 +443,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void onCastSessionAvailable() {
-        Timber.d("");
+        Timber.d("Cast session available");
         if (currentPlayer != castPlayer) {
             defaultCastPosition = exoPlayer.getCurrentPosition();
             setCurrentPlayer(castPlayer);
@@ -467,8 +454,9 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     @Override
     public void onCastSessionUnavailable() {
-        Timber.e(String.valueOf(castPlayer.getCurrentWindowIndex()));
-        Timber.e(String.valueOf(exoPlayer.getCurrentWindowIndex()));
+        Timber.e("Cast session unavailable");
+        Timber.e("Cast window: " + castPlayer.getCurrentMediaItemIndex());
+        Timber.e("ExoPlayer window: " + exoPlayer.getCurrentMediaItemIndex());
         setCurrentPlayer(exoPlayer);
         if (onCastAvailabilityChangeListener != null)
             onCastAvailabilityChangeListener.onCastAvailabilityChange(false);
@@ -483,22 +471,20 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             return;
 
         boolean shouldPlay = isPlaying() && currentPlayer.getPlaybackState() != Player.STATE_IDLE;
-
         pause();
 
         long time = currentPlayer.getCurrentPosition();
-        int window = currentPlayer.getCurrentWindowIndex();
+        int window = currentPlayer.getCurrentMediaItemIndex();
 
-        Timber.d(String.valueOf(window));
-        Timber.i(String.valueOf(time));
+        Timber.d("Switching player - window: " + window + ", time: " + time);
 
         currentPlayer = player;
         isPreparing = true;
 
         if (currentPlayer == castPlayer) {
-            Timber.d("");
+            Timber.d("Switching to Cast player");
             isCasting = true;
-            if (mediaItems != null && mediaItems.size() != 0)
+            if (castMediaItems != null && !castMediaItems.isEmpty())
                 setCastItems();
         }
 
@@ -521,11 +507,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     }
 
     public int getCurrentWindow() {
-        return currentPlayer.getCurrentWindowIndex();
+        return currentPlayer.getCurrentMediaItemIndex();
     }
 
     public int getWindowCount() {
-
         return mediaSourceInfoList.size();
     }
 
@@ -540,90 +525,75 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     public void setCastContext(CastContext castContext) {
         this.castContext = castContext;
         createCastPlayer(castContext);
-//        init();
     }
 
+    // Interfaces
     public interface OnTrackChangedListener {
-        /**
-         * @param isFinished is track finished, if false it was changed by user
-         */
         void onTrackChanged(boolean isFinished);
     }
 
     public interface OnAudioSessionIdSetListener {
-
         void onAudioSessionIdset(int audioSessionId);
     }
 
     public interface OnPositionDiscontinuityListener {
-        /**
-         * @param reason             reason
-         * @param currentWindowIndex currentWindowIndex
-         */
         void onPositionDiscontinuity(int reason, int currentWindowIndex);
     }
 
     public interface OnCastAvailabilityChangeListener {
-        /**
-         * @param isAvailable is casting availabe
-         */
         void onCastAvailabilityChange(boolean isAvailable);
     }
 
     public interface OnLoadingChanged {
-        /**
-         * @param isLoading is player Loading
-         */
         void onLoadingChanged(boolean isLoading);
     }
 
     public interface OnPlayerStateChanged {
-        /**
-         * @param playWhenReady playWhenReady
-         * @param playbackState playbackState states from Player class
-         */
         void onPlayerStateChanged(boolean playWhenReady, int playbackState);
     }
 
-
+    // Player Event Listener
     class MyPlayerEventListener implements Player.Listener {
-        private Player player;
+        private final Player player;
 
         public MyPlayerEventListener(Player player) {
             this.player = player;
         }
 
         @Override
-        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-//            super.onPlayerStateChanged(playWhenReady, playbackState);
-
-//            Timber.d("playback state = " + playbackState);
-
+        public void onPlaybackStateChanged(int playbackState) {
             if (currentPlayer != player)
                 return;
 
+            handlePlayerStateChange(player.getPlayWhenReady(), playbackState);
+        }
+
+        @Override
+        public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
+            if (currentPlayer != player)
+                return;
+
+            handlePlayerStateChange(playWhenReady, player.getPlaybackState());
+        }
+
+        private void handlePlayerStateChange(boolean playWhenReady, int playbackState) {
             if (onPlayerStateChanged != null)
                 onPlayerStateChanged.onPlayerStateChanged(playWhenReady, playbackState);
 
             if (currentState != playbackState || isPreparing) {
-
-                // handling: https://github.com/google/ExoPlayer/issues/4049
                 if (playbackState == Player.STATE_READY)
                     checkWindowChanged();
 
-
                 switch (playbackState) {
                     case Player.STATE_ENDED:
-
                         if (onCompletionListener != null)
                             onCompletionListener.onCompletion(ExoMediaPlayer.this);
                         break;
 
                     case Player.STATE_READY:
                         if (isPreparing && onPreparedListener != null && shouldBeWindow == getCurrentWindow()) {
-//                            Timber.d("ret " + currentPlayer.getDuration());
-                            if ((currentPlayer.getDuration() < 0 && currentPlayer.isCurrentWindowSeekable())
-                                    || currentPlayer.getCurrentWindowIndex() >= getWindowCount())
+                            if ((currentPlayer.getDuration() == C.TIME_UNSET && currentPlayer.isCurrentMediaItemSeekable())
+                                    || currentPlayer.getCurrentMediaItemIndex() >= getWindowCount())
                                 return;
                             isPreparing = false;
                             onPreparedListener.onPrepared(ExoMediaPlayer.this);
@@ -632,56 +602,57 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
                     case Player.STATE_IDLE:
                         if (isCasting && getCurrentWindow() == getWindowCount() - 1) {
-                            SessionManager sessionManager = castContext.getSessionManager();
-                            CastSession castSession = sessionManager.getCurrentCastSession();
-                            if (castSession != null) {
-                                RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
-                                if (remoteMediaClient != null) {
-                                    Timber.i("playback state session= " + remoteMediaClient.getIdleReason());
-
-                                    if (MediaStatus.IDLE_REASON_FINISHED == remoteMediaClient.getIdleReason()) {
-                                        if (onCompletionListener != null) {
-                                            currentPlayer.setPlayWhenReady(false);
-                                            onCompletionListener.onCompletion(ExoMediaPlayer.this);
-                                        }
-                                    }
-                                }
-                            }
-                            break;
+                            handleCastCompletion();
                         }
+                        break;
                 }
             }
             currentState = playbackState;
+        }
 
+        private void handleCastCompletion() {
+            SessionManager sessionManager = castContext.getSessionManager();
+            CastSession castSession = sessionManager.getCurrentCastSession();
+            if (castSession != null) {
+                RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
+                if (remoteMediaClient != null) {
+                    Timber.i("Cast idle reason: " + remoteMediaClient.getIdleReason());
+                    if (MediaStatus.IDLE_REASON_FINISHED == remoteMediaClient.getIdleReason()) {
+                        if (onCompletionListener != null) {
+                            currentPlayer.setPlayWhenReady(false);
+                            onCompletionListener.onCompletion(ExoMediaPlayer.this);
+                        }
+                    }
+                }
+            }
         }
 
         @Override
-        public void onPositionDiscontinuity(int reason) {
+        public void onPositionDiscontinuity(Player.PositionInfo oldPosition,
+                                            Player.PositionInfo newPosition,
+                                            int reason) {
             if (currentPlayer != player)
                 return;
 
             checkWindowChanged();
 
             if (onPositionDiscontinuityListener != null)
-                onPositionDiscontinuityListener.onPositionDiscontinuity(reason, currentPlayer.getCurrentWindowIndex());
+                onPositionDiscontinuityListener.onPositionDiscontinuity(
+                        reason,
+                        currentPlayer.getCurrentMediaItemIndex()
+                );
         }
 
         private void checkWindowChanged() {
-            int newIndex = currentPlayer.getCurrentWindowIndex();
+            int newIndex = currentPlayer.getCurrentMediaItemIndex();
             if (newIndex < 0)
                 return;
 
-//            Timber.d("onTrackChanged currentWindow " + currentWindow);
-//            Timber.d("onTrackChanged newIndex " + newIndex);
-//            Timber.d("onTrackChanged shouldBeWindow " + shouldBeWindow);
-//            Timber.d("onTrackChanged player.getDuration() " + player.getDuration());
-
             if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
-                // The index has changed; update the UI to show info for source at newIndex
                 shouldBeWindow = newIndex;
                 currentWindow = newIndex;
 
-                if (player.getDuration() < 0)
+                if (player.getDuration() == C.TIME_UNSET)
                     isPreparing = true;
 
                 if (onTrackChangedListener != null)
@@ -689,23 +660,17 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
                 isChangingWindowByUser = false;
 
-
-                // TODO: 02/03/2020 delete this with new library:
-                //workaround for bug in cast library 18.1 - covers sometimes doesn't load after track changed (play/pause/seek helps)
+                // Workaround for Cast notification image loading
                 if (isCasting) {
-                    Runnable reloadNotificationImageRunnable = () -> {
-                        if (player == null)
-                            return;
-                        if (player.getPlayWhenReady())
-                            player.setPlayWhenReady(true);
-                        else
-                            player.setPlayWhenReady(false);
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    Runnable reloadRunnable = () -> {
+                        if (player != null) {
+                            player.setPlayWhenReady(player.getPlayWhenReady());
+                        }
                     };
-                    Handler handler = new Handler();
-                    handler.postDelayed(reloadNotificationImageRunnable, 3000);
-                    handler.postDelayed(reloadNotificationImageRunnable, 6000);
+                    handler.postDelayed(reloadRunnable, 3000);
+                    handler.postDelayed(reloadRunnable, 6000);
                 }
-                /// TODO: 02/03/2020 end of the workaround
             }
         }
 
@@ -718,9 +683,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                 onErrorListener.onError(error, ExoMediaPlayer.this);
         }
 
-
         @Override
-        public void onLoadingChanged(boolean isLoading) {
+        public void onIsLoadingChanged(boolean isLoading) {
             if (onLoadingChanged != null)
                 onLoadingChanged.onLoadingChanged(isLoading);
         }
