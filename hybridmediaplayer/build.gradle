@@ -46,6 +46,7 @@ dependencies {
     api "androidx.media3:media3-exoplayer:1.5.0"
     api "androidx.media3:media3-session:1.5.0"
     api "androidx.media3:media3-cast:1.5.0"
+    api "androidx.media3:media3-ui:1.5.0"
     implementation 'androidx.work:work-runtime:2.11.0'
 }
 
