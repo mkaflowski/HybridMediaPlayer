@@ -166,14 +166,22 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         // Create data source factory
         dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
 
-        // Build MediaItems for local playback
+        // Build MediaItems for local playback - użyj tej samej logiki co dla Cast
         localMediaItems = new ArrayList<>();
-        for (MediaSourceInfo source : normalSources) {
+        for (int i = 0; i < normalSources.size(); i++) {
+            MediaSourceInfo source = normalSources.get(i);
+
             MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder()
                     .setTitle(source.getTitle())
                     .setArtist(source.getAuthor())
                     .setAlbumArtist(source.getAlbumTitle())
                     .setMediaType(source.getMediaType());
+
+            // Dodaj artwork URI
+            String imageUrl = source.getImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                metadataBuilder.setArtworkUri(Uri.parse(imageUrl));
+            }
 
             MediaItem.Builder builder = new MediaItem.Builder()
                     .setUri(Uri.parse(source.getUrl()))
