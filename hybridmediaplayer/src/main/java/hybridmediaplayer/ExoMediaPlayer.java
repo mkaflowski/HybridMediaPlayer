@@ -169,8 +169,15 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         // Build MediaItems for local playback
         localMediaItems = new ArrayList<>();
         for (MediaSourceInfo source : normalSources) {
+            MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder()
+                    .setTitle(source.getTitle())
+                    .setArtist(source.getAuthor())
+                    .setAlbumArtist(source.getAlbumTitle())
+                    .setMediaType(source.getMediaType());
+
             MediaItem.Builder builder = new MediaItem.Builder()
-                    .setUri(Uri.parse(source.getUrl()));
+                    .setUri(Uri.parse(source.getUrl()))
+                    .setMediaMetadata(metadataBuilder.build());
 
             // Set mime type if it's HLS
             if (source.getUrl().contains(".m3u8")) {
@@ -211,6 +218,8 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                 .setTitle(mediaSourceInfo.getTitle())
                 .setArtist(mediaSourceInfo.getAuthor())
                 .setArtworkUri(Uri.parse(mediaSourceInfo.getImageUrl()))
+                .setAlbumArtist(mediaSourceInfo.getAlbumTitle())
+                .setMediaType(mediaSourceInfo.getMediaType())
                 .setTrackNumber(position);
 
         MediaItem.Builder builder = new MediaItem.Builder()

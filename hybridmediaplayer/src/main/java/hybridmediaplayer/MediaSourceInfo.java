@@ -1,5 +1,9 @@
 package hybridmediaplayer;
 
+import static androidx.media3.common.MediaMetadata.MEDIA_TYPE_MUSIC;
+
+import androidx.media3.common.MediaMetadata;
+
 public class MediaSourceInfo {
 
     private String title;
@@ -7,6 +11,8 @@ public class MediaSourceInfo {
     private String url;
     private String imageUrl;
     private boolean isVideo;
+    private String albumTitle;
+    private @MediaMetadata.MediaType int mediaType = MEDIA_TYPE_MUSIC;
 
     public static MediaSourceInfo PLACEHOLDER = new Builder().setTitle("HybridMediaPlayer Casting")
             .setAuthor("lib by Mateusz Kaflowski")
@@ -49,7 +55,15 @@ public class MediaSourceInfo {
         return isVideo;
     }
 
-    private MediaSourceInfo(String title, String author, String url, String imageUrl, boolean isVideo) {
+    public String getAlbumTitle() {
+        return albumTitle;
+    }
+
+    public @MediaMetadata.MediaType int getMediaType() {
+        return mediaType;
+    }
+
+    private MediaSourceInfo(String title, String author, String url, String imageUrl, boolean isVideo, String albumTitle, int mediaType) {
         this.title = title;
         this.author = author;
         this.url = url;
@@ -63,7 +77,8 @@ public class MediaSourceInfo {
         private String url;
         private String imageUrl;
         private boolean isVideo;
-
+        private String albumTitle;
+        private int mediaType = MEDIA_TYPE_MUSIC;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -90,8 +105,18 @@ public class MediaSourceInfo {
             return this;
         }
 
+        public Builder albumTitle(String albumTitle){
+            this.albumTitle = albumTitle;
+            return this;
+        }
+
+        public Builder setMediaType(@MediaMetadata.MediaType int mediaType){
+            this.mediaType = mediaType;
+            return this;
+        }
+
         public MediaSourceInfo build() {
-            return new MediaSourceInfo(title, author, url, imageUrl, isVideo);
+            return new MediaSourceInfo(title, author, url, imageUrl, isVideo, albumTitle, mediaType);
         }
     }
 
