@@ -105,7 +105,7 @@ public class MediaSourceInfo {
             return this;
         }
 
-        public Builder albumTitle(String albumTitle){
+        public Builder setAlbumTitle(String albumTitle){
             this.albumTitle = albumTitle;
             return this;
         }

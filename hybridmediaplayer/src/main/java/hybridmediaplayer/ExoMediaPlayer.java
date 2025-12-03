@@ -145,6 +145,81 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         this.userAgent = userAgent;
     }
 
+    public void setDataSourceWithMediaItems(List<MediaItem> normalSources, List<MediaItem> castSources, long defaultCastPosition) {
+        if (exoPlayer != null)
+            exoPlayer.stop();
+
+        this.defaultCastPosition = defaultCastPosition;
+
+        // Set up HTTP data source
+        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setUserAgent(userAgent)
+                .setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS)
+                .setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS)
+                .setAllowCrossProtocolRedirects(true);
+
+        // Set default cookie manager
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
+        CookieHandler.setDefault(cookieManager);
+
+        // Create data source factory
+        dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
+
+        // Build MediaItems for local playback - użyj tej samej logiki co dla Cast
+        localMediaItems = new ArrayList<>();
+        for (int i = 0; i < normalSources.size(); i++) {
+            localMediaItems.add(normalSources.get(i));
+        }
+
+        // Prepare cast items
+        this.mediaSourceInfoList = new ArrayList<>();
+
+        // Media items for CastPlayer
+        castMediaItems = new ArrayList<>();
+        for (int i = 0; i < castSources.size(); i++) {
+            MediaItem source = castSources.get(i);
+            castMediaItems.add(source);
+
+            MediaSourceInfo.Builder builder = new MediaSourceInfo.Builder();
+
+            // URL
+            if (source.localConfiguration != null && source.localConfiguration.uri != null) {
+                builder.setUrl(source.localConfiguration.uri.toString());
+            }
+
+            // Title
+            if (source.mediaMetadata.title != null) {
+                builder.setTitle(source.mediaMetadata.title.toString());
+            }
+
+            // Artist/Author
+            if (source.mediaMetadata.artist != null) {
+                builder.setAuthor(source.mediaMetadata.artist.toString());
+            }
+
+            // Album
+            if (source.mediaMetadata.albumTitle != null) {
+                builder.setAlbumTitle(source.mediaMetadata.albumTitle.toString());
+            }
+
+            // Image URL
+            if (source.mediaMetadata.artworkUri != null) {
+                builder.setImageUrl(source.mediaMetadata.artworkUri.toString());
+            }
+
+            // Media type
+            if (source.mediaMetadata.mediaType != null) {
+                builder.setMediaType(source.mediaMetadata.mediaType);
+            }
+
+            mediaSourceInfoList.add(builder.build());
+        }
+
+        if (isCasting)
+            setCastItems();
+    }
+
     public void setDataSource(List<MediaSourceInfo> normalSources, List<MediaSourceInfo> castSources, long defaultCastPosition) {
         if (exoPlayer != null)
             exoPlayer.stop();
