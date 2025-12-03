@@ -336,8 +336,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
         isPreparing = true;
 
-        // Set media items and prepare
-        exoPlayer.setMediaItems(localMediaItems);
+        if (exoPlayer.getMediaItemCount() == 0 && localMediaItems != null) {
+            exoPlayer.setMediaItems(localMediaItems);
+        }
+
         exoPlayer.prepare();
 
         shouldBeWindow = initialWindowNum;
