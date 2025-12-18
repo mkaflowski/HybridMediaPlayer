@@ -25,6 +25,7 @@ import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.extractor.metadata.icy.IcyHeaders;
 import androidx.media3.extractor.metadata.icy.IcyInfo;
+import androidx.media3.session.CommandButton;
 import androidx.mediarouter.app.MediaRouteButton;
 
 import com.google.android.gms.cast.framework.CastButtonFactory;
@@ -131,52 +132,54 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     @OptIn(markerClass = UnstableApi.class)
     private void createPlayer() {
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-        }
+//        if (mediaPlayer != null) {
+//            mediaPlayer.stop();
+//            mediaPlayer.release();
+//        }
 
         createSources();
-        mediaPlayer = new ExoMediaPlayer(this, null, 0);
-        mediaPlayer.setCastContext(castContext);
+
+        if (mediaPlayer == null) {
+            mediaPlayer = new ExoMediaPlayer(this, null, 0);
+            mediaPlayer.setCastContext(castContext);
 //        mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
 
-        mediaPlayer.setPlayerView(this, playerView);
-        mediaPlayer.setSupportingSystemEqualizer(true);
-        mediaPlayer.setOnTrackChangedListener(isFinished -> {
-            Timber.w("onTrackChanged isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
-        });
+            mediaPlayer.setPlayerView(this, playerView);
+            mediaPlayer.setSupportingSystemEqualizer(true);
+            mediaPlayer.setOnTrackChangedListener(isFinished -> {
+                Timber.w("onTrackChanged isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
+            });
 
 
-        mediaPlayer.setOnPreparedListener(player -> {
-            Timber.w(String.valueOf(mediaPlayer.hasVideo()));
-            Timber.d("onPrepared " + mediaPlayer.getCurrentPlayer());
-        });
+            mediaPlayer.setOnPreparedListener(player -> {
+                Timber.w(String.valueOf(mediaPlayer.hasVideo()));
+                Timber.d("onPrepared " + mediaPlayer.getCurrentPlayer());
+            });
 
-        mediaPlayer.setOnPlayerStateChanged((playWhenReady, playbackState) -> {
+            mediaPlayer.setOnPlayerStateChanged((playWhenReady, playbackState) -> {
 //            Timber.d("onPlayerStateChanged playbackState " + playbackState + " position " + mediaPlayer.getCurrentWindow());
-        });
+            });
 
-        mediaPlayer.setOnCompletionListener(player -> Timber.i("onCompletion"));
+            mediaPlayer.setOnCompletionListener(player -> Timber.i("onCompletion"));
 
-        mediaPlayer.setOnLoadingChanged(isLoading -> Timber.d("setOnLoadingChanged " + isLoading));
+            mediaPlayer.setOnLoadingChanged(isLoading -> Timber.d("setOnLoadingChanged " + isLoading));
 
-        mediaPlayer.setOnErrorListener(new HybridMediaPlayer.OnErrorListener() {
-            @Override
-            public void onError(Exception error, HybridMediaPlayer player) {
-                Timber.e(error);
-                Timber.e(String.valueOf(player));
-            }
-        });
+            mediaPlayer.setOnErrorListener(new HybridMediaPlayer.OnErrorListener() {
+                @Override
+                public void onError(Exception error, HybridMediaPlayer player) {
+                    Timber.e(error);
+                    Timber.e(String.valueOf(player));
+                }
+            });
+        }
 
 //        mediaPlayer.setAppUserAgent("HybridPlayer");
         mediaPlayer.setDataSource(sources, sources, 0);
+        mediaPlayer.setInitialWindowNum(0);
         mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> Timber.d("onAudioSessionIdset audio session id = " + audioSessionId));
         mediaPlayer.setOnPositionDiscontinuityListener((reason, currentWindowIndex) -> Timber.w("onPositionDiscontinuity reason " + reason + " position " + mediaPlayer.getCurrentWindow() + " currentWindowIndex " + currentWindowIndex));
-//        mediaPlayer.setInitialWindowNum(2);
-//        mediaPlayer.setInitialWindowNum(2);
         mediaPlayer.prepare();
-        mediaPlayer.seekTo(0, 1000 * 30);
+//        mediaPlayer.seekTo(0, 1000 * 30);
         mediaPlayer.play();
 
         Timber.w(String.valueOf(mediaPlayer.getWindowCount()));
@@ -239,7 +242,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 .setTitle("Source 2")
                 .setImageUrl("https://www.benq.com/content/dam/b2c/en-au/campaign/4k-monitor/kv-city-m.jpg")
                 .build();
-        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("https://sample-videos.com/audio/mp3/crowd-cheering.mp3") //http://stream3.polskieradio.pl:8904/;
+        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("https://download.samplelib.com/mp3/sample-6s.mp3") //http://stream3.polskieradio.pl:8904/;
                 .setTitle("Source 3")
                 .setImageUrl("https://s3-us-west-2.amazonaws.com/anchor-generated-image-bank/production/podcast_uploaded400/1415185/1415185-1549732984963-ac8825f57f7a6.jpg")
                 .build();
@@ -332,10 +335,23 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 Timber.i(String.valueOf(mediaPlayer.getDuration()));
             }
         } else if (view.getId() == R.id.btSetSources) {
-            createSources2();
+//            createSources2();
+//            mediaPlayer.setDataSource(sources, sources, 0);
+//            mediaPlayer.prepare();
+//            mediaPlayer.seekTo(0, 0);
+
+//            mediaPlayer.setDataSource(sources, sources, 0);
+//            mediaPlayer.setInitialWindowNum(2);
+//            mediaPlayer.setOnAudioSessionIdSetListener(audioSessionId -> Timber.d("onAudioSessionIdset audio session id = " + audioSessionId));
+//            mediaPlayer.setOnPositionDiscontinuityListener((reason, currentWindowIndex) -> Timber.w("onPositionDiscontinuity reason " + reason + " position " + mediaPlayer.getCurrentWindow() + " currentWindowIndex " + currentWindowIndex));
+//            mediaPlayer.prepare();
+
+            mediaPlayer.setInitialWindowNum(2);
             mediaPlayer.setDataSource(sources, sources, 0);
             mediaPlayer.prepare();
-            mediaPlayer.seekTo(0, 0);
+            mediaPlayer.seekTo(2, 0);
+//        mediaPlayer.seekTo(0, 1000 * 30);
+            mediaPlayer.play();
         } else if (view.getId() == R.id.fastForward) {
             mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 1500);
             Timber.e(String.valueOf(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex()));
@@ -400,7 +416,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, TESTCHANNEL)
-                .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_shuffle_on)
+                .setSmallIcon(CommandButton.ICON_SHUFFLE_ON)
                 .setContentTitle(Integer.toString(notificationCounter))
                 .setContentText("noti")
                 .setGroup(GROUP_1)
@@ -408,7 +424,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 
         NotificationCompat.Builder gruobuilder = new NotificationCompat.Builder(this, TESTCHANNEL)
-                .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_shuffle_on)
+                .setSmallIcon(CommandButton.ICON_SHUFFLE_ON)
                 .setContentTitle("GROUP " + Integer.toString(notificationCounter))
                 .setContentText("noti")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -426,17 +442,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         notificationCounter++;
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            StatusBarNotification[] statusBarNotifications = manager.getActiveNotifications();
-            int counter = 0;
-            for (StatusBarNotification statusBarNotification : statusBarNotifications) {
-                if (statusBarNotification.getGroupKey().contains(GROUP_1))
-                    counter++;
-            }
+        StatusBarNotification[] statusBarNotifications = manager.getActiveNotifications();
+        int counter = 0;
+        for (StatusBarNotification statusBarNotification : statusBarNotifications) {
+            if (statusBarNotification.getGroupKey().contains(GROUP_1))
+                counter++;
+        }
 
-            if (counter == 1) {
-                manager.cancel(999);
-            }
+        if (counter == 1) {
+            manager.cancel(999);
         }
 
     }
@@ -459,32 +473,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mChannel.setDescription(description);
         mChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
         mNotificationManager.createNotificationChannel(mChannel);
-    }
-
-    @OptIn(markerClass = UnstableApi.class)
-    private void loadOtherSources() {
-        List<MediaSourceInfo> sources2 = new ArrayList<>();
-        MediaSourceInfo source = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
-                .setTitle("Source 1")
-                .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
-                .build();
-        MediaSourceInfo source2 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
-                .setTitle("Source 2")
-                .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
-                .build();
-        MediaSourceInfo source3 = new MediaSourceInfo.Builder().setUrl("http://api.spreaker.com/download/episode/14404535/dlaczego_rezygnujemy.mp3")
-                .setTitle("Source 3")
-                .setImageUrl("https://github.com/mkaflowski/HybridMediaPlayer/blob/master/images/cover.jpg?raw=true")
-                .build();
-
-        sources2.add(source);
-        sources2.add(source2);
-//        sources2.add(source3);
-        mediaPlayer.setInitialWindowNum(1);
-        mediaPlayer.setDataSource(sources2, sources2, 0);
-        mediaPlayer.prepare();
-        mediaPlayer.seekTo(10000);
-
     }
 
 
