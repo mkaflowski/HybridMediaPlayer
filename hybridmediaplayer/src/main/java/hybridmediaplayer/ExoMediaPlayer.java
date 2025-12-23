@@ -90,7 +90,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         this.context = context;
 
         DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);
-        LoadControl loadControl = new MyLoadControl(backBufferMs);
+        LoadControl loadControl = MyLoadControlFactory.create(backBufferMs);
 
         exoPlayer = new ExoPlayer.Builder(context)
                 .setTrackSelector(trackSelector)

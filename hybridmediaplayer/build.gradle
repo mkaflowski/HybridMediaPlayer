@@ -43,10 +43,10 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 
     implementation 'com.jakewharton.timber:timber:5.0.1'
-    api "androidx.media3:media3-exoplayer:1.5.0"
-    api "androidx.media3:media3-session:1.5.0"
-    api "androidx.media3:media3-cast:1.5.0"
-    api "androidx.media3:media3-ui:1.5.0"
+    api "androidx.media3:media3-exoplayer:1.9.0"
+    api "androidx.media3:media3-session:1.9.0"
+    api "androidx.media3:media3-cast:1.9.0"
+    api "androidx.media3:media3-ui:1.9.0"
     implementation 'androidx.work:work-runtime:2.11.0'
 }
 
