@@ -116,9 +116,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         castContext = CastContext.getSharedInstance(this);
+        Log.d("MainActivity","CastContext state = " + castContext.getCastState());
         castContext.addCastStateListener(new CastStateListener() {
             @Override
             public void onCastStateChanged(int state) {
+                Log.d("MainActivity","onCastStateChanged CastContext state = " + state);
                 if (state == CastState.NO_DEVICES_AVAILABLE)
                     mediaRouteButton.setVisibility(View.GONE);
                 else {

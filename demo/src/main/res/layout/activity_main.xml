@@ -107,7 +107,7 @@
         android:layout_toEndOf="@+id/btPlay"
         android:layout_toRightOf="@+id/btPlay"
         android:mediaRouteTypes="user"
-        android:visibility="gone"
+        android:visibility="visible"
         tools:visibility="visible"
         tools:targetApi="jelly_bean" />
 
