@@ -166,54 +166,74 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         // Create data source factory
         dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
 
-        // Build MediaItems for local playback - użyj tej samej logiki co dla Cast
+        // Build MediaItems for local playback
         localMediaItems = new ArrayList<>();
-        for (int i = 0; i < normalSources.size(); i++) {
-            localMediaItems.add(normalSources.get(i));
-        }
+        localMediaItems.addAll(normalSources);
 
         // Prepare cast items
         this.mediaSourceInfoList = new ArrayList<>();
 
-        // Media items for CastPlayer
+        // Media items for CastPlayer - rebuild with guaranteed mimeType
         castMediaItems = new ArrayList<>();
         for (int i = 0; i < castSources.size(); i++) {
             MediaItem source = castSources.get(i);
-            castMediaItems.add(source);
 
-            MediaSourceInfo.Builder builder = new MediaSourceInfo.Builder();
+            // Rebuild MediaItem with guaranteed mimeType for Cast
+            MediaItem.Builder builder = source.buildUpon();
+
+            if (source.localConfiguration != null) {
+                String uri = source.localConfiguration.uri.toString();
+                String existingMime = source.localConfiguration.mimeType;
+
+                // Ensure mimeType is set - Cast requires it
+                if (existingMime == null || existingMime.isEmpty()) {
+                    if (uri.contains(".m3u8")) {
+                        builder.setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8);
+                    } else if (source.mediaMetadata.mediaType != null
+                            && source.mediaMetadata.mediaType == MediaMetadata.MEDIA_TYPE_VIDEO) {
+                        builder.setMimeType(androidx.media3.common.MimeTypes.VIDEO_UNKNOWN);
+                    } else {
+                        builder.setMimeType(androidx.media3.common.MimeTypes.AUDIO_UNKNOWN);
+                    }
+                }
+            }
+
+            castMediaItems.add(builder.build());
+
+            // Build MediaSourceInfo for internal tracking
+            MediaSourceInfo.Builder infoBuilder = new MediaSourceInfo.Builder();
 
             // URL
-            if (source.localConfiguration != null && source.localConfiguration.uri != null) {
-                builder.setUrl(source.localConfiguration.uri.toString());
+            if (source.localConfiguration != null) {
+                infoBuilder.setUrl(source.localConfiguration.uri.toString());
             }
 
             // Title
             if (source.mediaMetadata.title != null) {
-                builder.setTitle(source.mediaMetadata.title.toString());
+                infoBuilder.setTitle(source.mediaMetadata.title.toString());
             }
 
             // Artist/Author
             if (source.mediaMetadata.artist != null) {
-                builder.setAuthor(source.mediaMetadata.artist.toString());
+                infoBuilder.setAuthor(source.mediaMetadata.artist.toString());
             }
 
             // Album
             if (source.mediaMetadata.albumTitle != null) {
-                builder.setAlbumTitle(source.mediaMetadata.albumTitle.toString());
+                infoBuilder.setAlbumTitle(source.mediaMetadata.albumTitle.toString());
             }
 
             // Image URL
             if (source.mediaMetadata.artworkUri != null) {
-                builder.setImageUrl(source.mediaMetadata.artworkUri.toString());
+                infoBuilder.setImageUrl(source.mediaMetadata.artworkUri.toString());
             }
 
             // Media type
             if (source.mediaMetadata.mediaType != null) {
-                builder.setMediaType(source.mediaMetadata.mediaType);
+                infoBuilder.setMediaType(source.mediaMetadata.mediaType);
             }
 
-            mediaSourceInfoList.add(builder.build());
+            mediaSourceInfoList.add(infoBuilder.build());
         }
 
         if (isCasting)

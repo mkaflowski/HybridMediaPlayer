@@ -1,14 +1,19 @@
 package hybridmediaplayer.demo;
 
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 import android.view.Menu;
 import android.view.SurfaceView;
 import android.view.View;
@@ -26,12 +31,16 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.media3.extractor.metadata.icy.IcyHeaders;
 import androidx.media3.extractor.metadata.icy.IcyInfo;
 import androidx.media3.session.CommandButton;
+import androidx.media3.session.MediaController;
+import androidx.media3.session.SessionToken;
 import androidx.mediarouter.app.MediaRouteButton;
 
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastState;
 import com.google.android.gms.cast.framework.CastStateListener;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +61,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private int time;
     float speed = 1;
     private SurfaceView playerView;
+    private MediaController mediaController;
 
 
     //Chromecast
@@ -66,6 +76,16 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        1001
+                );
+            }
+        }
+
         Button btPlay = findViewById(R.id.btPlay);
         Button btPause = findViewById(R.id.btPause);
         Button btFastForward = findViewById(R.id.fastForward);
@@ -74,6 +94,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         Button btNext = findViewById(R.id.btNext);
         Button btCreatePlayer = findViewById(R.id.btCreatePlayer);
         Button btSetSources = findViewById(R.id.btSetSources);
+        Button btStartService = findViewById(R.id.btStartService);
 
 
         btPlay.setOnClickListener(this);
@@ -84,6 +105,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         btNext.setOnClickListener(this);
         btCreatePlayer.setOnClickListener(this);
         btSetSources.setOnClickListener(this);
+        btStartService.setOnClickListener(this);
 
         playerView = findViewById(R.id.playerView);
 
@@ -315,6 +337,27 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         sources.add(source1);
     }
 
+    private void connectToPlayer() {
+        SessionToken sessionToken = new SessionToken(
+                this,
+                new ComponentName(this, PlayerService.class)
+        );
+
+        ListenableFuture<MediaController> controllerFuture =
+                new MediaController.Builder(this, sessionToken).buildAsync();
+
+        controllerFuture.addListener(() -> {
+            try {
+                mediaController = controllerFuture.get();
+                // Teraz możesz sterować odtwarzaczem:
+                // mediaController.play();
+                // mediaController.pause();
+            } catch (Exception e) {
+                Log.e("MainActivity", "Błąd połączenia", e);
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
@@ -325,6 +368,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             else {
                 mediaPlayer.play();
             }
+        } else if (view.getId() == R.id.btStartService) {
+            connectToPlayer();
         } else if (view.getId() == R.id.btPause) {
 //            showTestNotification();
 
