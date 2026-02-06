@@ -22,6 +22,7 @@ import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.LoadControl;
 import androidx.media3.exoplayer.analytics.AnalyticsListener;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy;
 import androidx.media3.cast.CastPlayer;
@@ -79,15 +80,36 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
     private DataSource.Factory dataSourceFactory;
 
     public ExoMediaPlayer(Context context, CastContext castContext) {
-        this(context, castContext, 20000);
+        this(context, castContext, 20000, null);
     }
 
     public ExoMediaPlayer(Context context) {
         this(context, null);
     }
 
-    public ExoMediaPlayer(Context context, CastContext castContext, int backBufferMs) {
+    public ExoMediaPlayer(Context context, CastContext castContext, int backBufferMs, LoadErrorHandlingPolicy loadErrorHandlingPolicy) {
         this.context = context;
+        this.loadErrorHandlingPolicy = loadErrorHandlingPolicy;
+
+        // Setup HTTP data source
+        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setUserAgent(userAgent)
+                .setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS)
+                .setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS)
+                .setAllowCrossProtocolRedirects(true);
+
+        // Set cookie manager
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
+        CookieHandler.setDefault(cookieManager);
+
+        dataSourceFactory = new DefaultDataSource.Factory(context, httpDataSourceFactory);
+
+        // Utwórz MediaSourceFactory z policy (jeśli podana)
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory);
+        if (loadErrorHandlingPolicy != null) {
+            mediaSourceFactory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy);
+        }
 
         DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);
         LoadControl loadControl = MyLoadControlFactory.create(backBufferMs);
@@ -95,6 +117,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
         exoPlayer = new ExoPlayer.Builder(context)
                 .setTrackSelector(trackSelector)
                 .setLoadControl(loadControl)
+                .setMediaSourceFactory(mediaSourceFactory)
                 .build();
 
         exoPlayer.addListener(new MyPlayerEventListener(exoPlayer));
@@ -547,10 +570,6 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
 
     public void setOnPositionDiscontinuityListener(OnPositionDiscontinuityListener onPositionDiscontinuityListener) {
         this.onPositionDiscontinuityListener = onPositionDiscontinuityListener;
-    }
-
-    public void setLoadErrorHandlingPolicy(LoadErrorHandlingPolicy loadErrorHandlingPolicy) {
-        this.loadErrorHandlingPolicy = loadErrorHandlingPolicy;
     }
 
     @Override

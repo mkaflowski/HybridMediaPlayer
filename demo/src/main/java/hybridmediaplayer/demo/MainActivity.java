@@ -7,7 +7,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
@@ -28,6 +27,9 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Metadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.HttpDataSource;
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy;
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy;
 import androidx.media3.extractor.metadata.icy.IcyHeaders;
 import androidx.media3.extractor.metadata.icy.IcyInfo;
 import androidx.media3.session.CommandButton;
@@ -68,12 +70,33 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private CastContext castContext;
     private MediaRouteButton mediaRouteButton;
     private List<MediaSourceInfo> sources;
+    private CastStateListener castListener;
+    private DefaultLoadErrorHandlingPolicy defaultLoadErrorHandlingPolicy;
 
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        defaultLoadErrorHandlingPolicy = new DefaultLoadErrorHandlingPolicy() {
+            private int minRetryCount = 3;
+
+            @Override
+            public long getRetryDelayMsFor(LoadErrorInfo loadErrorInfo) {
+                Log.w("playerproblem", "playerproblem getRetryDelayMsFor");
+                if (loadErrorInfo.exception instanceof HttpDataSource.HttpDataSourceException) {
+                    minRetryCount = 100;
+                    return 3000;
+                } else return super.getRetryDelayMsFor(loadErrorInfo);
+            }
+
+            @Override
+            public int getMinimumLoadableRetryCount(int dataType) {
+                return minRetryCount;
+            }
+        };
+
         setContentView(R.layout.activity_main);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -110,17 +133,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         playerView = findViewById(R.id.playerView);
 
         //Chromecast:
+        castContext = CastContext.getSharedInstance(this);
+
         mediaRouteButton = findViewById(R.id.media_route_button);
 
-//        // Ensure volume control is updated
-//        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-        castContext = CastContext.getSharedInstance(this);
-        Log.d("MainActivity","CastContext state = " + castContext.getCastState());
-        castContext.addCastStateListener(new CastStateListener() {
+        Log.d("MainActivity", "CastContext state = " + castContext.getCastState());
+        castListener = new CastStateListener() {
             @Override
             public void onCastStateChanged(int state) {
-                Log.d("MainActivity","onCastStateChanged CastContext state = " + state);
+                Log.d("MainActivity", "onCastStateChanged CastContext state = " + state);
                 if (state == CastState.NO_DEVICES_AVAILABLE)
                     mediaRouteButton.setVisibility(View.GONE);
                 else {
@@ -128,14 +149,19 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                         mediaRouteButton.setVisibility(View.VISIBLE);
                 }
             }
-        });
+        };
 
         CastButtonFactory.setUpMediaRouteButton(this, mediaRouteButton);
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
+        mediaPlayer = new ExoMediaPlayer(this, castContext, 0, defaultLoadErrorHandlingPolicy);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        castContext.addCastStateListener(castListener);
     }
 
     @OptIn(markerClass = UnstableApi.class)
@@ -160,18 +186,19 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //            mediaPlayer.stop();
 //            mediaPlayer.release();
 //        }
-
         createSources();
 
         if (mediaPlayer == null) {
-            mediaPlayer = new ExoMediaPlayer(this, null, 0);
+
+            mediaPlayer = new ExoMediaPlayer(this, null, 0, defaultLoadErrorHandlingPolicy);
             mediaPlayer.setCastContext(castContext);
 //        mediaPlayer = new ExoMediaPlayer(this, castContext, 0);
 
             mediaPlayer.setPlayerView(this, playerView);
+            mediaPlayer.setOnErrorListener((error, player) -> Log.w("playerproblem","playerproblem onError"+error.toString()));
             mediaPlayer.setSupportingSystemEqualizer(true);
             mediaPlayer.setOnTrackChangedListener(isFinished -> {
-                Timber.w("onTrackChanged isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
+                Log.w("player","onTrackChanged isFinished " + isFinished + " " + mediaPlayer.getDuration() + " window = " + mediaPlayer.getCurrentWindow());
             });
 
 
@@ -187,14 +214,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mediaPlayer.setOnCompletionListener(player -> Timber.i("onCompletion"));
 
             mediaPlayer.setOnLoadingChanged(isLoading -> Timber.d("setOnLoadingChanged " + isLoading));
-
-            mediaPlayer.setOnErrorListener(new HybridMediaPlayer.OnErrorListener() {
-                @Override
-                public void onError(Exception error, HybridMediaPlayer player) {
-                    Timber.e(error);
-                    Timber.e(String.valueOf(player));
-                }
-            });
         }
 
 //        mediaPlayer.setAppUserAgent("HybridPlayer");
@@ -256,7 +275,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         String url2 = "https://stream.rcs.revma.com/an1ugyygzk8uv";
         String url3 = "https://github.com/mediaelement/mediaelement-files/blob/master/big_buck_bunny.mp4?raw=true";
-        String url4 = "http://15113.live.streamtheworld.com/977_MIX_SC";
+        String url4 = "http://open.live.bbc.co.uk/mediaselector/6/redir/version/2.0/mediaset/audio-nondrm-download-rss-low/proto/http/vpid/p0mzl8m8.mp3";
         //mediaPlayer.setDataSource(url);
         MediaSourceInfo source1 = new MediaSourceInfo.Builder().setUrl(url4)
                 .setTitle("Source 1")
@@ -400,7 +419,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //        mediaPlayer.seekTo(0, 1000 * 30);
             mediaPlayer.play();
         } else if (view.getId() == R.id.fastForward) {
-            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 1500);
+            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 15000);
             Timber.e(String.valueOf(mediaPlayer.getCurrentPlayer().getCurrentWindowIndex()));
 //            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 2000);
         } else if (view.getId() == R.id.btSpeed) {
