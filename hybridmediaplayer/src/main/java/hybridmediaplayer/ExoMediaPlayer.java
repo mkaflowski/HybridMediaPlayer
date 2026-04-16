@@ -732,7 +732,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                         break;
 
                     case Player.STATE_IDLE:
-                        if (isCasting && getCurrentWindow() == getWindowCount() - 1) {
+                        if (isCasting) {
                             handleCastCompletion();
                         }
                         break;
@@ -779,7 +779,10 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
             if (newIndex < 0)
                 return;
 
-            if (newIndex != currentWindow && currentPlayer.getPlaybackState() != Player.STATE_IDLE) {
+            if (newIndex != currentWindow) {
+                boolean wasFinished = !isChangingWindowByUser;
+                int previousWindow = currentWindow;
+
                 shouldBeWindow = newIndex;
                 currentWindow = newIndex;
 
@@ -787,7 +790,7 @@ public class ExoMediaPlayer extends HybridMediaPlayer implements SessionAvailabi
                     isPreparing = true;
 
                 if (onTrackChangedListener != null)
-                    onTrackChangedListener.onTrackChanged(!isChangingWindowByUser);
+                    onTrackChangedListener.onTrackChanged(wasFinished);
 
                 isChangingWindowByUser = false;
 
